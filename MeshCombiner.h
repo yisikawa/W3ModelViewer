@@ -6,8 +6,7 @@
 
 using namespace irr;
 
-void combineMeshes(scene::ISkinnedMesh* newMesh, scene::IMesh *addition, bool preserveBones);
-scene::ISkinnedMesh* copySkinnedMesh(scene::ISceneManager* smgr, scene::IMesh* meshToCopy, bool preserveBones);
+void combineMeshes(scene::ISkinnedMesh* newMesh, scene::IAnimatedMesh *addition, bool preserveBones);
 
 
 #endif // MESHCOMBINER
