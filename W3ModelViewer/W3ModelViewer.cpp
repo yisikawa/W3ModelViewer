@@ -2,10 +2,35 @@
 //
 
 #include <iostream>
+#include <irrString.h>
+#include <irrArray.h>
+#include <IReadFile.h>
+#include <IFileSystem.h>
+#include <Irrlicht.h>
+
+using namespace irr;
+
+#ifdef _IRR_WINDOWS_
+#pragma comment(lib, "Irrlicht.lib")
+#pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
+#endif
 
 int main()
 {
+    video::E_DRIVER_TYPE driverType;
+
+    driverType = video::EDT_DIRECT3D9;
+    IrrlichtDevice* device =
+        createDevice(driverType, core::dimension2d<u32>(640, 480));
+    if (device == 0)
+        return 1; // could not create selected driver.
+    io::IFileSystem *fs = device->getFileSystem();
+    video::IVideoDriver* driver = device->getVideoDriver();
+    scene::ISceneManager* smgr = device->getSceneManager();
+    io::IReadFile* file = fs->createAndOpenFile(io::path("Z:\\uncooked\\characters\\models\\animals\\cat\\t_01__cat.w2ent"));
+    
     std::cout << "Hello World!\n";
+    system("pause");
 }
 
 // プログラムの実行: Ctrl + F5 または [デバッグ] > [デバッグなしで開始] メニュー

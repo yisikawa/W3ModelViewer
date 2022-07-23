@@ -1302,7 +1302,7 @@ void IO_MeshLoader_W3ENT::W3_CEntityTemplate(io::IReadFile* file, W3_DataInfos i
     {
         u8* data;
         IO_MeshLoader_W3ENT w3Loader(SceneManager, FileSystem);
-        IAnimatedMesh* m;
+//        IAnimatedMesh* m;
 
         //std::cout << "-> @" << file->getPos() <<", property = " << propHeader.propName.c_str() << ", type = " << propHeader.propType.c_str() << std::endl;
 
