@@ -7,8 +7,10 @@
 #include <IReadFile.h>
 #include <IFileSystem.h>
 #include <Irrlicht.h>
+#include "../IO_MeshLoader_W3ENT.h"
 
 using namespace irr;
+using namespace scene;
 
 #ifdef _IRR_WINDOWS_
 #pragma comment(lib, "Irrlicht.lib")
@@ -17,6 +19,8 @@ using namespace irr;
 
 int main()
 {
+    RedEngineFileHeader header;
+
     video::E_DRIVER_TYPE driverType;
 
     driverType = video::EDT_DIRECT3D9;
@@ -27,8 +31,10 @@ int main()
     io::IFileSystem *fs = device->getFileSystem();
     video::IVideoDriver* driver = device->getVideoDriver();
     scene::ISceneManager* smgr = device->getSceneManager();
+    IO_MeshLoader_W3ENT w3ent(smgr, fs);
+
     io::IReadFile* file = fs->createAndOpenFile(io::path("Z:\\uncooked\\characters\\models\\animals\\cat\\t_01__cat.w2ent"));
-    
+    w3ent.W3_load(file);
     std::cout << "Hello World!\n";
     system("pause");
 }

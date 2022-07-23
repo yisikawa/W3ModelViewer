@@ -1302,7 +1302,7 @@ void IO_MeshLoader_W3ENT::W3_CEntityTemplate(io::IReadFile* file, W3_DataInfos i
     {
         u8* data;
         IO_MeshLoader_W3ENT w3Loader(SceneManager, FileSystem);
-//        IAnimatedMesh* m;
+
 
         //std::cout << "-> @" << file->getPos() <<", property = " << propHeader.propName.c_str() << ", type = " << propHeader.propType.c_str() << std::endl;
 
@@ -1315,18 +1315,20 @@ void IO_MeshLoader_W3ENT::W3_CEntityTemplate(io::IReadFile* file, W3_DataInfos i
 
             data = new u8[arraySize]();
             file->read(data, arraySize);
-
+            std::cout << data;
 
             io::IReadFile* entityFile = SceneManager->getFileSystem()->createMemoryReadFile(data, arraySize, "tmpMemFile.w2ent_MEMORY", true);
-            if (!entityFile)
+            delete[] data;
+            if (entityFile) {
+                IO_MeshLoader_W3ENT w3Loader(SceneManager, FileSystem);
+                IAnimatedMesh* m = w3Loader.createMesh(entityFile);
+                if (m)
+                    m->drop();
+                entityFile->drop();
+            }
+//            else
 //                log->addLineAndFlush("fail");
 
-            IO_MeshLoader_W3ENT w3Loader(SceneManager, FileSystem);
-            IAnimatedMesh* m = w3Loader.createMesh(entityFile);
-            if (m)
-                m->drop();
-
-            entityFile->drop();
         }
 
         file->seek(propHeader.endPos);
