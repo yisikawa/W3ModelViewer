@@ -18,6 +18,7 @@ using namespace scene;
 #pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
 #endif
 
+
 int main()
 {
     RedEngineFileHeader header;
@@ -72,7 +73,7 @@ int main()
 	const f32 aspectRatio = static_cast<float>(640) / 480;
 	camera->setAspectRatio(aspectRatio);
 	camera->setFarValue(10000.f);
-	smgr->addCameraSceneNode(0, core::vector3df(0, 30, -40), core::vector3df(0, 5, 0));
+//	smgr->addCameraSceneNode(0, core::vector3df(0, 30, -40), core::vector3df(0, 5, 0));
 
 	/*
 	Ok, now we have set up the scene, lets draw everything: We run the
