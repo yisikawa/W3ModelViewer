@@ -1318,17 +1318,17 @@ void IO_MeshLoader_W3ENT::W3_CEntityTemplate(io::IReadFile* file, W3_DataInfos i
             std::cout << data;
 
             io::IReadFile* entityFile = SceneManager->getFileSystem()->createMemoryReadFile(data, arraySize, "tmpMemFile.w2ent_MEMORY", true);
-            delete[] data;
+//            delete[] data;
             if (entityFile) {
                 IO_MeshLoader_W3ENT w3Loader(SceneManager, FileSystem);
                 IAnimatedMesh* m = w3Loader.createMesh(entityFile);
                 if (m)
                     m->drop();
-                entityFile->drop();
+//                entityFile->drop();
             }
 //            else
 //                log->addLineAndFlush("fail");
-
+            delete[] data;
         }
 
         file->seek(propHeader.endPos);

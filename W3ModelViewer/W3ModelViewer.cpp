@@ -34,7 +34,7 @@ int main()
     IO_MeshLoader_W3ENT w3ent(smgr, fs);
 
     io::IReadFile* file = fs->createAndOpenFile(io::path("Z:\\uncooked\\characters\\models\\animals\\cat\\t_01__cat.w2ent"));
-    w3ent.W3_load(file);
+    w3ent.createMesh(file);
     std::cout << "Hello World!\n";
     system("pause");
 }
