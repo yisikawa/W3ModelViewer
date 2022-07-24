@@ -131,7 +131,6 @@ bool IO_MeshLoader_W3ENT::W3_load(io::IReadFile* file)
 
         file->read(&infos.size, 4);
         file->read(&infos.adress, 4);
-        //std::cout << "begin at " << infos.adress << " and end at " << infos.adress + infos.size << std::endl;
 
         file->seek(8, true);
 
@@ -199,7 +198,6 @@ bool IO_MeshLoader_W3ENT::W3_ReadBuffer(io::IReadFile* file, SBufferInfos buffer
             vBufferInf = bufferInfos.verticesBuffer[i];
             // the index of the first vertex in the buffer
             firstVertexOffset = meshInfos.firstVertex - (nbVertices - vBufferInf.nbVertices);
-            //std::cout << "firstVertexOffset=" << firstVertexOffset << std::endl;
             break;
         }
     }
@@ -210,7 +208,6 @@ bool IO_MeshLoader_W3ENT::W3_ReadBuffer(io::IReadFile* file, SBufferInfos buffer
         {
             vBufferInf = bufferInfos.verticesBuffer[i];
             firstIndiceOffset = meshInfos.firstIndice - (nbIndices - vBufferInf.nbIndices);
-            //std::cout << "firstIndiceOffset=" << firstVertexOffset << std::endl;
             break;
         }
     }
@@ -229,7 +226,6 @@ bool IO_MeshLoader_W3ENT::W3_ReadBuffer(io::IReadFile* file, SBufferInfos buffer
 
     scene::SSkinMeshBuffer* buffer = AnimatedMesh->addMeshBuffer();
     buffer->VertexType = video::EVT_STANDARD;
-    //std::cout << "Num vertices=" << meshInfos.numVertices << std::endl;
     buffer->Vertices_Standard.reallocate(meshInfos.numVertices);
 
     u32 vertexSize = 8;
@@ -237,7 +233,6 @@ bool IO_MeshLoader_W3ENT::W3_ReadBuffer(io::IReadFile* file, SBufferInfos buffer
         vertexSize += meshInfos.numBonesPerVertex * 2;
 
     bufferFile->seek(vBufferInf.verticesCoordsOffset + firstVertexOffset * vertexSize);
-    //std::cout << "POS vCoords=" << bufferFile->getPos() << std::endl;
 
     const video::SColor defaultColor(255, 255, 255, 255);
     for (u32 i = 0; i < meshInfos.numVertices; ++i)
@@ -278,7 +273,6 @@ bool IO_MeshLoader_W3ENT::W3_ReadBuffer(io::IReadFile* file, SBufferInfos buffer
                     weight->buffer_id = bufferId;
                     weight->strength = fWeightStrength;
                     weight->vertex_id = i;
-                    //std::cout << "TEST:" << fweight << ", " << bufferId << ", " << i << std::endl;
 
                     TW3_DataCache::_instance.addVertexEntry(boneId, bufferId, i, fWeightStrength);
                 }
@@ -289,10 +283,8 @@ bool IO_MeshLoader_W3ENT::W3_ReadBuffer(io::IReadFile* file, SBufferInfos buffer
         buffer->Vertices_Standard.push_back(video::S3DVertex());
         buffer->Vertices_Standard[i].Pos = core::vector3df(x, y, z) / 65535.f * bufferInfos.quantizationScale + bufferInfos.quantizationOffset;
         buffer->Vertices_Standard[i].Color = defaultColor;
-        //std::cout << "Position=" << buffer->Vertices_Standard[i].Pos.X << ", " << buffer->Vertices_Standard[i].Pos.Y << ", " << buffer->Vertices_Standard[i].Pos.Z << std::endl;
     }
     bufferFile->seek(vBufferInf.uvOffset + firstVertexOffset * 4);
-    //std::cout << "POS vUV=" << bufferFile->getPos() << std::endl;
 
     for (u32 i = 0; i < meshInfos.numVertices; ++i)
     {
@@ -308,7 +300,6 @@ bool IO_MeshLoader_W3ENT::W3_ReadBuffer(io::IReadFile* file, SBufferInfos buffer
 
 
     bufferFile->seek(vBufferInf.normalsOffset + firstVertexOffset * 8);
-    //std::cout << "POS vNormals=" << bufferFile->getPos() << std::endl;
     for (u32 i = 0; i < meshInfos.numVertices; ++i)
     {
         core::array<u8> bytes = readDataArray<u8>(bufferFile, 4);
@@ -322,7 +313,6 @@ bool IO_MeshLoader_W3ENT::W3_ReadBuffer(io::IReadFile* file, SBufferInfos buffer
         f32 fy = ((s16)y - 512) / 512.f;
         f32 fz = ((s16)z - 512) / 512.f;
 
-        //std::cout << "Normal : fX=" << fx << ", fY=" << fy << ", fZ=" << fz << std::endl;
 
         buffer->Vertices_Standard[i].Normal = core::vector3df(fx, fy, fz);
         buffer->Vertices_Standard[i].Normal.normalize();
@@ -333,8 +323,6 @@ bool IO_MeshLoader_W3ENT::W3_ReadBuffer(io::IReadFile* file, SBufferInfos buffer
     // Indices -------------------------------------------------------------------
     bufferFile->seek(bufferInfos.indicesBufferOffset + vBufferInf.indicesOffset + firstIndiceOffset * 2);
 
-    //std::cout << "POS Indices=" << bufferFile->getPos() - bufferInfos.indicesBufferOffset << std::endl;
-    //std::cout << "num indices=" << meshInfos.numIndices << std::endl;
     buffer->Indices.set_used(meshInfos.numIndices);
     for (u32 i = 0; i < meshInfos.numIndices; ++i)
     {
@@ -407,7 +395,6 @@ SAnimationBufferBitwiseCompressedData IO_MeshLoader_W3ENT::ReadSAnimationBufferB
         if (!ReadPropertyHeader(file, propHeader))
             break;
 
-        //std::cout << "@" << file->getPos() <<", property = " << propHeader.propName.c_str() << ", type = " << propHeader.propType.c_str() << std::endl;
         if (propHeader.propName == "dataAddr")
             dataInf.dataAddr = ReadUInt32Property(file);
         if (propHeader.propName == "dataAddrFallback")
@@ -450,7 +437,6 @@ core::array<core::array<SAnimationBufferBitwiseCompressedData> > IO_MeshLoader_W
         }
 
 
-        //std::cout << "@" << file->getPos() <<", property = " << propHeader.propName.c_str() << ", type = " << propHeader.propType.c_str() << std::endl;
         if (propHeader.propType == "SAnimationBufferBitwiseCompressedData")
         {
             SAnimationBufferBitwiseCompressedData animInf = ReadSAnimationBufferBitwiseCompressedDataProperty(file);
@@ -491,9 +477,6 @@ core::vector3df IO_MeshLoader_W3ENT::ReadVector3Property(io::IReadFile* file)
 core::array<video::SMaterial> IO_MeshLoader_W3ENT::ReadMaterialsProperty(io::IReadFile* file)
 {
     s32 nbChunks = readS32(file);
-
-    //std::cout << "NB material = -> " << nbChunks << std::endl;
-    //file->seek(1, true);
 
     core::array<video::SMaterial> materials;
 
@@ -559,8 +542,6 @@ core::array<SMeshInfos> IO_MeshLoader_W3ENT::ReadSMeshChunkPackedProperty(io::IR
 
     s32 nbChunks = readS32(file);
 
-    //std::cout << "NB = -> " << nbChunks << std::endl;
-
     file->seek(1, true);
 
     s32 chunkId = 0;
@@ -589,27 +570,22 @@ core::array<SMeshInfos> IO_MeshLoader_W3ENT::ReadSMeshChunkPackedProperty(io::IR
             }
         }
 
-        //std::cout << "@" << file->getPos() <<", property = " << propHeader.propName.c_str() << ", type = " << propHeader.propType.c_str() << std::endl;
 
         if (propHeader.propName == "numIndices")
         {
             meshInfos.numIndices = ReadUInt32Property(file);
-            //std::cout << "numIndices = " << meshInfos.numIndices << std::endl;
         }
         else if (propHeader.propName == "numVertices")
         {
             meshInfos.numVertices = ReadUInt32Property(file);
-            //std::cout << "numVertices = " << meshInfos.numVertices << std::endl;
         }
         else if (propHeader.propName == "firstVertex")
         {
             meshInfos.firstVertex = ReadUInt32Property(file);
-            //std::cout << "first vertex found (=" << meshInfos.firstVertex << ")" << std::endl;
         }
         else if (propHeader.propName == "firstIndex")
         {
             meshInfos.firstIndice = ReadUInt32Property(file);
-            //std::cout << "firstIndice = " << meshInfos.firstIndice << std::endl;
         }
         else if (propHeader.propName == "vertexType")
         {
@@ -635,17 +611,11 @@ core::array<SMeshInfos> IO_MeshLoader_W3ENT::ReadSMeshChunkPackedProperty(io::IR
 void IO_MeshLoader_W3ENT::ReadRenderChunksProperty(io::IReadFile* file, SBufferInfos* buffer)
 {
     s32 nbElements = readS32(file); // array size (= bytes count here)
-    //std::cout << "nbElem = " << nbElements << ", @= " << file->getPos() << ", end @=" << back + propSize << std::endl;
-    //const long back = file->getPos();
 
-    //file->seek(1, true);
     u8 nbBuffers = readU8(file);
-    //std::cout << "nbBuffers = " << (u32)nbBuffers << std::endl;
 
-    //while(file->getPos() - back < nbElements)
     for (u32 i = 0; i < nbBuffers; ++i)
     {
-        //std::cout << "@@@ -> " << file->getPos() << std::endl;
         SVertexBufferInfos buffInfos;
         file->seek(1, true); // Unknown
 
@@ -658,7 +628,6 @@ void IO_MeshLoader_W3ENT::ReadRenderChunksProperty(io::IReadFile* file, SBufferI
         file->seek(1, true); // 0x1D
 
         file->read(&buffInfos.nbVertices, 2);
-        //std::cout << "Nb VERT=" << buffInfos.nbVertices << std::endl;
         file->read(&buffInfos.nbIndices, 4);
         file->seek(3, true); // Unknown
         buffInfos.lod = readU8(file); // lod ?
@@ -674,7 +643,6 @@ video::SMaterial IO_MeshLoader_W3ENT::ReadIMaterialProperty(io::IReadFile* file)
 
     s32 nbProperty = readS32(file);
     std::cout << "nb property = " << nbProperty << std::endl;
-    //std::cout << "adress = " << file->getPos() << std::endl;
 
     // Read the properties of the material
     for (u32 i = 0; i < nbProperty; ++i)
@@ -738,7 +706,6 @@ core::array<core::vector3df> IO_MeshLoader_W3ENT::ReadBonesPosition(io::IReadFil
         core::vector3df position = core::vector3df(x, y, z);
         positions.push_back(position);
 
-        //std::cout << "position = " << x << ", " << y << ", " << z << ", " << w << std::endl;
         file->seek(3, true);
     }
     return positions;
@@ -751,7 +718,6 @@ void IO_MeshLoader_W3ENT::ReadRenderLODSProperty(io::IReadFile* file)
     for (u32 i = 0; i < arraySize; ++i)
     {
         f32 value = readF32(file);
-        //std::cout << "Value : " << value << std::endl;
     }
 }
 
@@ -764,8 +730,6 @@ SBufferInfos IO_MeshLoader_W3ENT::ReadSMeshCookedDataProperty(io::IReadFile* fil
     SPropertyHeader propHeader;
     while(ReadPropertyHeader(file, propHeader))
     {
-        //std::cout << "@" << file->getPos() <<", property = " << propHeader.propName.c_str() << ", type = " << propHeader.propType.c_str() << std::endl;
-
         if (propHeader.propName == "indexBufferSize")
         {
             bufferInfos.indicesBufferSize = ReadUInt32Property(file);
@@ -892,8 +856,6 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<SAnimationBuffe
                 u32 keyframe = f;
                 keyframe += FrameOffset;
 
-
-                //std::cout << "Adress = " << dataFile->getPos() << std::endl;
                 u8 compressionSize = 0; // no compression
                 if (infos.compression == 1)
                     compressionSize = 24;
@@ -902,7 +864,6 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<SAnimationBuffe
 
                 if (infos.type == EATT_POSITION)
                 {
-                    //std::cout << "compressionSize= " << (u32)compressionSize << std::endl;
                     f32 px = readCompressedFloat(dataFile, compressionSize);
                     f32 py = readCompressedFloat(dataFile, compressionSize);
                     f32 pz = readCompressedFloat(dataFile, compressionSize);
@@ -930,14 +891,6 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<SAnimationBuffe
                         y = (bits & 0x0000000FFF000000) >> 24;
                         z = (bits & 0x0000000000FFF000) >> 12;
                         w =  bits & 0x0000000000000FFF;
-
-                        /*
-                        std::cout << std::dec << x << std::endl;
-                        std::cout << std::hex << x << std::endl;
-                        std::cout << std::hex << y << std::endl;
-                        std::cout << std::hex << z << std::endl;
-                        std::cout << std::hex << w << std::endl;
-                        */
 
                         fx = bits12ToFloat(x);
                         fy = bits12ToFloat(y);
@@ -967,7 +920,6 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<SAnimationBuffe
                     key->frame = keyframe;
                 }
             }
-            std::cout << std::endl;
         }
     }
 }
@@ -979,7 +931,6 @@ void IO_MeshLoader_W3ENT::W3_CUnknown(io::IReadFile* file, W3_DataInfos infos)
     SPropertyHeader propHeader;
     while (ReadPropertyHeader(file, propHeader))
     {
-        //std::cout << "-> @" << file->getPos() <<", property = " << propHeader.propName.c_str() << ", type = " << propHeader.propType.c_str() << std::endl;
         file->seek(propHeader.endPos);
     }
 }
@@ -1028,7 +979,6 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
             defferedData = readU16(file);
         }
 
-        //std::cout << "-> @" << file->getPos() <<", property = " << propHeader.propName.c_str() << ", type = " << propHeader.propType.c_str() << std::endl;
         file->seek(propHeader.endPos);
     }
 
@@ -1063,8 +1013,6 @@ TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, W3_DataInfo
     SPropertyHeader propHeader;
     while (ReadPropertyHeader(file, propHeader))
     {
-        //std::cout << "-> @" << file->getPos() <<", property = " << property.c_str() << ", type = " << propertyType.c_str() << std::endl;
-
         if (propHeader.propName == "bones")
         {
             // array
@@ -1082,21 +1030,17 @@ TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, W3_DataInfo
                 core::stringc name = readString(file, nameSize);
                 skeleton.names.push_back(name);
 
-                //std::cout << "name=" << name.c_str() << std::endl;
-
                 // An other property (nameAsCName)
                 file->seek(13, true); // nameAsCName + CName + size + CName string ID + 3 0x00 octets
             }
         }
         else if (propHeader.propName == "parentIndices")
         {
-            //std::cout << "@EndOfProperty = " << propHeader.endPos << std::endl;
             s32 nbBones = readS32(file);
 
             for (s32 i = 0; i < nbBones; ++i)
             {
                 s16 parentId = readS16(file);
-                //std::cout << "parent ID=" << parentId << std::endl;
 
                 skeleton.parentId.push_back(parentId);
             }
@@ -1112,7 +1056,6 @@ TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, W3_DataInfo
 
     for (u32 i = 0; i < skeleton.nbBones; ++i)
     {
-        //std::cout << "bone = " << skeleton.names[i].c_str() << std::endl;
         // position (vector 4) + quaternion (4 float) + scale (vector 4)
         core::vector3df position;
         position.X = readF32(file);
@@ -1138,8 +1081,7 @@ TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, W3_DataInfo
         core::matrix4 rotMat;
         core::vector3df euler;
         orientation.toEuler(euler);
-        //std::cout << "Position = " << position.X << ", " << position.Y << ", " << position.Z << std::endl;
-        //std::cout << "Rotation (radians) = " << euler.X << ", " << euler.Y << ", " << euler.Z << std::endl;
+
         chechNaNErrors(euler);
 
         rotMat.setRotationRadians(euler);
@@ -1154,10 +1096,6 @@ TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, W3_DataInfo
         skeleton.rotations.push_back(orientation);
         skeleton.scales.push_back(scale);
 
-        //std::cout << "Rotation (NaN fixed) = " << euler.X << ", " << euler.Y << ", " << euler.Z << std::endl;
-        //std::cout << "Rotation = " << euler.X * core::RADTODEG << ", " << euler.Y * core::RADTODEG << ", " << euler.Z * core::RADTODEG << std::endl;
-        //std::cout << "Scale = " << scale.X << ", " << scale.Y << ", " << scale.Z << std::endl;
-        //std::cout << std::endl;
     }
 
     Skeleton = skeleton;
@@ -1172,8 +1110,6 @@ void IO_MeshLoader_W3ENT::W3_CMeshComponent(io::IReadFile* file, W3_DataInfos in
     SPropertyHeader propHeader;
     while (ReadPropertyHeader(file, propHeader))
     {
-        //std::cout << "-> @" << file->getPos() <<", property = " << property.c_str() << ", type = " << propertyType.c_str() << std::endl;
-
         if (propHeader.propName == "mesh")
         {
             u32 meshComponentValue = readU32(file);
@@ -1204,15 +1140,10 @@ void IO_MeshLoader_W3ENT::W3_CEntityTemplate(io::IReadFile* file, W3_DataInfos i
         u8* data;
         IO_MeshLoader_W3ENT w3Loader(SceneManager, FileSystem);
 
-
-        //std::cout << "-> @" << file->getPos() <<", property = " << propHeader.propName.c_str() << ", type = " << propHeader.propType.c_str() << std::endl;
-
         if (propHeader.propName == "flatCompiledData") // array of u8
         {
             s32 arraySize = readS32(file);
             arraySize -= 4;
-
-//            std::cout << file->getPos() << std::endl;
 
             data = new u8[arraySize]();
             file->read(data, arraySize);
@@ -1237,7 +1168,6 @@ void IO_MeshLoader_W3ENT::W3_CEntityTemplate(io::IReadFile* file, W3_DataInfos i
 void IO_MeshLoader_W3ENT::W3_CEntity(io::IReadFile* file, W3_DataInfos infos)
 {
     file->seek(infos.adress + 1);
-    //std::cout << "W3_CEntity, @infos.adress=" << infos.adress << ", end @" << infos.adress + infos.size << std::endl;
 }
 
 bool IO_MeshLoader_W3ENT::checkBones(io::IReadFile* file, char nbBones)
@@ -1282,7 +1212,6 @@ void IO_MeshLoader_W3ENT::W3_CMesh(io::IReadFile* file, W3_DataInfos infos)
     SPropertyHeader propHeader;
     while (ReadPropertyHeader(file, propHeader))
     {
-        //std::cout << "-> @" << file->getPos() <<", property = " << propHeader.propName.c_str() << ", type = " << propHeader.propType.c_str() << std::endl;
         if (propHeader.propType == "SMeshCookedData")
         {
             bufferInfos = ReadSMeshCookedDataProperty(file);
@@ -1430,7 +1359,6 @@ void IO_MeshLoader_W3ENT::ReadBones(io::IReadFile* file)
     for (char i = 0; i < nbBones; ++i)
     {
         u32 unk = readU32(file);
-        //std::cout << "= " << joints[parent]->Name.c_str() << "->" << joints[i]->Name.c_str() << std::endl;
     }
 }
 
