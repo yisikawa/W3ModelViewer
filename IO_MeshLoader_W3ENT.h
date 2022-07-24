@@ -174,9 +174,6 @@ public:
     TW3_CSkeleton Skeleton;
     scene::ISkinnedMesh* meshToAnimate;
 
-    // load the different types of data private >> public
-    bool W3_load(io::IReadFile* file);
-    void W3_CMesh(io::IReadFile* file, W3_DataInfos infos);
 
 private:
 
@@ -187,9 +184,9 @@ private:
 
     u32 FrameOffset;
 
-    //// load the different types of data
-    //bool W3_load(io::IReadFile* file);
-    //void W3_CMesh(io::IReadFile* file, W3_DataInfos infos);
+    // load the different types of data
+    bool W3_load(io::IReadFile* file);
+    void W3_CMesh(io::IReadFile* file, W3_DataInfos infos);
     video::SMaterial W3_CMaterialInstance(io::IReadFile* file, W3_DataInfos infos);
     void W3_CMeshComponent(io::IReadFile* file, W3_DataInfos infos);
     void W3_CEntityTemplate(io::IReadFile* file, W3_DataInfos infos);   // Not handled yet

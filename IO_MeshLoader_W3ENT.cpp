@@ -1311,14 +1311,13 @@ void IO_MeshLoader_W3ENT::W3_CEntityTemplate(io::IReadFile* file, W3_DataInfos i
             s32 arraySize = readS32(file);
             arraySize -= 4;
 
-            std::cout << file->getPos() << std::endl;
+//            std::cout << file->getPos() << std::endl;
 
             data = new u8[arraySize]();
             file->read(data, arraySize);
-            std::cout << data;
 
-            io::IReadFile* entityFile = SceneManager->getFileSystem()->createMemoryReadFile(data, arraySize, "tmpMemFile.w2ent_MEMORY", true);
-            delete[] data;
+
+            io::IReadFile* entityFile = SceneManager->getFileSystem()->createMemoryReadFile(data, arraySize, "tmpMemFile.w2ent_MEMORY", false);
             if (entityFile) {
                 IO_MeshLoader_W3ENT w3Loader(SceneManager, FileSystem);
                 IAnimatedMesh* m = w3Loader.createMesh(entityFile);
@@ -1326,6 +1325,7 @@ void IO_MeshLoader_W3ENT::W3_CEntityTemplate(io::IReadFile* file, W3_DataInfos i
                     m->drop();
                 entityFile->drop();
             }
+            delete[] data;
 //            else
 //                log->addLineAndFlush("fail");
 
@@ -1595,8 +1595,8 @@ video::SMaterial IO_MeshLoader_W3ENT::ReadMaterialFile(core::stringc filename)
     if (core::hasFileExtension(filename, "w2mi"))
         return ReadW2MIFile(filename);
     else if (core::hasFileExtension(filename, "w2mg"))
-        ; // shader, not handled
-    else
+     ; // shader, not handled
+//    else
 //        log->addLineAndFlush(formatString("Unknown type of file for a material : %s", filename.c_str()));
 
     return video::SMaterial();
