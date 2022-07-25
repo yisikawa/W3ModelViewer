@@ -18,6 +18,184 @@ using namespace scene;
 #pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
 #endif
 
+class MeshSize
+{
+public:
+	static float _scaleFactor;
+};
+
+void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node)
+{
+	// materials with normal maps are not handled
+	for (u32 i = 0; i < node->getMaterialCount(); ++i)
+	{
+		video::SMaterial& material = node->getMaterial(i);
+		if (material.MaterialType == video::EMT_NORMAL_MAP_SOLID
+			|| material.MaterialType == video::EMT_PARALLAX_MAP_SOLID)
+		{
+			material.MaterialType = video::EMT_SOLID;
+		}
+		else if (material.MaterialType == video::EMT_NORMAL_MAP_TRANSPARENT_ADD_COLOR
+			|| material.MaterialType == video::EMT_PARALLAX_MAP_TRANSPARENT_ADD_COLOR)
+		{
+			material.MaterialType = video::EMT_TRANSPARENT_ADD_COLOR;
+		}
+		else if (material.MaterialType == video::EMT_NORMAL_MAP_TRANSPARENT_VERTEX_ALPHA
+			|| material.MaterialType == video::EMT_PARALLAX_MAP_TRANSPARENT_VERTEX_ALPHA)
+		{
+			material.MaterialType = video::EMT_TRANSPARENT_VERTEX_ALPHA;
+		}
+	}
+
+	node->setMaterialFlag(video::EMF_LIGHTING, false);
+	node->setMaterialFlag(video::EMF_BACK_FACE_CULLING, false);
+
+	for (u32 i = 1; i < _IRR_MATERIAL_MAX_TEXTURES_; ++i)
+		node->setMaterialTexture(i, nullptr);
+}
+
+bool loadRig(IrrlichtDevice* device, const io::path filename)
+{
+	io::IReadFile* file = device->getFileSystem()->createAndOpenFile(filename);
+	if (!file)
+	{
+		return false;
+	}
+
+	scene::IO_MeshLoader_W3ENT loader(device->getSceneManager(), device->getFileSystem());
+	scene::IAnimatedMesh* mesh = loader.createMesh(file);
+	file->drop();
+
+	if (mesh)
+		mesh->drop();
+
+	TW3_CSkeleton skeleton = loader.Skeleton;
+
+	scene::ISkinnedMesh* newMesh = copySkinnedMesh(device->getSceneManager(), _currentLodData->_node->getMesh(), false);
+
+	bool success = skeleton.applyToModel(newMesh);
+	if (success)
+	{
+		// Apply the skinning
+		TW3_DataCache::_instance.setOwner(newMesh);
+		TW3_DataCache::_instance.apply();
+	}
+
+	newMesh->setDirty();
+	newMesh->finalize();
+
+	_currentLodData->_node->setMesh(newMesh);
+
+	setMaterialsSettings(_currentLodData->_node);
+	return success;
+}
+
+bool loadAnims(IrrlichtDevice* device, const io::path filename)
+{
+	io::IReadFile* file = device->getFileSystem()->createAndOpenFile(filename);
+	if (!file)
+	{
+		return false;
+	}
+
+	scene::IO_MeshLoader_W3ENT loader(device->getSceneManager(), device->getFileSystem());
+
+	scene::ISkinnedMesh* newMesh = copySkinnedMesh(_device->getSceneManager(), _currentLodData->_node->getMesh(), true);
+
+	// use the loader to add the animation to the new model
+	loader.meshToAnimate = newMesh;
+	scene::IAnimatedMesh* mesh = loader.createMesh(file);
+	file->drop();
+
+	if (mesh)
+		mesh->drop();
+
+
+	newMesh->setDirty();
+	newMesh->finalize();
+
+	_currentLodData->_node->setMesh(newMesh);
+
+	setMaterialsSettings(_currentLodData->_node);
+
+	return true;
+}
+
+void loadMeshPostProcess()
+{
+	const scene::IAnimatedMesh* mesh = _currentLodData->_node->getMesh();
+
+	MeshSize::_scaleFactor = 1.f;
+
+	// Save the path of normals/specular maps
+	_currentLodData->_additionalTextures.resize(mesh->getMeshBufferCount());
+	for (u32 i = 0; i < mesh->getMeshBufferCount(); ++i)
+	{
+		const video::SMaterial material = mesh->getMeshBuffer(i)->getMaterial();
+		_currentLodData->_additionalTextures[i].resize(_IRR_MATERIAL_MAX_TEXTURES_ - 1);
+		for (u32 j = 1; j < _IRR_MATERIAL_MAX_TEXTURES_; ++j)
+		{
+			QString texturePath = QString();
+			const video::ITexture* texture = material.getTexture(j);
+			if (texture)
+				texturePath = irrPathToQString(texture->getName().getPath());
+
+			_currentLodData->_additionalTextures[i][j - 1] = texturePath;
+		}
+	}
+
+	setMaterialsSettings(_currentLodData->_node);
+
+}
+
+IAnimatedMesh* loadMesh(IrrlichtDevice* _device, QString filename)
+{
+	_device->getSceneManager()->getParameters()->setAttribute("TW_GAME_PATH", cleanPath(Settings::_baseDir).toStdString().c_str());
+	_device->getSceneManager()->getParameters()->setAttribute("TW_TW3_TEX_PATH", cleanPath(Settings::_TW3TexPath).toStdString().c_str());
+	_device->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_SKEL", Settings::_TW3LoadSkeletonEnabled);
+	_device->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_BEST_LOD_ONLY", Settings::_TW3LoadBestLODEnabled);
+
+	_device->getSceneManager()->getParameters()->setAttribute("TW_TW2_LOAD_BEST_LOD_ONLY", Settings::_TW2LoadBestLODEnabled);
+
+	ConfigNodeType tw1ToLoad = (ConfigNodeType)0;
+	if (Settings::_TW1LoadStaticMesh) tw1ToLoad = (ConfigNodeType)((int)tw1ToLoad | (int)ConfigNodeTrimesh);
+	if (Settings::_TW1LoadSkinnedMesh) tw1ToLoad = (ConfigNodeType)((int)tw1ToLoad | (int)ConfigNodeSkin);
+	if (Settings::_TW1LoadPaintedMesh) tw1ToLoad = (ConfigNodeType)((int)tw1ToLoad | (int)ConfigNodeTexturePaint);
+	_device->getSceneManager()->getParameters()->setAttribute("TW_TW1_NODE_TYPES_TO_LOAD", (int)tw1ToLoad);
+
+	// Clear the previous data
+	TW3_DataCache::_instance.clear();
+
+
+	const io::path irrFilename = qStringToIrrPath(filename);
+	io::path extension;
+	core::getFileNameExtension(extension, irrFilename);
+
+	scene::IAnimatedMesh* mesh = nullptr;
+
+#ifdef COMPILE_WITH_ASSIMP
+	IrrAssimp assimp(_device->getSceneManager());
+#endif
+
+	if (isLoadableByIrrlicht(irrFilename))
+	{
+		mesh = _device->getSceneManager()->getMesh(irrFilename);
+	}
+#ifdef COMPILE_WITH_ASSIMP
+	else if (assimp.isLoadable(irrFilename))
+	{
+		mesh = assimp.getMesh(irrFilename);
+
+		if (!mesh)
+		{
+			LoggerManager::Instance()->addLineAndFlush(assimp.getError(), true);
+		}
+	}
+#endif
+
+	return mesh;
+}
+
 
 int main()
 {
@@ -56,7 +234,8 @@ int main()
 	IAnimatedMeshSceneNode* node = smgr->addAnimatedMeshSceneNode(mesh);
 	if (node)
 	{
-		node->setMaterialFlag(video::EMF_LIGHTING, false);
+		setMaterialsSettings(node);
+	//	node->setMaterialFlag(video::EMF_LIGHTING, false);
 	//	node->setMD2Animation(scene::EMAT_STAND);
 	//	node->setMaterialTexture(0, driver->getTexture("../../media/sydney.bmp"));
 	}

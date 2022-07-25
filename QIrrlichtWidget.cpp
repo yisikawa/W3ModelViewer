@@ -6,18 +6,8 @@
 #include <QMessageBox>
 #include <QDir>
 
-#include "IO_MeshLoader_W2ENT.h"
-#include "IO_MeshLoader_W3ENT.h"
-#include "IO_MeshLoader_RE.h"
-#include "IO_MeshLoader_WitcherMDL.h"
-#include "IO_MeshLoader_CEF.h"
-#include "IO_MeshLoader_TheCouncil_Prefab.h"
-#include "IO_SceneLoader_TheCouncil.h"
 
 #include "MeshCombiner.h"
-#include "Translator.h"
-#include "Utils_Qt_Irr.h"
-#include "Utils_Qt.h"
 
 #include <iostream>
 
@@ -58,28 +48,6 @@ QIrrlichtWidget::~QIrrlichtWidget ()
     destroyIrrFileLogger();
 }
 
-void QIrrlichtWidget::createIrrFileLogger()
-{
-    _irrFileLogger = new IrrFileLogger(_device->getSceneManager()->getFileSystem(), qStringToIrrPath(QCoreApplication::applicationDirPath() + "/debug.log"));
-    if (_irrFileLogger->works())
-    {
-        LoggerManager::Instance()->registerLogger(_irrFileLogger, Logger_Dev);
-    }
-    else
-    {
-        LoggerManager::Instance()->addLineAndFlush("Error : The log file can't be created\nCheck that you don't use special characters in your software path. (Unicode isn't supported)", true);
-    }
-}
-
-void QIrrlichtWidget::destroyIrrFileLogger()
-{
-    if (_irrFileLogger)
-    {
-        LoggerManager::Instance()->unregisterLogger(_irrFileLogger);
-        delete _irrFileLogger;
-        _irrFileLogger = nullptr;
-    }
-}
 
 void QIrrlichtWidget::init()
 {
@@ -139,13 +107,6 @@ void QIrrlichtWidget::init()
 
     // et on lance notre timer
     startTimer (0);
-
-
-    destroyIrrFileLogger();
-    if (Settings::_debugLog)
-    {
-        createIrrFileLogger();
-    }
 
     initNormalsMaterial();
 }
@@ -431,32 +392,6 @@ bool QIrrlichtWidget::loadAnims(const io::path filename)
     return true;
 }
 
-bool QIrrlichtWidget::loadTW1Anims(const io::path filename)
-{
-    io::IReadFile* file = _device->getFileSystem()->createAndOpenFile(filename);
-    if (!file)
-    {
-        LoggerManager::Instance()->addLineAndFlush("Error : The file can't be opened.", true);
-        return false;
-    }
-
-
-    IO_MeshLoader_WitcherMDL loader(_device->getSceneManager(), _device->getFileSystem());
-
-    scene::ISkinnedMesh* newMesh = copySkinnedMesh(_device->getSceneManager(), _currentLodData->_node->getMesh(), true);
-
-    // use the loader to add the animation to the new model
-    loader.meshToAnimate = newMesh;
-    scene::IAnimatedMesh* mesh = loader.createMesh(file);
-    file->drop();
-
-    _currentLodData->_node->setMesh(newMesh);
-
-    setMaterialsSettings(_currentLodData->_node);
-
-    return true;
-}
-
 bool QIrrlichtWidget::loadRig(const io::path filename)
 {
     io::IReadFile* file = _device->getFileSystem()->createAndOpenFile(filename);
@@ -549,12 +484,6 @@ void QIrrlichtWidget::loadMeshPostProcess()
 
     setMaterialsSettings(_currentLodData->_node);
 
-    // DEBUG
-    /*
-    std::cout << "Dimensions : x=" << mesh->getBoundingBox().MaxEdge.X - mesh->getBoundingBox().MinEdge.X
-              << ", y=" << mesh->getBoundingBox().MaxEdge.Y - mesh->getBoundingBox().MinEdge.Y
-              << ", z=" << mesh->getBoundingBox().MaxEdge.Z - mesh->getBoundingBox().MinEdge.Z << std::endl;
-    */
 }
 
 scene::IAnimatedMesh* QIrrlichtWidget::loadMesh(QString filename)
