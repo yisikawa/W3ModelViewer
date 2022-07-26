@@ -100,7 +100,7 @@ bool loadAnims(IrrlichtDevice* device, const io::path filename)
 
 	scene::IO_MeshLoader_W3ENT loader(device->getSceneManager(), device->getFileSystem());
 
-	scene::ISkinnedMesh* newMesh = copySkinnedMesh(_device->getSceneManager(), _currentLodData->_node->getMesh(), true);
+	scene::ISkinnedMesh* newMesh = copySkinnedMesh(device->getSceneManager(), _currentLodData->_node->getMesh(), true);
 
 	// use the loader to add the animation to the new model
 	loader.meshToAnimate = newMesh;
@@ -148,7 +148,7 @@ void loadMeshPostProcess()
 
 }
 
-IAnimatedMesh* loadMesh(IrrlichtDevice* _device, QString filename)
+IAnimatedMesh* loadMesh(IrrlichtDevice* _device, core::stringc filename)
 {
 	_device->getSceneManager()->getParameters()->setAttribute("TW_GAME_PATH", cleanPath(Settings::_baseDir).toStdString().c_str());
 	_device->getSceneManager()->getParameters()->setAttribute("TW_TW3_TEX_PATH", cleanPath(Settings::_TW3TexPath).toStdString().c_str());
@@ -156,12 +156,6 @@ IAnimatedMesh* loadMesh(IrrlichtDevice* _device, QString filename)
 	_device->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_BEST_LOD_ONLY", Settings::_TW3LoadBestLODEnabled);
 
 	_device->getSceneManager()->getParameters()->setAttribute("TW_TW2_LOAD_BEST_LOD_ONLY", Settings::_TW2LoadBestLODEnabled);
-
-	ConfigNodeType tw1ToLoad = (ConfigNodeType)0;
-	if (Settings::_TW1LoadStaticMesh) tw1ToLoad = (ConfigNodeType)((int)tw1ToLoad | (int)ConfigNodeTrimesh);
-	if (Settings::_TW1LoadSkinnedMesh) tw1ToLoad = (ConfigNodeType)((int)tw1ToLoad | (int)ConfigNodeSkin);
-	if (Settings::_TW1LoadPaintedMesh) tw1ToLoad = (ConfigNodeType)((int)tw1ToLoad | (int)ConfigNodeTexturePaint);
-	_device->getSceneManager()->getParameters()->setAttribute("TW_TW1_NODE_TYPES_TO_LOAD", (int)tw1ToLoad);
 
 	// Clear the previous data
 	TW3_DataCache::_instance.clear();
@@ -194,6 +188,37 @@ IAnimatedMesh* loadMesh(IrrlichtDevice* _device, QString filename)
 #endif
 
 	return mesh;
+}
+
+bool loadAndReplaceMesh(QString filename)
+{
+	_inLoading = true;
+
+	// Delete the current mesh
+	clearLOD();
+
+	scene::IAnimatedMesh* mesh = loadMesh(filename);
+
+	// Leave here if there was a problem during the loading
+	if (!mesh)
+	{
+		LoggerManager::Instance()->addAndFlush("fail", true);
+		_inLoading = false;
+		return false;
+	}
+
+	_currentLodData->_node = _device->getSceneManager()->addAnimatedMeshSceneNode(mesh);
+	_currentLodData->_node->setScale(core::vector3df(20, 20, 20));
+	_currentLodData->_node->setRotation(core::vector3df(_currentLodData->_node->getRotation().X, _currentLodData->_node->getRotation().Y - 90, _currentLodData->_node->getRotation().Z));
+
+	// for debug only
+	// loadedNode->setDebugDataVisible(EDS_BBOX_ALL);
+
+	_camera->setTarget(_currentLodData->_node->getPosition());
+	loadMeshPostProcess();
+
+	_inLoading = false;
+	return true;
 }
 
 

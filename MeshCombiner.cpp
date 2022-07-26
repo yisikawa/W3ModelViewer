@@ -1,6 +1,17 @@
 #include "MeshCombiner.h"
 
 
+scene::ISkinnedMesh* copySkinnedMesh(scene::ISceneManager* smgr, scene::IAnimatedMesh* meshToCopy, bool preserveBones)
+{
+    if (!meshToCopy)
+        return nullptr;
+
+    scene::ISkinnedMesh* clone = smgr->createSkinnedMesh();
+    combineMeshes(clone, meshToCopy, preserveBones);
+
+    return clone;
+}
+
 // Clones a static IMesh into a modifiable SMesh.
 // not yet 32bit
 void combineMeshes(scene::ISkinnedMesh* newMesh, scene::IAnimatedMesh* addition, bool preserveBones)
