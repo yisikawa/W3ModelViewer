@@ -8,6 +8,7 @@
 #include <IReadFile.h>
 #include <IFileSystem.h>
 #include "../IO_MeshLoader_W3ENT.h"
+#include "../MeshCombiner.h"
 
 using namespace irr;
 using namespace scene;
@@ -23,6 +24,53 @@ class MeshSize
 public:
 	static float _scaleFactor;
 };
+void enableWireframe(scene::IAnimatedMeshSceneNode* node,bool enabled)
+{
+	if (node)
+		node->setMaterialFlag(video::EMF_WIREFRAME, enabled);
+}
+
+void enableRigging(scene::IAnimatedMeshSceneNode* node,bool enabled)
+{
+	if (!node)
+		return;
+
+	if (enabled)
+		node->setDebugDataVisible(scene::EDS_SKELETON);
+	else
+		node->setDebugDataVisible(scene::EDS_OFF);
+
+}
+
+unsigned int getJointsCount(scene::IAnimatedMeshSceneNode* node)
+{
+	if (node)
+		return node->getJointCount();
+	return 0;
+}
+
+core::vector3df getMeshDimensions(scene::IAnimatedMeshSceneNode* node)
+{
+	if (node)
+		return node->getMesh()->getBoundingBox().MaxEdge - node->getMesh()->getBoundingBox().MinEdge;
+	return core::vector3df(0.f, 0.f, 0.f);
+}
+
+void changeOptions(scene::ICameraSceneNode* camera, f32 cameraSpeed, f32 cameraRotationSpeed)
+{ 
+	core::list<scene::ISceneNodeAnimator*> anims = camera->getAnimators();
+	core::list<scene::ISceneNodeAnimator*>::Iterator it;
+	for (it = anims.begin(); it != anims.end(); it++)
+	{
+		if ((*it)->getType() == scene::ESNAT_CAMERA_MAYA)
+		{
+			break;
+		}
+	}
+	scene::ISceneNodeAnimatorCameraMaya* anim = (scene::ISceneNodeAnimatorCameraMaya*)(*it);
+	anim->setMoveSpeed(cameraSpeed);
+	anim->setRotateSpeed(cameraRotationSpeed);
+}
 
 void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node)
 {
@@ -185,6 +233,9 @@ int main()
 		setMaterialsSettings(node);
 		//	loadMeshPostProcess();
 	}
+	loadRig(device, node, "Z:/uncooked/characters/base_entities/cat_base/cat_base.w2rig");
+	enableRigging(node, true);
+	// loadAnims(device, node, "Z:/uncooked/animations/animals/cat/cat_animation.w2anims");
 
 	scene::ICameraSceneNode* camera;
 	camera = device->getSceneManager()->addCameraSceneNodeMaya(nullptr);

@@ -123,7 +123,7 @@ bool IO_MeshLoader_W3ENT::W3_load(io::IReadFile* file)
     file->seek(contentChunkStart);
     for (s32 i = 0; i < contentChunkSize; ++i)
     {
-        W3_DataInfos infos;
+        W3_DataInfos infos; // new じゃない？
         u16 dataType = readU16(file);
         core::stringc dataTypeName = Strings[dataType];
 
