@@ -54,7 +54,7 @@ void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node)
 		node->setMaterialTexture(i, nullptr);
 }
 
-bool loadRig(IrrlichtDevice* device, const io::path filename)
+bool loadRig(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_node, const io::path filename)
 {
 	io::IReadFile* file = device->getFileSystem()->createAndOpenFile(filename);
 	if (!file)
@@ -71,7 +71,7 @@ bool loadRig(IrrlichtDevice* device, const io::path filename)
 
 	TW3_CSkeleton skeleton = loader.Skeleton;
 
-	scene::ISkinnedMesh* newMesh = copySkinnedMesh(device->getSceneManager(), _currentLodData->_node->getMesh(), false);
+	scene::ISkinnedMesh* newMesh = copySkinnedMesh(device->getSceneManager(), _current_node->getMesh(), false);
 
 	bool success = skeleton.applyToModel(newMesh);
 	if (success)
@@ -84,13 +84,13 @@ bool loadRig(IrrlichtDevice* device, const io::path filename)
 	newMesh->setDirty();
 	newMesh->finalize();
 
-	_currentLodData->_node->setMesh(newMesh);
+	_current_node->setMesh(newMesh);
 
-	setMaterialsSettings(_currentLodData->_node);
+	setMaterialsSettings(_current_node);
 	return success;
 }
 
-bool loadAnims(IrrlichtDevice* device, const io::path filename)
+bool loadAnims(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_node, const io::path filename)
 {
 	io::IReadFile* file = device->getFileSystem()->createAndOpenFile(filename);
 	if (!file)
@@ -100,7 +100,7 @@ bool loadAnims(IrrlichtDevice* device, const io::path filename)
 
 	scene::IO_MeshLoader_W3ENT loader(device->getSceneManager(), device->getFileSystem());
 
-	scene::ISkinnedMesh* newMesh = copySkinnedMesh(device->getSceneManager(), _currentLodData->_node->getMesh(), true);
+	scene::ISkinnedMesh* newMesh = copySkinnedMesh(device->getSceneManager(), _current_node->getMesh(), true);
 
 	// use the loader to add the animation to the new model
 	loader.meshToAnimate = newMesh;
@@ -114,14 +114,15 @@ bool loadAnims(IrrlichtDevice* device, const io::path filename)
 	newMesh->setDirty();
 	newMesh->finalize();
 
-	_currentLodData->_node->setMesh(newMesh);
+	_current_node->setMesh(newMesh);
 
-	setMaterialsSettings(_currentLodData->_node);
+	setMaterialsSettings(_current_node);
 
 	return true;
 }
 
-void loadMeshPostProcess()
+/*
+void QIrrlichtWidget::loadMeshPostProcess()
 {
 	const scene::IAnimatedMesh* mesh = _currentLodData->_node->getMesh();
 
@@ -145,81 +146,9 @@ void loadMeshPostProcess()
 	}
 
 	setMaterialsSettings(_currentLodData->_node);
-
 }
+*/
 
-IAnimatedMesh* loadMesh(IrrlichtDevice* _device, core::stringc filename)
-{
-	_device->getSceneManager()->getParameters()->setAttribute("TW_GAME_PATH", cleanPath(Settings::_baseDir).toStdString().c_str());
-	_device->getSceneManager()->getParameters()->setAttribute("TW_TW3_TEX_PATH", cleanPath(Settings::_TW3TexPath).toStdString().c_str());
-	_device->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_SKEL", Settings::_TW3LoadSkeletonEnabled);
-	_device->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_BEST_LOD_ONLY", Settings::_TW3LoadBestLODEnabled);
-
-	_device->getSceneManager()->getParameters()->setAttribute("TW_TW2_LOAD_BEST_LOD_ONLY", Settings::_TW2LoadBestLODEnabled);
-
-	// Clear the previous data
-	TW3_DataCache::_instance.clear();
-
-
-	const io::path irrFilename = qStringToIrrPath(filename);
-	io::path extension;
-	core::getFileNameExtension(extension, irrFilename);
-
-	scene::IAnimatedMesh* mesh = nullptr;
-
-#ifdef COMPILE_WITH_ASSIMP
-	IrrAssimp assimp(_device->getSceneManager());
-#endif
-
-	if (isLoadableByIrrlicht(irrFilename))
-	{
-		mesh = _device->getSceneManager()->getMesh(irrFilename);
-	}
-#ifdef COMPILE_WITH_ASSIMP
-	else if (assimp.isLoadable(irrFilename))
-	{
-		mesh = assimp.getMesh(irrFilename);
-
-		if (!mesh)
-		{
-			LoggerManager::Instance()->addLineAndFlush(assimp.getError(), true);
-		}
-	}
-#endif
-
-	return mesh;
-}
-
-bool loadAndReplaceMesh(QString filename)
-{
-	_inLoading = true;
-
-	// Delete the current mesh
-	clearLOD();
-
-	scene::IAnimatedMesh* mesh = loadMesh(filename);
-
-	// Leave here if there was a problem during the loading
-	if (!mesh)
-	{
-		LoggerManager::Instance()->addAndFlush("fail", true);
-		_inLoading = false;
-		return false;
-	}
-
-	_currentLodData->_node = _device->getSceneManager()->addAnimatedMeshSceneNode(mesh);
-	_currentLodData->_node->setScale(core::vector3df(20, 20, 20));
-	_currentLodData->_node->setRotation(core::vector3df(_currentLodData->_node->getRotation().X, _currentLodData->_node->getRotation().Y - 90, _currentLodData->_node->getRotation().Z));
-
-	// for debug only
-	// loadedNode->setDebugDataVisible(EDS_BBOX_ALL);
-
-	_camera->setTarget(_currentLodData->_node->getPosition());
-	loadMeshPostProcess();
-
-	_inLoading = false;
-	return true;
-}
 
 
 int main()
@@ -238,6 +167,7 @@ int main()
 	device->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_SKEL", true);
 	device->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_BEST_LOD_ONLY", true);
 
+	IAnimatedMeshSceneNode* node = nullptr;
     io::IFileSystem *fs = device->getFileSystem();
     video::IVideoDriver* driver = device->getVideoDriver();
     scene::ISceneManager* smgr = device->getSceneManager();
@@ -247,53 +177,25 @@ int main()
 	IAnimatedMesh* mesh = w3ent.createMesh(file);
 
 
-
-	/*
-	To let the mesh look a little bit nicer, we change its material. We
-	disable lighting because we do not have a dynamic light in here, and
-	the mesh would be totally black otherwise. Then we set the frame loop,
-	such that the predefined STAND animation is used. And last, we apply a
-	texture to the mesh. Without it the mesh would be drawn using only a
-	color.
-	*/
-	IAnimatedMeshSceneNode* node = smgr->addAnimatedMeshSceneNode(mesh);
+	node = device->getSceneManager()->addAnimatedMeshSceneNode(mesh);
 	if (node)
 	{
+		node->setScale(core::vector3df(20, 20, 20));
+		node->setRotation(core::vector3df(node->getRotation().X, node->getRotation().Y - 90, node->getRotation().Z));
 		setMaterialsSettings(node);
-	//	node->setMaterialFlag(video::EMF_LIGHTING, false);
-	//	node->setMD2Animation(scene::EMAT_STAND);
-	//	node->setMaterialTexture(0, driver->getTexture("../../media/sydney.bmp"));
+		//	loadMeshPostProcess();
 	}
 
-	/*
-	To look at the mesh, we place a camera into 3d space at the position
-	(0, 30, -40). The camera looks from there to (0,5,0), which is
-	approximately the place where our md2 model is.
-	*/
 	scene::ICameraSceneNode* camera;
 	camera = device->getSceneManager()->addCameraSceneNodeMaya(nullptr);
 	camera->setPosition(core::vector3df(0.f, 30.f, -40.f));
-	camera->setTarget(core::vector3df(0.f, 0.f, 0.f));
+	camera->setTarget(node->getPosition());
 	const f32 aspectRatio = static_cast<float>(640) / 480;
 	camera->setAspectRatio(aspectRatio);
 	camera->setFarValue(10000.f);
-//	smgr->addCameraSceneNode(0, core::vector3df(0, 30, -40), core::vector3df(0, 5, 0));
 
-	/*
-	Ok, now we have set up the scene, lets draw everything: We run the
-	device in a while() loop, until the device does not want to run any
-	more. This would be when the user closes the window or presses ALT+F4
-	(or whatever keycode closes a window).
-	*/
 	while (device->run())
 	{
-		/*
-		Anything can be drawn between a beginScene() and an endScene()
-		call. The beginScene() call clears the screen with a color and
-		the depth buffer, if desired. Then we let the Scene Manager and
-		the GUI Environment draw their content. With the endScene()
-		call everything is presented on the screen.
-		*/
 		driver->beginScene(true, true, video::SColor(255, 100, 101, 140));
 
 		smgr->drawAll();
@@ -301,24 +203,5 @@ int main()
 		driver->endScene();
 	}
 
-	/*
-	After we are done with the render loop, we have to delete the Irrlicht
-	Device created before with createDevice(). In the Irrlicht Engine, you
-	have to delete all objects you created with a method or function which
-	starts with 'create'. The object is simply deleted by calling ->drop().
-	See the documentation at irr::IReferenceCounted::drop() for more
-	information.
-	*/
 	device->drop();
 }
-
-// プログラムの実行: Ctrl + F5 または [デバッグ] > [デバッグなしで開始] メニュー
-// プログラムのデバッグ: F5 または [デバッグ] > [デバッグの開始] メニュー
-
-// 作業を開始するためのヒント: 
-//    1. ソリューション エクスプローラー ウィンドウを使用してファイルを追加/管理します 
-//   2. チーム エクスプローラー ウィンドウを使用してソース管理に接続します
-//   3. 出力ウィンドウを使用して、ビルド出力とその他のメッセージを表示します
-//   4. エラー一覧ウィンドウを使用してエラーを表示します
-//   5. [プロジェクト] > [新しい項目の追加] と移動して新しいコード ファイルを作成するか、[プロジェクト] > [既存の項目の追加] と移動して既存のコード ファイルをプロジェクトに追加します
-//   6. 後ほどこのプロジェクトを再び開く場合、[ファイル] > [開く] > [プロジェクト] と移動して .sln ファイルを選択します
