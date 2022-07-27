@@ -225,21 +225,21 @@ int main()
     scene::ISceneManager* smgr = device->getSceneManager();
     IO_MeshLoader_W3ENT* w3ent = new IO_MeshLoader_W3ENT(smgr, fs);
 
-	io::IReadFile* file = fs->createAndOpenFile(io::path(fileCatEnt));
+	io::IReadFile* file = fs->createAndOpenFile(io::path(fileCatMesh));
 	IAnimatedMesh* mesh = w3ent->createMesh(file);
 
 
 	node = device->getSceneManager()->addAnimatedMeshSceneNode(mesh);
 	if (node)
 	{
-		node->setScale(core::vector3df(20, 20, 20));
-		node->setRotation(core::vector3df(node->getRotation().X, node->getRotation().Y - 90, node->getRotation().Z));
+		node->setScale(core::vector3df(50.f, 50.f, 50.f));
+		node->setRotation(core::vector3df(node->getRotation().X, node->getRotation().Y-90, node->getRotation().Z-90.));
 		setMaterialsSettings(node);
 		//	loadMeshPostProcess();
 	}
-	loadRig(device, node, fileCatRig);
-	enableRigging(node, true);
-	loadAnims(device, node, "Z:/uncooked/animations/animals/cat/cat_animation.w2anims");
+	//loadRig(device, node, fileCatRig);
+	//enableRigging(node, true);
+	//loadAnims(device, node, "Z:/uncooked/animations/animals/cat/cat_animation.w2anims");
 
 	scene::ICameraSceneNode* camera;
 	camera = device->getSceneManager()->addCameraSceneNodeMaya(nullptr);
@@ -247,7 +247,7 @@ int main()
 	camera->setTarget(node->getPosition());
 	const f32 aspectRatio = static_cast<float>(640) / 480;
 	camera->setAspectRatio(aspectRatio);
-	camera->setFarValue(10000.f);
+	camera->setFarValue(1000.f);
 
 	while (device->run())
 	{
