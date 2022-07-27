@@ -77,17 +77,7 @@ IAnimatedMesh* IO_MeshLoader_W3ENT::createMesh(io::IReadFile* f)
 
 	if (load(f))
 	{
-        /*
-        for (u32 i = 0; i < Meshes.size(); ++i)
-        {
-            combineMeshes(AnimatedMesh, Meshes[i], true);
-            Meshes[i]->drop();
-        }
-        */
-
 		AnimatedMesh->finalize();
-
-        //SceneManager->getMeshManipulator()->flipSurfaces(AnimatedMesh);
 	}
 	else
 	{
@@ -109,6 +99,7 @@ void checkMaterial(video::SMaterial mat)
 
 bool IO_MeshLoader_W3ENT::W3_load(io::IReadFile* file)
 {
+    video::SMaterial* mat;
     RedEngineFileHeader header;
     loadTW3FileHeader(file, header);
     Strings = header.Strings;
@@ -141,9 +132,10 @@ bool IO_MeshLoader_W3ENT::W3_load(io::IReadFile* file)
         }
         else if (dataTypeName == "CMaterialInstance")
         {
-            video::SMaterial mat = W3_CMaterialInstance(file, *infos);
-            checkMaterial(mat);
-            Materials.insert(std::make_pair(i+1, mat));
+            mat = new video::SMaterial;
+            *mat = IO_MeshLoader_W3ENT::W3_CMaterialInstance(file, *infos);
+            checkMaterial(*mat);
+            Materials.insert(std::make_pair(i+1, *mat));
         }
         else if (dataTypeName == "CEntityTemplate")
         {

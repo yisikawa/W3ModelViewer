@@ -225,7 +225,7 @@ int main()
     scene::ISceneManager* smgr = device->getSceneManager();
     IO_MeshLoader_W3ENT* w3ent = new IO_MeshLoader_W3ENT(smgr, fs);
 
-	io::IReadFile* file = fs->createAndOpenFile(io::path(fileCatMesh));
+	io::IReadFile* file = fs->createAndOpenFile(io::path(fileCatEnt));
 	IAnimatedMesh* mesh = w3ent->createMesh(file);
 
 
