@@ -123,51 +123,51 @@ bool IO_MeshLoader_W3ENT::W3_load(io::IReadFile* file)
     file->seek(contentChunkStart);
     for (s32 i = 0; i < contentChunkSize; ++i)
     {
-        W3_DataInfos infos; // new じゃない？
+        W3_DataInfos* infos = new W3_DataInfos;
         u16 dataType = readU16(file);
         core::stringc dataTypeName = Strings[dataType];
 
         file->seek(6, true);
 
-        file->read(&infos.size, 4);
-        file->read(&infos.adress, 4);
+        file->read(&infos->size, 4);
+        file->read(&infos->adress, 4);
 
         file->seek(8, true);
 
         s32 back = file->getPos();
         if (dataTypeName == "CMesh")
         {
-            meshes.push_back(infos);
+            meshes.push_back(*infos);
         }
         else if (dataTypeName == "CMaterialInstance")
         {
-            video::SMaterial mat = W3_CMaterialInstance(file, infos);
+            video::SMaterial mat = W3_CMaterialInstance(file, *infos);
             checkMaterial(mat);
             Materials.insert(std::make_pair(i+1, mat));
         }
         else if (dataTypeName == "CEntityTemplate")
         {
-            W3_CEntityTemplate(file, infos);
+            W3_CEntityTemplate(file, *infos);
         }
         else if (dataTypeName == "CEntity")
         {
-            W3_CEntity(file, infos);
+            W3_CEntity(file, *infos);
         }
         else if (dataTypeName == "CMeshComponent")
         {
-            W3_CMeshComponent(file, infos);
+            W3_CMeshComponent(file, *infos);
         }
         else if (dataTypeName == "CSkeleton")
         {
-            W3_CSkeleton(file, infos);
+            W3_CSkeleton(file, *infos);
         }
         else if (dataTypeName == "CAnimationBufferBitwiseCompressed" && meshToAnimate)
         {
-            W3_CAnimationBufferBitwiseCompressed(file, infos);
+            W3_CAnimationBufferBitwiseCompressed(file, *infos);
         }
         else
         {
-            W3_CUnknown(file, infos);
+            W3_CUnknown(file, *infos);
         }
         file->seek(back);
     }
@@ -831,14 +831,18 @@ core::stringc getAnimTrackString(EAnimTrackType type)
 
 void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<SAnimationBufferBitwiseCompressedData> >& inf, io::IReadFile* dataFile, SAnimationBufferOrientationCompressionMethod c)
 {
-    // Create bones to store the keys if they doesn't exist
-    /*
-    if (meshToAnimate->getJointCount() < inf.size())
-    {
-        for (u32 i = meshToAnimate->getJointCount(); i < inf.size(); ++i)
-            meshToAnimate->addJoint();
-    }
-    */
+    uint64_t b1, b2, b3, b4, b5, b6, bits;
+    u8 compressionSize;
+    u32 keyframe;
+    f32 sx, sy, sz;
+    f32 px, py, pz;
+    f32 fx, fy, fz, fw;
+    s16 x, y, z, w;
+    core::vector3df euler;
+    core::quaternion orientation;
+    scene::ISkinnedMesh::SPositionKey* pkey;
+    scene::ISkinnedMesh::SRotationKey* rkey;
+    scene::ISkinnedMesh::SScaleKey* skey;
 
 
     for (u32 i = 0; i < inf.size(); ++i)
@@ -853,43 +857,41 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<SAnimationBuffe
             // TODO
             for (u32 f = 0; f < infos.numFrames; ++f)
             {
-                u32 keyframe = f;
+                keyframe = f;
                 keyframe += FrameOffset;
 
-                u8 compressionSize = 0; // no compression
+                compressionSize = 0; // no compression
                 if (infos.compression == 1)
                     compressionSize = 24;
                 else if (infos.compression == 2)
                     compressionSize = 16;
-
                 if (infos.type == EATT_POSITION)
                 {
-                    f32 px = readCompressedFloat(dataFile, compressionSize);
-                    f32 py = readCompressedFloat(dataFile, compressionSize);
-                    f32 pz = readCompressedFloat(dataFile, compressionSize);
-
+                    px = readCompressedFloat(dataFile, compressionSize);
+                    py = readCompressedFloat(dataFile, compressionSize);
+                    pz = readCompressedFloat(dataFile, compressionSize);
+                    pkey = meshToAnimate->addPositionKey(joint);
+                    pkey->position = core::vector3df(px,py,pz);
+                    pkey->frame = (irr::f32)keyframe;
                 }
                 if (infos.type == EATT_ORIENTATION)
                 {
-                    core::quaternion orientation;
+
                     if (c == ABOCM_PackIn48bitsW)
                     {
-                        uint64_t b1 = readU8(dataFile);
-                        uint64_t b2 = readU8(dataFile);
-                        uint64_t b3 = readU8(dataFile);
-                        uint64_t b4 = readU8(dataFile);
-                        uint64_t b5 = readU8(dataFile);
-                        uint64_t b6 = readU8(dataFile);
-                        uint64_t bits = b6 | (b5 << 8) | (b4 << 16) | (b3 << 24) | (b2 << 32) | (b1 << 40);
+                        b1 = readU8(dataFile);
+                        b2 = readU8(dataFile);
+                        b3 = readU8(dataFile);
+                        b4 = readU8(dataFile);
+                        b5 = readU8(dataFile);
+                        b6 = readU8(dataFile);
+                        bits = b6 | (b5 << 8) | (b4 << 16) | (b3 << 24) | (b2 << 32) | (b1 << 40);
                         //dataFile->read(&bits, sizeof(uint64_t));
 
-
-                        f32 fx, fy, fz, fw;
-
-                        s16 x = 0, y = 0, z = 0, w = 0;
-                        x = (bits & 0x0000FFF000000000) >> 36;
-                        y = (bits & 0x0000000FFF000000) >> 24;
-                        z = (bits & 0x0000000000FFF000) >> 12;
+                        x = y = z = w = 0;
+                        x = (irr::s16)((bits & 0x0000FFF000000000) >> 36);
+                        y = (irr::s16)((bits & 0x0000000FFF000000) >> 24);
+                        z = (irr::s16)((bits & 0x0000000000FFF000) >> 12);
                         w =  bits & 0x0000000000000FFF;
 
                         fx = bits12ToFloat(x);
@@ -898,26 +900,25 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<SAnimationBuffe
                         fw = -bits12ToFloat(w);
 
                         orientation = core::quaternion(fx, fy, fz, fw);
-                        core::vector3df euler;
+
                         orientation.toEuler(euler);
                         euler *= core::RADTODEG;
 
                     }
 
-                    scene::ISkinnedMesh::SRotationKey* key = meshToAnimate->addRotationKey(joint);
-                    key->rotation = orientation;
-                    key->frame = keyframe;
+                    rkey = meshToAnimate->addRotationKey(joint);
+                    rkey->rotation = orientation;
+                    rkey->frame = (irr::f32)keyframe;
                 }
                 if (infos.type == EATT_SCALE)
                 {
-                    f32 sx = readCompressedFloat(dataFile, compressionSize);
-                    f32 sy = readCompressedFloat(dataFile, compressionSize);
-                    f32 sz = readCompressedFloat(dataFile, compressionSize);
+                    sx = readCompressedFloat(dataFile, compressionSize);
+                    sy = readCompressedFloat(dataFile, compressionSize);
+                    sz = readCompressedFloat(dataFile, compressionSize);
 
-
-                    scene::ISkinnedMesh::SScaleKey* key = meshToAnimate->addScaleKey(meshToAnimate->getAllJoints()[i]);
-                    key->scale = core::vector3df(sx, sy, sz);
-                    key->frame = keyframe;
+                    skey = meshToAnimate->addScaleKey(joint);
+                    skey->scale = core::vector3df(sx, sy, sz);
+                    skey->frame = (irr::f32)keyframe;
                 }
             }
         }
@@ -943,7 +944,7 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
     core::array<core::array<SAnimationBufferBitwiseCompressedData> > inf;
     core::array<s8> data;
     io::IReadFile* dataFile = nullptr;
-    SAnimationBufferOrientationCompressionMethod compress;
+    SAnimationBufferOrientationCompressionMethod compress= ABOCM_PackIn48bitsW;
 
     f32 animDuration = 1.0f;
     u32 numFrames = 0;
@@ -1383,7 +1384,7 @@ video::SMaterial IO_MeshLoader_W3ENT::ReadMaterialFile(core::stringc filename)
     if (core::hasFileExtension(filename, "w2mi"))
         return ReadW2MIFile(filename);
     else if (core::hasFileExtension(filename, "w2mg"))
-        return video::SMaterial(); // shader, not handled   
+        return video::SMaterial(); // shader, not handled 
 }
 
 video::SMaterial IO_MeshLoader_W3ENT::ReadW2MIFile(core::stringc filename)

@@ -22,7 +22,7 @@ using namespace scene;
 class MeshSize
 {
 public:
-	static float _scaleFactor;
+	float _scaleFactor = 1.f;
 };
 void enableWireframe(scene::IAnimatedMeshSceneNode* node,bool enabled)
 {
@@ -56,7 +56,8 @@ core::vector3df getMeshDimensions(scene::IAnimatedMeshSceneNode* node)
 	return core::vector3df(0.f, 0.f, 0.f);
 }
 
-void changeOptions(scene::ICameraSceneNode* camera, f32 cameraSpeed, f32 cameraRotationSpeed)
+void changeOptions(scene::ICameraSceneNode* camera, f32 cameraSpeed, 
+	f32 cameraRotationSpeed)
 { 
 	core::list<scene::ISceneNodeAnimator*> anims = camera->getAnimators();
 	core::list<scene::ISceneNodeAnimator*>::Iterator it;
@@ -172,8 +173,7 @@ bool loadAnims(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_n
 /*
 void QIrrlichtWidget::loadMeshPostProcess()
 {
-	const scene::IAnimatedMesh* mesh = _currentLodData->_node->getMesh();
-
+	const scene::IAnimatedMesh* mesh = _currentLodData->_node->getMesh();_scaleFactor
 	MeshSize::_scaleFactor = 1.f;
 
 	// Save the path of normals/specular maps
@@ -201,6 +201,10 @@ void QIrrlichtWidget::loadMeshPostProcess()
 
 int main()
 {
+	core::stringc fileCatEnt = "Z:/uncooked/characters/models/animals/cat/t_01__cat.w2ent";
+	core::stringc fileCatMesh = "Z:/uncooked/characters/models/animals/cat/model/t_01__cat.w2mesh";
+	core::stringc fileCatRig = "Z:/uncooked/characters/base_entities/cat_base/cat_base.w2rig";
+	core::stringc fileCatAnim = "Z:/uncooked/animations/animals/cat/cat_animation.w2anims";
     RedEngineFileHeader header;
 
     video::E_DRIVER_TYPE driverType;
@@ -219,10 +223,10 @@ int main()
     io::IFileSystem *fs = device->getFileSystem();
     video::IVideoDriver* driver = device->getVideoDriver();
     scene::ISceneManager* smgr = device->getSceneManager();
-    IO_MeshLoader_W3ENT w3ent(smgr, fs);
+    IO_MeshLoader_W3ENT* w3ent = new IO_MeshLoader_W3ENT(smgr, fs);
 
-	io::IReadFile* file = fs->createAndOpenFile(io::path("Z:/uncooked/characters/models/animals/cat/t_01__cat.w2ent"));
-	IAnimatedMesh* mesh = w3ent.createMesh(file);
+	io::IReadFile* file = fs->createAndOpenFile(io::path(fileCatMesh));
+	IAnimatedMesh* mesh = w3ent->createMesh(file);
 
 
 	node = device->getSceneManager()->addAnimatedMeshSceneNode(mesh);
@@ -233,9 +237,9 @@ int main()
 		setMaterialsSettings(node);
 		//	loadMeshPostProcess();
 	}
-	loadRig(device, node, "Z:/uncooked/characters/base_entities/cat_base/cat_base.w2rig");
+	loadRig(device, node, fileCatRig);
 	enableRigging(node, true);
-	// loadAnims(device, node, "Z:/uncooked/animations/animals/cat/cat_animation.w2anims");
+	loadAnims(device, node, "Z:/uncooked/animations/animals/cat/cat_animation.w2anims");
 
 	scene::ICameraSceneNode* camera;
 	camera = device->getSceneManager()->addCameraSceneNodeMaya(nullptr);
@@ -253,6 +257,6 @@ int main()
 
 		driver->endScene();
 	}
-
+	delete w3ent;
 	device->drop();
 }
