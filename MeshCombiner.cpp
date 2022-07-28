@@ -85,7 +85,7 @@ void combineMeshes(scene::ISkinnedMesh* newMesh, scene::IAnimatedMesh* addition,
     }// end for all mesh buffers
 
     newMesh->setBoundingBox(addition->getBoundingBox());
-
+    
     if (addition->getMeshType() != scene::EAMT_SKINNED || !preserveBones)
         return;
 

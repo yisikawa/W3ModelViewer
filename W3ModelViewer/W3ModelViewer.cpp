@@ -201,10 +201,13 @@ void QIrrlichtWidget::loadMeshPostProcess()
 
 int main()
 {
+	core::stringc fileGardEnt = "Z:/uncooked/characters/models/background_npc/nilfgaard_knight/nilfgaard_knight_background_man_01.w2ent";
 	core::stringc fileCatEnt = "Z:/uncooked/characters/models/animals/cat/t_01__cat.w2ent";
 	core::stringc fileCatMesh = "Z:/uncooked/characters/models/animals/cat/model/t_01__cat.w2mesh";
 	core::stringc fileCatRig = "Z:/uncooked/characters/base_entities/cat_base/cat_base.w2rig";
+	core::stringc fileGardRig = "F:uncooked/characters/base_entities/man_background_base/soldier_background_base.w2rig";
 	core::stringc fileCatAnim = "Z:/uncooked/animations/animals/cat/cat_animation.w2anims";
+	core::stringc fileGardAnim = "Z:/uncooked/animations/background_npc/background_knights/background_knights_animation.w2anims";
     RedEngineFileHeader header;
 
     video::E_DRIVER_TYPE driverType;
@@ -225,26 +228,27 @@ int main()
     scene::ISceneManager* smgr = device->getSceneManager();
     IO_MeshLoader_W3ENT* w3ent = new IO_MeshLoader_W3ENT(smgr, fs);
 
-	io::IReadFile* file = fs->createAndOpenFile(io::path(fileCatMesh));
+	io::IReadFile* file = fs->createAndOpenFile(io::path(fileGardEnt));
 	IAnimatedMesh* mesh = w3ent->createMesh(file);
 
 
 	node = device->getSceneManager()->addAnimatedMeshSceneNode(mesh);
 	if (node)
 	{
-		node->setScale(core::vector3df(50.f, 50.f, 50.f));
-		node->setRotation(core::vector3df(node->getRotation().X, node->getRotation().Y-90, node->getRotation().Z-90.));
+		node->setScale(core::vector3df(30.f, 30.f, 30.f));
+		node->setRotation(core::vector3df(node->getRotation().X, node->getRotation().Y-90, node->getRotation().Z-90));
 		setMaterialsSettings(node);
 		//	loadMeshPostProcess();
 	}
-	//loadRig(device, node, fileCatRig);
-	//enableRigging(node, true);
-	//loadAnims(device, node, "Z:/uncooked/animations/animals/cat/cat_animation.w2anims");
+//	loadRig(device, node, fileGardRig);
+//	enableRigging(node, true);
+//	loadAnims(device, node, fileGardAnim);
 
 	scene::ICameraSceneNode* camera;
 	camera = device->getSceneManager()->addCameraSceneNodeMaya(nullptr);
 	camera->setPosition(core::vector3df(0.f, 30.f, -40.f));
-	camera->setTarget(node->getPosition());
+	core::vector3df target = node->getPosition(); target.Y += 30.;
+	camera->setTarget(target);
 	const f32 aspectRatio = static_cast<float>(640) / 480;
 	camera->setAspectRatio(aspectRatio);
 	camera->setFarValue(1000.f);

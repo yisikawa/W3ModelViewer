@@ -139,7 +139,8 @@ bool IO_MeshLoader_W3ENT::W3_load(io::IReadFile* file)
         }
         else if (dataTypeName == "CEntityTemplate")
         {
-            W3_CEntityTemplate(file, *infos);
+            W3_CUnknown(file, *infos);
+//            W3_CEntityTemplate(file, *infos);
         }
         else if (dataTypeName == "CEntity")
         {
