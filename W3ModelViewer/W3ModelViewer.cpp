@@ -20,6 +20,10 @@ using namespace gui;
 #pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
 #endif
 
+void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node);
+bool loadRig(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_node, const io::path filename);
+bool loadAnims(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_node, const io::path filename);
+
 //Some global variables 
 IrrlichtDevice* gDevice = nullptr;
 scene::IAnimatedMeshSceneNode* gModel = nullptr;
@@ -27,7 +31,12 @@ scene::ICameraSceneNode* gCamera = nullptr;
 core::stringc gStartUpModelFile;
 core::stringw gMessageText;
 core::stringw gCaption;
-
+IO_MeshLoader_W3ENT* gW3ENT;
+const core::stringc gGamePath = "Z:/uncooked/";
+const core::stringc gTexPath = "Z:/uncooked/";
+core::stringc gStartUpEnt = "Z:/uncooked/characters/models/background_npc/novigrad_citizen/novigrad_background_man_01.w2ent";
+core::stringc gStartUpRig = "Z:/uncooked/characters/base_entities/man_base/man_base.w2rig";
+core::stringc gStartUpAnim = "Z:/uncooked/animations/man/community/man_carry_items.w2anims";
 
 
 // For the gui id's
@@ -40,30 +49,108 @@ enum EGUI_IDS
 	GUI_ID_MAX
 };
 
-/*
-	Handle "menu item clicked" events.
-*/
-void OnMenuItemSelected(IGUIContextMenu* menu)
+void loadModel(const c8* fn)
 {
-	s32 id = menu->getItemCommandId(menu->getSelectedItem());
-	IGUIEnvironment* env = gDevice->getGUIEnvironment();
+	// modify the name if it a .pk3 file
 
-	switch (id)
+	io::path filename(fn);
+
+	io::path extension;
+	core::getFileNameExtension(extension, filename);
+	extension.make_lower();
+
+	// if a texture is loaded apply it to the current model..
+	if (extension == ".w2ent")
 	{
-	case GUI_ID_OPEN_ENT: // FilOnButtonSetScalinge -> Open Model
-		env->addFileOpenDialog(L"Please select a model file to open");
-		break;
-	case GUI_ID_OPEN_RIG: // File -> Set Model Archive
-		env->addFileOpenDialog(L"Please select a Rig file to open");
-		break;
-	case GUI_ID_OPEN_ANIM: // File -> LoadAsOctree
-		env->addFileOpenDialog(L"Please select a Animation file to open");
-		break;
-	case GUI_ID_QUIT: // File -> Quit
-		gDevice->closeDevice();
-		break;
+		gW3ENT->ClearW3ENT();
+		io::IFileSystem* fs = gDevice->getFileSystem();
+		io::IReadFile* file = fs->createAndOpenFile(io::path(fn));
+		IAnimatedMesh* mesh = gW3ENT->createMesh(file);
+		if (mesh)
+			gModel->remove();
+		gModel = gDevice->getSceneManager()->addAnimatedMeshSceneNode(mesh);
+		if (gModel)
+		{
+			gModel->setScale(core::vector3df(30.f, 30.f, 30.f));
+			gModel->setRotation(core::vector3df(gModel->getRotation().X, gModel->getRotation().Y - 90, gModel->getRotation().Z - 90));
+			setMaterialsSettings(gModel);
+			gCamera->setPosition(core::vector3df(0.f, 30.f, -40.f));
+			core::vector3df target = gModel->getPosition(); target.Y += 30.;
+			gCamera->setTarget(target);
+			//	loadMeshPostProcess();
+		}
+		return;
+	}
+	else if (extension == ".w2rig")
+	{
+		loadRig(gDevice, gModel, io::path(fn));
+		return;
+	}
+	else if (extension == ".w2anims")
+	{
+		loadAnims(gDevice, gModel, io::path(fn));
+		return;
 	}
 }
+
+class MyEventReceiver : public IEventReceiver
+{
+public:
+	virtual bool OnEvent(const SEvent& event)
+	{
+		if (event.EventType == EET_GUI_EVENT)
+		{
+			s32 id = event.GUIEvent.Caller->getID();
+			IGUIEnvironment* env = gDevice->getGUIEnvironment();
+
+			switch (event.GUIEvent.EventType)
+			{
+			case EGET_MENU_ITEM_SELECTED:
+				// a menu item was clicked
+				OnMenuItemSelected((IGUIContextMenu*)event.GUIEvent.Caller);
+				break;
+
+			case EGET_FILE_SELECTED:
+				{
+					// load the model file, selected in the file open dialog
+					IGUIFileOpenDialog* dialog =
+						(IGUIFileOpenDialog*)event.GUIEvent.Caller;
+					loadModel(core::stringc(dialog->getFileName()).c_str());
+				}
+				break;
+			default:
+				break;
+			}
+		}
+
+		return false;
+	}
+
+	/*
+		Handle "menu item clicked" events.
+	*/
+	void OnMenuItemSelected(IGUIContextMenu* menu)
+	{
+		s32 id = menu->getItemCommandId(menu->getSelectedItem());
+		IGUIEnvironment* env = gDevice->getGUIEnvironment();
+
+		switch (id)
+		{
+		case GUI_ID_OPEN_ENT: // FilOnButtonSetScalinge -> Open Model
+			env->addFileOpenDialog(L"Please select a model file to open");
+			break;
+		case GUI_ID_OPEN_RIG: // File -> Set Model Archive
+			env->addFileOpenDialog(L"Please select a Rig file to open");
+			break;
+		case GUI_ID_OPEN_ANIM: // File -> LoadAsOctree
+			env->addFileOpenDialog(L"Please select a Animation file to open");
+			break;
+		case GUI_ID_QUIT: // File -> Quit
+			gDevice->closeDevice();
+			break;
+		}
+	}
+};
 
 class MeshSize
 {
@@ -247,22 +334,14 @@ void QIrrlichtWidget::loadMeshPostProcess()
 
 int main()
 {
-	core::stringc fileNPCEnt = "Z:/uncooked/characters/models/background_npc/novigrad_citizen/novigrad_background_man_01.w2ent";
-	core::stringc fileGardEnt = "Z:/uncooked/characters/models/background_npc/nilfgaard_knight/nilfgaard_knight_background_man_01.w2ent";
-	core::stringc fileCatEnt = "Z:/uncooked/characters/models/animals/cat/t_01__cat.w2ent";
-	core::stringc fileCatMesh = "Z:/uncooked/characters/models/animals/cat/model/t_01__cat.w2mesh";
-	core::stringc fileCatRig = "Z:/uncooked/characters/base_entities/cat_base/cat_base.w2rig";
-	core::stringc fileGardRig = "Z:uncooked/characters/base_entities/man_background_base/soldier_background_base.w2rig";
-	core::stringc fileNPCRig = "Z:/uncooked/characters/base_entities/man_base/man_base.w2rig";
-	core::stringc fileCatAnim = "Z:/uncooked/animations/animals/cat/cat_animation.w2anims";
-	core::stringc fileGardAnim = "Z:/uncooked/animations/background_npc/background_knights/background_knights_animation.w2anims";
-	core::stringc fileNPCAnim = "Z:/uncooked/animations/man/community/man_carry_items.w2anims";
 
-    gDevice = createDevice(video::EDT_DIRECT3D9, core::dimension2d<u32>(800, 600));
+	MyEventReceiver receiver;
+    gDevice = createDevice(video::EDT_DIRECT3D9, core::dimension2d<u32>(800, 600),
+		16,false,false,false,&receiver);
     if (gDevice == 0)
         return 1; // could not create selected driver
 	gDevice->setResizable(true);
-	gDevice->getSceneManager()->getParameters()->setAttribute("TW_GAME_PATH","Z:/uncooked/");
+	gDevice->getSceneManager()->getParameters()->setAttribute("TW_GAME_PATH", "Z:/uncooked/");
 	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_TEX_PATH", "Z:/uncooked/");
 	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_SKEL", true);
 	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_BEST_LOD_ONLY", true);
@@ -271,6 +350,11 @@ int main()
 	video::IVideoDriver* driver = gDevice->getVideoDriver();
 	IGUIEnvironment* env = gDevice->getGUIEnvironment();
 	scene::ISceneManager* smgr = gDevice->getSceneManager();
+// set a nicer font
+	IGUISkin* skin = env->getSkin();
+	IGUIFont* font = env->getFont("fonthaettenschweiler.bmp");
+	if (font)
+		skin->setFont(font);
 // create menu
 	gui::IGUIContextMenu* menu = env->addMenu();
 	menu->addItem(L"File", -1, true, true);
@@ -292,9 +376,9 @@ int main()
 	gCaption += "]";
 	gDevice->setWindowCaption(gCaption.c_str());
 
-    IO_MeshLoader_W3ENT* w3ent = new IO_MeshLoader_W3ENT(smgr, fs);
-	io::IReadFile* file = fs->createAndOpenFile(io::path(fileNPCEnt));
-	IAnimatedMesh* mesh = w3ent->createMesh(file);
+    gW3ENT = new IO_MeshLoader_W3ENT(smgr, fs);
+	io::IReadFile* file = fs->createAndOpenFile(io::path(gStartUpEnt));
+	IAnimatedMesh* mesh = gW3ENT->createMesh(file);
 
 
 	gModel = gDevice->getSceneManager()->addAnimatedMeshSceneNode(mesh);
@@ -305,15 +389,15 @@ int main()
 		setMaterialsSettings(gModel);
 		//	loadMeshPostProcess();
 	}
-	loadRig(gDevice, gModel, fileNPCRig);
-	enableRigging(gModel, true);
-	loadAnims(gDevice, gModel, fileNPCAnim);
+	loadRig(gDevice, gModel, gStartUpRig);
+	enableRigging(gModel, false);
+	loadAnims(gDevice, gModel, gStartUpAnim);
 
 	gCamera = gDevice->getSceneManager()->addCameraSceneNodeMaya(nullptr);
 	gCamera->setPosition(core::vector3df(0.f, 30.f, -40.f));
 	core::vector3df target = gModel->getPosition(); target.Y += 30.;
 	gCamera->setTarget(target);
-	const f32 aspectRatio = static_cast<float>(640) / 480;
+	const f32 aspectRatio = static_cast<float>(800) / 600;
 	gCamera->setAspectRatio(aspectRatio);
 	gCamera->setFarValue(1000.f);
 
@@ -334,6 +418,6 @@ int main()
 		else
 			gDevice->yield();
 	}
-	delete w3ent;
+	delete gW3ENT;
 	gDevice->drop();
 }

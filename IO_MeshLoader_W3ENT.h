@@ -173,6 +173,7 @@ public:
     std::map<int, video::SMaterial> Materials;
     TW3_CSkeleton Skeleton;
     scene::ISkinnedMesh* meshToAnimate;
+    void ClearW3ENT();
 
 
 private:

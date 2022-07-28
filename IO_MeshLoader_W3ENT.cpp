@@ -15,6 +15,13 @@ namespace irr
 {
 namespace scene
 {
+void IO_MeshLoader_W3ENT::ClearW3ENT()
+{
+    Materials.clear();
+    Skeleton.matrix.clear();
+    Skeleton.names.clear();
+    Skeleton.nbBones = 0;
+}
 
 //! Constructor
 IO_MeshLoader_W3ENT::IO_MeshLoader_W3ENT(scene::ISceneManager* smgr, io::IFileSystem* fs)
