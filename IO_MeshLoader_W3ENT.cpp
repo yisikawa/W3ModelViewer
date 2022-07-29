@@ -910,15 +910,15 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                         fw = -bits12ToFloat(w);
 
                         orientation = core::quaternion(fx, fy, fz, fw);
-
+                        orientation.normalize();
                         orientation.toEuler(euler);
                         euler *= core::RADTODEG;
-
+                        rkey = meshToAnimate->addRotationKey(joint);
+                        rkey->rotation = orientation;
+                        rkey->frame = (irr::f32)keyframe;
                     }
 
-                    rkey = meshToAnimate->addRotationKey(joint);
-                    rkey->rotation = orientation;
-                    rkey->frame = (irr::f32)keyframe;
+
                 }
                 if (infos.type == EATT_SCALE)
                 {
