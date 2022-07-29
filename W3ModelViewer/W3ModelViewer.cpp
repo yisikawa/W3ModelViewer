@@ -85,12 +85,15 @@ void loadModel(const c8* fn)
 	}
 	else if (extension == ".w2rig")
 	{
+		gW3ENT->Skeleton.clear();
+		TW3_DataCache::_instance.clear();
 		loadRig(gDevice, gModel, io::path(fn));
 		enableRigging(gModel, true);
 		return;
 	}
 	else if (extension == ".w2anims")
 	{
+		TW3_DataCache::_instance.clear();
 		loadAnims(gDevice, gModel, io::path(fn));
 		return;
 	}
@@ -140,13 +143,13 @@ public:
 		switch (id)
 		{
 		case GUI_ID_OPEN_ENT: // FilOnButtonSetScalinge -> Open Model
-			env->addFileOpenDialog(L"Please select a model file to open");
+			env->addFileOpenDialog(L"Please select a model file to open",true,0,-1,false,(irr::c8*)gGamePath.c_str());
 			break;
 		case GUI_ID_OPEN_RIG: // File -> Set Model Archive
-			env->addFileOpenDialog(L"Please select a Rig file to open");
+			env->addFileOpenDialog(L"Please select a Rig file to open", true, 0, -1, false, (irr::c8*)gGamePath.c_str());
 			break;
 		case GUI_ID_OPEN_ANIM: // File -> LoadAsOctree
-			env->addFileOpenDialog(L"Please select a Animation file to open");
+			env->addFileOpenDialog(L"Please select a Animation file to open", true, 0, -1, false, (irr::c8*)gGamePath.c_str());
 			break;
 		case GUI_ID_QUIT: // File -> Quit
 			gDevice->closeDevice();
@@ -355,7 +358,7 @@ int main()
 	scene::ISceneManager* smgr = gDevice->getSceneManager();
 // set a nicer font
 	IGUISkin* skin = env->getSkin();
-	IGUIFont* font = env->getFont("fonthaettenschweiler.bmp");
+	IGUIFont* font = env->getFont("../fonthaettenschweiler.bmp");
 	if (font)
 		skin->setFont(font);
 // create menu
