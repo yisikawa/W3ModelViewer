@@ -23,6 +23,7 @@ using namespace gui;
 void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node);
 bool loadRig(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_node, const io::path filename);
 bool loadAnims(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_node, const io::path filename);
+void enableRigging(scene::IAnimatedMeshSceneNode* node, bool enabled);
 
 //Some global variables 
 IrrlichtDevice* gDevice = nullptr;
@@ -60,9 +61,10 @@ void loadModel(const c8* fn)
 	extension.make_lower();
 
 	// if a texture is loaded apply it to the current model..
-	if (extension == ".w2ent")
+	if (extension == ".w2ent"|| extension == ".w2mesh" )
 	{
-		gW3ENT->ClearW3ENT();
+		gW3ENT->clear();
+		TW3_DataCache::_instance.clear();
 		io::IFileSystem* fs = gDevice->getFileSystem();
 		io::IReadFile* file = fs->createAndOpenFile(io::path(fn));
 		IAnimatedMesh* mesh = gW3ENT->createMesh(file);
@@ -84,6 +86,7 @@ void loadModel(const c8* fn)
 	else if (extension == ".w2rig")
 	{
 		loadRig(gDevice, gModel, io::path(fn));
+		enableRigging(gModel, true);
 		return;
 	}
 	else if (extension == ".w2anims")
@@ -390,7 +393,7 @@ int main()
 		//	loadMeshPostProcess();
 	}
 	loadRig(gDevice, gModel, gStartUpRig);
-	enableRigging(gModel, false);
+	enableRigging(gModel, true);
 	loadAnims(gDevice, gModel, gStartUpAnim);
 
 	gCamera = gDevice->getSceneManager()->addCameraSceneNodeMaya(nullptr);

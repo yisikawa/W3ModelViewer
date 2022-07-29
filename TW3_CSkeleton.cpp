@@ -4,9 +4,25 @@
 
 #include <iostream>
 
-TW3_CSkeleton::TW3_CSkeleton() : nbBones(0)
+TW3_CSkeleton::TW3_CSkeleton() : nbBones(0),
+names(core::array<core::stringc>()),
+parentId(core::array<short>()),
+matrix(core::array<core::matrix4>()),
+positions(core::array<core::vector3df>()),
+rotations(core::array<core::quaternion>()),
+scales(core::array<core::vector3df>())
 {
 
+}
+
+void TW3_CSkeleton::clear()
+{
+    names.clear();
+    parentId.clear();
+    matrix.clear();
+    positions.clear();
+    rotations.clear();
+    scales.clear();
 }
 
 // Definition in IrrAssimpExport

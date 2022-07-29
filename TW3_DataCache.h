@@ -50,12 +50,12 @@ class TW3_DataCache
 {
     scene::ISkinnedMesh* _owner;
 
-    core::array<BoneEntry> _bones;
-    core::array<VertexSkinningEntry> _vertices;
+    core::array<struct BoneEntry> _bones;
+    core::array<struct VertexSkinningEntry> _vertices;
 
 
     std::vector<std::vector<SkinnedVertex> > _skinnedVertex;
-    void skinJoint(irr::scene::ISkinnedMesh::SJoint *joint, BoneEntry bone);
+    void skinJoint(irr::scene::ISkinnedMesh::SJoint *joint, struct BoneEntry bone);
     void buildSkinnedVertexArray();
     void applySkinnedVertexArray();
 

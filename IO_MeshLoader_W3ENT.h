@@ -67,7 +67,7 @@ struct SMeshInfos
     EMeshVertexType vertexType;
 
     u32 materialID;
-};
+} ;
 
 // Informations about the .buffer file
 struct SVertexBufferInfos
@@ -91,7 +91,7 @@ struct SVertexBufferInfos
 struct SBufferInfos
 {
     SBufferInfos() : verticesBufferOffset(0), verticesBufferSize(0), indicesBufferOffset(0), indicesBufferSize(0),
-        quantizationScale(core::vector3df(1, 1, 1)), quantizationOffset(core::vector3df(0, 0, 0)), verticesBuffer(core::array<SVertexBufferInfos>())
+        quantizationScale(core::vector3df(1, 1, 1)), quantizationOffset(core::vector3df(0, 0, 0)), verticesBuffer(core::array<struct SVertexBufferInfos>())
     {
     }
 
@@ -104,11 +104,14 @@ struct SBufferInfos
     core::vector3df quantizationScale;
     core::vector3df quantizationOffset;
 
-    core::array<SVertexBufferInfos> verticesBuffer;
+    core::array<struct SVertexBufferInfos> verticesBuffer;
 };
 
 struct SPropertyHeader
 {
+    SPropertyHeader(): propName(core::stringc()), propType(core::stringc()), propSize(0), endPos(0)
+    {
+    }
     core::stringc propName;
     core::stringc propType;
     s32 propSize;
@@ -118,6 +121,9 @@ struct SPropertyHeader
 
 struct W3_DataInfos
 {
+    W3_DataInfos() :adress(0), size(0)
+    {
+    }
     s32 adress;
     s32 size;
 };
@@ -173,35 +179,45 @@ public:
     std::map<int, video::SMaterial> Materials;
     TW3_CSkeleton Skeleton;
     scene::ISkinnedMesh* meshToAnimate;
-    void ClearW3ENT();
+    void clear();
 
 
 private:
 
     // Attributes
+    u32 FrameOffset;
+    u32 NbBonesPos;
     scene::ISceneManager* SceneManager;
     io::IFileSystem* FileSystem;
     scene::ISkinnedMesh* AnimatedMesh;
+    // Strings table
+    core::array<core::stringc> Strings;
+    // Files table
+    core::array<core::stringc> Files;
+    bool ConfigLoadSkeleton;
+    bool ConfigLoadOnlyBestLOD;
+    io::path ConfigGameTexturesPath;
+    io::path ConfigGamePath;
 
-    u32 FrameOffset;
+    core::array<scene::ISkinnedMesh*> Meshes;
 
     // load the different types of data
     bool W3_load(io::IReadFile* file);
-    void W3_CMesh(io::IReadFile* file, W3_DataInfos infos);
-    video::SMaterial W3_CMaterialInstance(io::IReadFile* file, W3_DataInfos infos);
-    void W3_CMeshComponent(io::IReadFile* file, W3_DataInfos infos);
-    void W3_CEntityTemplate(io::IReadFile* file, W3_DataInfos infos);   // Not handled yet
-    void W3_CEntity(io::IReadFile* file, W3_DataInfos infos);           // Not handled yet
-    TW3_CSkeleton W3_CSkeleton(io::IReadFile* file, W3_DataInfos infos);
-    void W3_CAnimationBufferBitwiseCompressed(io::IReadFile* file, W3_DataInfos infos);
-    void W3_CUnknown(io::IReadFile* file, W3_DataInfos infos);
+    void W3_CMesh(io::IReadFile* file, struct W3_DataInfos infos);
+    video::SMaterial W3_CMaterialInstance(io::IReadFile* file, struct W3_DataInfos infos);
+    void W3_CMeshComponent(io::IReadFile* file, struct W3_DataInfos infos);
+    void W3_CEntityTemplate(io::IReadFile* file, struct W3_DataInfos infos);   // Not handled yet
+    void W3_CEntity(io::IReadFile* file, struct W3_DataInfos infos);           // Not handled yet
+    TW3_CSkeleton W3_CSkeleton(io::IReadFile* file, struct W3_DataInfos infos);
+    void W3_CAnimationBufferBitwiseCompressed(io::IReadFile* file, struct W3_DataInfos infos);
+    void W3_CUnknown(io::IReadFile* file, struct W3_DataInfos infos);
 
     // load a mesh buffer from the buffer file
-    bool W3_ReadBuffer(io::IReadFile* file, SBufferInfos bufferInfos, SMeshInfos meshInfos);
+    bool W3_ReadBuffer(io::IReadFile* file, struct SBufferInfos bufferInfos, struct SMeshInfos meshInfos);
 
-    SAnimationBufferBitwiseCompressedData ReadSAnimationBufferBitwiseCompressedDataProperty(io::IReadFile* file);
-    core::array<core::array<SAnimationBufferBitwiseCompressedData> > ReadSAnimationBufferBitwiseCompressedBoneTrackProperty(io::IReadFile* file);
-    void readAnimBuffer(core::array<core::array<SAnimationBufferBitwiseCompressedData> >& inf, io::IReadFile *dataFile, SAnimationBufferOrientationCompressionMethod c);
+    struct SAnimationBufferBitwiseCompressedData ReadSAnimationBufferBitwiseCompressedDataProperty(io::IReadFile* file);
+    core::array<core::array<struct SAnimationBufferBitwiseCompressedData> > ReadSAnimationBufferBitwiseCompressedBoneTrackProperty(io::IReadFile* file);
+    void readAnimBuffer(core::array<core::array<struct SAnimationBufferBitwiseCompressedData> >& inf, io::IReadFile *dataFile, SAnimationBufferOrientationCompressionMethod c);
 
     void ReadBones(io::IReadFile* file);
 
@@ -211,18 +227,10 @@ private:
 
     video::ITexture* getTexture(io::path filename);
 
-
-    // Strings table
-    core::array<core::stringc> Strings;
-    // Files table
-    core::array<core::stringc> Files;
-
-    u32 NbBonesPos;
-
     int getTextureLayerFromTextureType(core::stringc textureType);
 
     // To read the properties
-    bool ReadPropertyHeader(io::IReadFile* file, SPropertyHeader& propHeader);
+    bool ReadPropertyHeader(io::IReadFile* file, struct SPropertyHeader& propHeader);
 
     SBufferInfos ReadSMeshCookedDataProperty(io::IReadFile* file);
     core::array<SMeshInfos> ReadSMeshChunkPackedProperty(io::IReadFile* file);
@@ -235,7 +243,7 @@ private:
     void ReadUnknowProperty(io::IReadFile* file);
     EMeshVertexType ReadEMVTProperty(io::IReadFile* file);
     SAnimationBufferOrientationCompressionMethod ReadAnimationBufferOrientationCompressionMethodProperty(io::IReadFile* file);
-    void ReadRenderChunksProperty(io::IReadFile* file, SBufferInfos* buffer);
+    void ReadRenderChunksProperty(io::IReadFile* file, struct SBufferInfos* buffer);
     core::array<video::SMaterial> ReadMaterialsProperty(io::IReadFile* file);
     video::SMaterial ReadIMaterialProperty(io::IReadFile* file);
     core::array<core::vector3df> ReadBonesPosition(io::IReadFile* file);
@@ -247,15 +255,6 @@ private:
     ISkinnedMesh* ReadW2MESHFile(core::stringc filename);
 
     bool checkBones(io::IReadFile* file, char nbBones);
-
-
-    bool ConfigLoadSkeleton;
-    bool ConfigLoadOnlyBestLOD;
-    io::path ConfigGameTexturesPath;
-    io::path ConfigGamePath;
-
-    core::array<scene::ISkinnedMesh*> Meshes;
-
 };
 
 } // end namespace scene

@@ -10,6 +10,8 @@ class TW3_CSkeleton
 public:
     TW3_CSkeleton();
 
+    void clear();
+
     u32 nbBones;
     core::array<core::stringc> names;
     core::array<short> parentId;

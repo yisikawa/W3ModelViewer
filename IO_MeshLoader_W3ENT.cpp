@@ -15,12 +15,21 @@ namespace irr
 {
 namespace scene
 {
-void IO_MeshLoader_W3ENT::ClearW3ENT()
+void IO_MeshLoader_W3ENT::clear()
 {
     Materials.clear();
-    Skeleton.matrix.clear();
-    Skeleton.names.clear();
-    Skeleton.nbBones = 0;
+    Skeleton.clear();
+    meshToAnimate = nullptr;
+    AnimatedMesh = nullptr;
+    FrameOffset = 0;
+    NbBonesPos = 0;
+    Strings.clear();
+    Files.clear();
+    Meshes.clear();
+//    ConfigLoadSkeleton = false;
+//    ConfigLoadOnlyBestLOD = false;
+//    ConfigGameTexturesPath = "";
+//    ConfigGamePath = "";
 }
 
 //! Constructor
@@ -30,6 +39,7 @@ IO_MeshLoader_W3ENT::IO_MeshLoader_W3ENT(scene::ISceneManager* smgr, io::IFileSy
   FileSystem(fs),
   AnimatedMesh(nullptr),
   FrameOffset(0),
+  NbBonesPos(0),
   ConfigLoadSkeleton(true),
   ConfigLoadOnlyBestLOD(false)
 {
@@ -107,7 +117,7 @@ void checkMaterial(video::SMaterial mat)
 bool IO_MeshLoader_W3ENT::W3_load(io::IReadFile* file)
 {
     video::SMaterial* mat;
-    RedEngineFileHeader header;
+    struct RedEngineFileHeader header;
     loadTW3FileHeader(file, header);
     Strings = header.Strings;
     Files = header.Files;
@@ -117,11 +127,11 @@ bool IO_MeshLoader_W3ENT::W3_load(io::IReadFile* file)
     s32 contentChunkStart = headerData[19];
     s32 contentChunkSize = headerData[20];
 
-    core::array<W3_DataInfos> meshes;
+    core::array<struct W3_DataInfos> meshes;
     file->seek(contentChunkStart);
     for (s32 i = 0; i < contentChunkSize; ++i)
     {
-        W3_DataInfos* infos = new W3_DataInfos;
+        struct W3_DataInfos* infos = new struct W3_DataInfos;
         u16 dataType = readU16(file);
         core::stringc dataTypeName = Strings[dataType];
 
@@ -342,7 +352,7 @@ bool IO_MeshLoader_W3ENT::W3_ReadBuffer(io::IReadFile* file, SBufferInfos buffer
     return true;
 }
 
-bool IO_MeshLoader_W3ENT::ReadPropertyHeader(io::IReadFile* file, SPropertyHeader& propHeader)
+bool IO_MeshLoader_W3ENT::ReadPropertyHeader(io::IReadFile* file, struct SPropertyHeader& propHeader)
 {
     u16 propName = readU16(file);
     u16 propType = readU16(file);
@@ -384,14 +394,14 @@ bool IO_MeshLoader_W3ENT::ReadBoolProperty(io::IReadFile* file)
     return value;
 }
 
-SAnimationBufferBitwiseCompressedData IO_MeshLoader_W3ENT::ReadSAnimationBufferBitwiseCompressedDataProperty(io::IReadFile* file)
+struct SAnimationBufferBitwiseCompressedData IO_MeshLoader_W3ENT::ReadSAnimationBufferBitwiseCompressedDataProperty(io::IReadFile* file)
 {
     file->seek(1, true);
-    SAnimationBufferBitwiseCompressedData dataInf;
+    struct SAnimationBufferBitwiseCompressedData dataInf;
 
     while(1)
     {
-        SPropertyHeader propHeader;
+        struct SPropertyHeader propHeader;
         if (!ReadPropertyHeader(file, propHeader))
             break;
 
@@ -411,18 +421,18 @@ SAnimationBufferBitwiseCompressedData IO_MeshLoader_W3ENT::ReadSAnimationBufferB
     return dataInf;
 }
 
-core::array<core::array<SAnimationBufferBitwiseCompressedData> > IO_MeshLoader_W3ENT::ReadSAnimationBufferBitwiseCompressedBoneTrackProperty(io::IReadFile* file)
+core::array<core::array<struct SAnimationBufferBitwiseCompressedData> > IO_MeshLoader_W3ENT::ReadSAnimationBufferBitwiseCompressedBoneTrackProperty(io::IReadFile* file)
 {
     s32 arraySize = readS32(file);
     file->seek(1, true);
 
-    core::array<core::array<SAnimationBufferBitwiseCompressedData> > inf;
-    inf.push_back(core::array<SAnimationBufferBitwiseCompressedData>());
+    core::array<core::array<struct SAnimationBufferBitwiseCompressedData> > inf;
+    inf.push_back(core::array<struct SAnimationBufferBitwiseCompressedData>());
 
     int i = 0;              // array index
     while(i <= arraySize)   // the array index = bone index
     {
-        SPropertyHeader propHeader;
+        struct SPropertyHeader propHeader;
         if (!ReadPropertyHeader(file, propHeader))
         {
             ++i;
@@ -432,14 +442,14 @@ core::array<core::array<SAnimationBufferBitwiseCompressedData> > IO_MeshLoader_W
             // go back and re-read
             file->seek(-1, true);
             ReadPropertyHeader(file, propHeader);
-            inf.push_back(core::array<SAnimationBufferBitwiseCompressedData>());
+            inf.push_back(core::array<struct SAnimationBufferBitwiseCompressedData>());
 
         }
 
 
         if (propHeader.propType == "SAnimationBufferBitwiseCompressedData")
         {
-            SAnimationBufferBitwiseCompressedData animInf = ReadSAnimationBufferBitwiseCompressedDataProperty(file);
+            struct SAnimationBufferBitwiseCompressedData animInf = ReadSAnimationBufferBitwiseCompressedDataProperty(file);
 
             if (propHeader.propName == "position")
                 animInf.type = EATT_POSITION;
@@ -548,7 +558,7 @@ core::array<SMeshInfos> IO_MeshLoader_W3ENT::ReadSMeshChunkPackedProperty(io::IR
 
     while(1)
     {
-        SPropertyHeader propHeader;
+        struct SPropertyHeader propHeader;
 
         // invalid property = next chunk
         if (!ReadPropertyHeader(file, propHeader))
@@ -727,7 +737,7 @@ SBufferInfos IO_MeshLoader_W3ENT::ReadSMeshCookedDataProperty(io::IReadFile* fil
 
     file->seek(1, true);
 
-    SPropertyHeader propHeader;
+    struct SPropertyHeader propHeader;
     while(ReadPropertyHeader(file, propHeader))
     {
         if (propHeader.propName == "indexBufferSize")
@@ -829,7 +839,7 @@ core::stringc getAnimTrackString(EAnimTrackType type)
         return "EATT_SCALE";
 }
 
-void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<SAnimationBufferBitwiseCompressedData> >& inf, io::IReadFile* dataFile, SAnimationBufferOrientationCompressionMethod c)
+void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimationBufferBitwiseCompressedData> >& inf, io::IReadFile* dataFile, SAnimationBufferOrientationCompressionMethod c)
 {
     uint64_t b1, b2, b3, b4, b5, b6, bits;
     u8 compressionSize;
@@ -851,7 +861,7 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<SAnimationBuffe
 
         for (u32 j = 0; j < inf[i].size(); ++j)
         {
-            SAnimationBufferBitwiseCompressedData infos = inf[i][j];
+            struct SAnimationBufferBitwiseCompressedData infos = inf[i][j];
             dataFile->seek(infos.dataAddr);
 
             // TODO
@@ -925,11 +935,11 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<SAnimationBuffe
     }
 }
 
-void IO_MeshLoader_W3ENT::W3_CUnknown(io::IReadFile* file, W3_DataInfos infos)
+void IO_MeshLoader_W3ENT::W3_CUnknown(io::IReadFile* file, struct W3_DataInfos infos)
 {
     file->seek(infos.adress + 1);
 
-    SPropertyHeader propHeader;
+    struct SPropertyHeader propHeader;
     while (ReadPropertyHeader(file, propHeader))
     {
         file->seek(propHeader.endPos);
@@ -937,11 +947,11 @@ void IO_MeshLoader_W3ENT::W3_CUnknown(io::IReadFile* file, W3_DataInfos infos)
 }
 
 
-void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* file, W3_DataInfos infos)
+void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* file, struct W3_DataInfos infos)
 {
     file->seek(infos.adress + 1);
 
-    core::array<core::array<SAnimationBufferBitwiseCompressedData> > inf;
+    core::array<core::array<struct SAnimationBufferBitwiseCompressedData> > inf;
     core::array<s8> data;
     io::IReadFile* dataFile = nullptr;
     SAnimationBufferOrientationCompressionMethod compress= ABOCM_PackIn48bitsW;
@@ -950,7 +960,7 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
     u32 numFrames = 0;
     u16 defferedData = 0;
 
-    SPropertyHeader propHeader;
+    struct SPropertyHeader propHeader;
     while (ReadPropertyHeader(file, propHeader))
     {
         if (propHeader.propType == "array:129,0,SAnimationBufferBitwiseCompressedBoneTrack")
@@ -1005,13 +1015,13 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
     FrameOffset += numFrames;
 }
 
-TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, W3_DataInfos infos)
+TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, struct W3_DataInfos infos)
 {
     file->seek(infos.adress + 1);
 
     TW3_CSkeleton skeleton;
 
-    SPropertyHeader propHeader;
+    struct SPropertyHeader propHeader;
     while (ReadPropertyHeader(file, propHeader))
     {
         if (propHeader.propName == "bones")
@@ -1024,7 +1034,7 @@ TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, W3_DataInfo
 
             for (s32 i = 0; i < nbBones; ++i)
             {
-                SPropertyHeader h;
+                struct SPropertyHeader h;
                 ReadPropertyHeader(file, h);  // name + StringANSI
 
                 u8 nameSize = readU8(file);
@@ -1104,11 +1114,11 @@ TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, W3_DataInfo
     return skeleton;
 }
 
-void IO_MeshLoader_W3ENT::W3_CMeshComponent(io::IReadFile* file, W3_DataInfos infos)
+void IO_MeshLoader_W3ENT::W3_CMeshComponent(io::IReadFile* file, struct W3_DataInfos infos)
 {
     file->seek(infos.adress + 1);
 
-    SPropertyHeader propHeader;
+    struct SPropertyHeader propHeader;
     while (ReadPropertyHeader(file, propHeader))
     {
         if (propHeader.propName == "mesh")
@@ -1131,11 +1141,11 @@ void IO_MeshLoader_W3ENT::W3_CMeshComponent(io::IReadFile* file, W3_DataInfos in
 
 }
 
-void IO_MeshLoader_W3ENT::W3_CEntityTemplate(io::IReadFile* file, W3_DataInfos infos)
+void IO_MeshLoader_W3ENT::W3_CEntityTemplate(io::IReadFile* file, struct W3_DataInfos infos)
 {
     file->seek(infos.adress + 1);
 
-    SPropertyHeader propHeader;
+    struct SPropertyHeader propHeader;
     while (ReadPropertyHeader(file, propHeader))
     {
         u8* data;
@@ -1166,7 +1176,7 @@ void IO_MeshLoader_W3ENT::W3_CEntityTemplate(io::IReadFile* file, W3_DataInfos i
     }
 }
 
-void IO_MeshLoader_W3ENT::W3_CEntity(io::IReadFile* file, W3_DataInfos infos)
+void IO_MeshLoader_W3ENT::W3_CEntity(io::IReadFile* file, struct W3_DataInfos infos)
 {
     file->seek(infos.adress + 1);
 }
@@ -1199,7 +1209,7 @@ char readBonesNumber(io::IReadFile* file)
     return nbBones;
 }
 
-void IO_MeshLoader_W3ENT::W3_CMesh(io::IReadFile* file, W3_DataInfos infos)
+void IO_MeshLoader_W3ENT::W3_CMesh(io::IReadFile* file, struct W3_DataInfos infos)
 {
 
     SBufferInfos bufferInfos;
@@ -1210,7 +1220,7 @@ void IO_MeshLoader_W3ENT::W3_CMesh(io::IReadFile* file, W3_DataInfos infos)
 
     file->seek(infos.adress + 1);
 
-    SPropertyHeader propHeader;
+    struct SPropertyHeader propHeader;
     while (ReadPropertyHeader(file, propHeader))
     {
         if (propHeader.propType == "SMeshCookedData")
@@ -1409,7 +1419,7 @@ video::SMaterial IO_MeshLoader_W3ENT::ReadW2MIFile(core::stringc filename)
     return material;
 }
 
-video::SMaterial IO_MeshLoader_W3ENT::W3_CMaterialInstance(io::IReadFile* file, W3_DataInfos infos)
+video::SMaterial IO_MeshLoader_W3ENT::W3_CMaterialInstance(io::IReadFile* file, struct W3_DataInfos infos)
 {
     file->seek(infos.adress + 1);
 
@@ -1419,7 +1429,7 @@ video::SMaterial IO_MeshLoader_W3ENT::W3_CMaterialInstance(io::IReadFile* file, 
 
     while (file->getPos() < endOfChunk)
     {
-        SPropertyHeader propHeader;
+        struct SPropertyHeader propHeader;
         if (!ReadPropertyHeader(file, propHeader))
         {
             file->seek(-2, true);

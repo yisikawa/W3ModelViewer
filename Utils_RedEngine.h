@@ -27,6 +27,9 @@ enum RedEngineContentType
 
 struct RedEngineFileHeader
 {
+    RedEngineFileHeader() : Version(0), Strings(core::array<core::stringc>()), Files(core::array<core::stringc>())
+    {
+    }
     s32 Version;
     core::array<core::stringc> Strings;
     core::array<core::stringc> Files;
@@ -37,6 +40,6 @@ RedEngineVersion getTWFileFormatVersion(io::IReadFile* file);
 bool hasRedEngineMagicCode(io::IReadFile* file);
 RedEngineVersion getRedEngineFileType(io::IReadFile* file);
 
-bool loadTW3FileHeader(io::IReadFile* file, RedEngineFileHeader &header);
+bool loadTW3FileHeader(io::IReadFile* file, struct RedEngineFileHeader &header);
 
 #endif // UTILS_TW_H

@@ -20,16 +20,18 @@ void TW3_DataCache::clear()
     _owner = nullptr;
     _bones.clear();
     _vertices.clear();
+    _skinnedVertex.clear();
+    _bufferID = 0;
 }
 
 void TW3_DataCache::addBoneEntry(core::stringc name, core::matrix4 boneOffset)
 {
-    _bones.push_back(BoneEntry(name, boneOffset));
+    _bones.push_back(struct BoneEntry(name, boneOffset));
 }
 
 void TW3_DataCache::addVertexEntry(u32 boneID, u16 meshBufferID, u32 vertexID, f32 strenght)
 {
-    _vertices.push_back(VertexSkinningEntry(boneID, _bufferID + meshBufferID, vertexID, strenght));
+    _vertices.push_back(struct VertexSkinningEntry(boneID, _bufferID + meshBufferID, vertexID, strenght));
 }
 
 void TW3_DataCache::apply()
@@ -39,7 +41,7 @@ void TW3_DataCache::apply()
 
     for (u32 i = 0; i < _vertices.size(); ++i)
     {
-        VertexSkinningEntry entry = _vertices[i];
+        struct VertexSkinningEntry entry = _vertices[i];
 
         // Check if it's a valid entry
         if (    entry._boneID >= _bones.size()
@@ -74,7 +76,7 @@ void TW3_DataCache::skin()
     buildSkinnedVertexArray();
     for (u32 i = 0; i < _bones.size(); ++i)
     {
-        BoneEntry bone = _bones[i];
+        struct BoneEntry bone = _bones[i];
 
         scene::ISkinnedMesh::SJoint* joint = _owner->getAllJoints()[_owner->getJointNumber(bone._name.c_str())];
         if (joint == nullptr)
@@ -89,7 +91,7 @@ void TW3_DataCache::skin()
 }
 
 // Adapted from http://sourceforge.net/p/assimp/discussion/817654/thread/5462cbf5
-void TW3_DataCache::skinJoint(scene::ISkinnedMesh::SJoint* joint, BoneEntry bone)
+void TW3_DataCache::skinJoint(scene::ISkinnedMesh::SJoint* joint, struct BoneEntry bone)
 {
     const core::matrix4 boneOffset = bone._offsetMatrix;
     const core::matrix4 boneMat = joint->GlobalMatrix * boneOffset; //* InverseRootNodeWorldTransform;

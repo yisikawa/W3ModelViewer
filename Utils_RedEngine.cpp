@@ -62,7 +62,7 @@ RedEngineVersion getRedEngineFileType(io::IReadFile* file)
 }
 
 
-bool loadTW3FileHeader(io::IReadFile* file, RedEngineFileHeader &header)
+bool loadTW3FileHeader(io::IReadFile* file, struct RedEngineFileHeader &header)
 {
     if (!file)
         return false;
