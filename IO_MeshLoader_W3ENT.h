@@ -33,7 +33,8 @@ enum EAnimTrackType
 {
     EATT_POSITION,
     EATT_ORIENTATION,
-    EATT_SCALE
+    EATT_SCALE,
+    EATT_DUMMY
 };
 
 enum SAnimationBufferOrientationCompressionMethod
@@ -130,7 +131,7 @@ struct W3_DataInfos
 
 struct SAnimationBufferBitwiseCompressedData
 {
-    SAnimationBufferBitwiseCompressedData() : type(EATT_POSITION), dt(0.f), compression(0), numFrames(0), dataAddr(0), dataAddrFallback(0)
+    SAnimationBufferBitwiseCompressedData() : type(EATT_DUMMY), dt(0.f), compression(0), numFrames(0), dataAddr(0), dataAddrFallback(0)
     {
 
     }

@@ -879,7 +879,7 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                     //pkey->position = core::vector3df(px,py,pz);
                     //pkey->frame = (irr::f32)keyframe;
                 }
-                if (infos.type == EATT_ORIENTATION)
+                else if (infos.type == EATT_ORIENTATION)
                 {
 
                     if (c == ABOCM_PackIn48bitsW)
@@ -915,7 +915,7 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
 
 
                 }
-                if (infos.type == EATT_SCALE)
+                else if (infos.type == EATT_SCALE)
                 {
                     sx = readCompressedFloat(dataFile, compressionSize);
                     sy = readCompressedFloat(dataFile, compressionSize);
