@@ -33,19 +33,20 @@ core::stringc gStartUpModelFile;
 core::stringw gMessageText;
 core::stringw gCaption;
 IO_MeshLoader_W3ENT* gW3ENT;
-const core::stringc gGamePath = "Z:/uncooked/";
-const core::stringc gTexPath = "Z:/uncooked/";
-core::stringc gStartUpEnt = "Z:/uncooked/characters/models/background_npc/novigrad_citizen/novigrad_background_man_01.w2ent";
-core::stringc gStartUpRig = "Z:/uncooked/characters/base_entities/man_base/man_base.w2rig";
-core::stringc gStartUpAnim = "Z:/uncooked/animations/man/community/man_carry_items.w2anims";
+const core::stringc gGamePath = "f:/uncooked/";
+const core::stringc gTexPath = "f:/uncooked/";
+core::stringc gStartUpEnt = "f:/uncooked/characters/models/animals/cat/t_02__cat.w2ent";
+core::stringc gStartUpRig = "f:/uncooked/characters/base_entities/cat_base/cat_base.w2rig";
+core::stringc gStartUpAnim = "f:/uncooked/animations/animals/cat/cat_animation.w2anims";
 
 
 // For the gui id's
 enum EGUI_IDS
 {
-	GUI_ID_OPEN_ENT  = 1,
-	GUI_ID_OPEN_RIG  = 2,
-	GUI_ID_OPEN_ANIM = 3,
+	GUI_ID_LOAD_ENT = 1,
+	GUI_ID_LOAD_RIG = 2,
+	GUI_ID_LOAD_ANIM = 3,
+	GUI_ID_ADD_MESH = 4,
 	GUI_ID_QUIT,
 	GUI_ID_MAX
 };
@@ -61,42 +62,46 @@ void loadModel(const c8* fn)
 	extension.make_lower();
 
 	// if a texture is loaded apply it to the current model..
-	if (extension == ".w2ent"|| extension == ".w2mesh" )
+	if (extension != ".w2ent" && extension != ".w2mesh") return;
+	if( gW3ENT ) gW3ENT->clear();
+	TW3_DataCache::_instance.clear();
+	io::IFileSystem* fs = gDevice->getFileSystem();
+	io::IReadFile* file = fs->createAndOpenFile(io::path(fn));
+	IAnimatedMesh* mesh = gW3ENT->createMesh(file);
+	if ( mesh && gModel )
+		gModel->remove();
+	gModel = gDevice->getSceneManager()->addAnimatedMeshSceneNode(mesh);
+	if (gModel)
 	{
-		gW3ENT->clear();
-		TW3_DataCache::_instance.clear();
-		io::IFileSystem* fs = gDevice->getFileSystem();
-		io::IReadFile* file = fs->createAndOpenFile(io::path(fn));
-		IAnimatedMesh* mesh = gW3ENT->createMesh(file);
-		if (mesh)
-			gModel->remove();
+		gModel->setScale(core::vector3df(30.f, 30.f, 30.f));
+		gModel->setRotation(core::vector3df(gModel->getRotation().X, gModel->getRotation().Y - 90, gModel->getRotation().Z - 90));
+		setMaterialsSettings(gModel);
+		gCamera->setPosition(core::vector3df(0.f, 30.f, -40.f));
+		core::vector3df target = gModel->getPosition(); target.Y += 10.;
+		gCamera->setTarget(target);
+		//	loadMeshPostProcess();
+	}
+}
+
+bool addMesh(const c8* fn)
+{
+	io::path filename(fn);
+
+	io::IFileSystem* fs = gDevice->getFileSystem();
+	io::IReadFile* file = fs->createAndOpenFile(io::path(fn));
+	IAnimatedMesh* mesh = gW3ENT->createMesh(file);
+	if (mesh)
+	{
 		gModel = gDevice->getSceneManager()->addAnimatedMeshSceneNode(mesh);
-		if (gModel)
-		{
-			gModel->setScale(core::vector3df(30.f, 30.f, 30.f));
-			gModel->setRotation(core::vector3df(gModel->getRotation().X, gModel->getRotation().Y - 90, gModel->getRotation().Z - 90));
-			setMaterialsSettings(gModel);
-			gCamera->setPosition(core::vector3df(0.f, 30.f, -40.f));
-			core::vector3df target = gModel->getPosition(); target.Y += 30.;
-			gCamera->setTarget(target);
-			//	loadMeshPostProcess();
-		}
-		return;
 	}
-	else if (extension == ".w2rig")
-	{
-		gW3ENT->Skeleton.clear();
-		TW3_DataCache::_instance.clear();
-		loadRig(gDevice, gModel, io::path(fn));
-		enableRigging(gModel, true);
-		return;
-	}
-	else if (extension == ".w2anims")
-	{
-		TW3_DataCache::_instance.clear();
-		loadAnims(gDevice, gModel, io::path(fn));
-		return;
-	}
+
+	ISkinnedMesh* newMesh = copySkinnedMesh(gDevice->getSceneManager(), gModel->getMesh(), true);
+	combineMeshes(newMesh, mesh, true);
+	newMesh->finalize();
+	gModel->setMesh(newMesh);
+	setMaterialsSettings(gModel);
+//	loadMeshPostProcess();
+	return true;
 }
 
 class MyEventReceiver : public IEventReceiver
@@ -118,10 +123,41 @@ public:
 
 			case EGET_FILE_SELECTED:
 				{
+					io::path extension;
+					IGUIFileOpenDialog* dialog =(IGUIFileOpenDialog*)event.GUIEvent.Caller;
+					core::getFileNameExtension(extension, core::stringc(dialog->getFileName()).c_str());
+					extension.make_lower();
 					// load the model file, selected in the file open dialog
-					IGUIFileOpenDialog* dialog =
-						(IGUIFileOpenDialog*)event.GUIEvent.Caller;
-					loadModel(core::stringc(dialog->getFileName()).c_str());
+					switch (dialog->getID())
+					{
+					case 11:
+						if (extension == ".w2ent" || extension == ".w2mesh" )
+						{
+							loadModel(core::stringc(dialog->getFileName()).c_str());
+						}
+						break;
+					case 12:
+						if (extension == ".w2rig")
+						{
+							gW3ENT->Skeleton.clear();
+							loadRig(gDevice, gModel, io::path(core::stringc(dialog->getFileName()).c_str()));
+							enableRigging(gModel, true);
+						}
+						break;
+					case 13:
+						if (extension == ".w2anims")
+						{
+							loadAnims(gDevice, gModel, io::path(core::stringc(dialog->getFileName()).c_str()));
+						}
+						break;
+					case 14:
+						if (extension == ".w2ent" || extension == ".w2mesh")
+						{
+							addMesh(core::stringc(dialog->getFileName()).c_str());
+						}
+						break;
+					}
+
 				}
 				break;
 			default:
@@ -142,14 +178,17 @@ public:
 
 		switch (id)
 		{
-		case GUI_ID_OPEN_ENT: // FilOnButtonSetScalinge -> Open Model
-			env->addFileOpenDialog(L"Please select a model file to open",true,0,-1,false,(irr::c8*)gGamePath.c_str());
+		case GUI_ID_LOAD_ENT: // FilOnButtonSetScalinge -> Open Model
+			env->addFileOpenDialog(L"Please select a model file to load",true,0,11,false,(irr::c8*)gGamePath.c_str());
 			break;
-		case GUI_ID_OPEN_RIG: // File -> Set Model Archive
-			env->addFileOpenDialog(L"Please select a Rig file to open", true, 0, -1, false, (irr::c8*)gGamePath.c_str());
+		case GUI_ID_LOAD_RIG: // File -> Set Model Archive
+			env->addFileOpenDialog(L"Please select a Rig file to load", true, 0, 12, false, (irr::c8*)gGamePath.c_str());
 			break;
-		case GUI_ID_OPEN_ANIM: // File -> LoadAsOctree
-			env->addFileOpenDialog(L"Please select a Animation file to open", true, 0, -1, false, (irr::c8*)gGamePath.c_str());
+		case GUI_ID_LOAD_ANIM: // File -> LoadAsOctree
+			env->addFileOpenDialog(L"Please select a Animation file to load", true, 0, 13, false, (irr::c8*)gGamePath.c_str());
+			break;
+		case GUI_ID_ADD_MESH: // File -> LoadAsOctree
+			env->addFileOpenDialog(L"Please select a Mesh file to add", true, 0, 14, false, (irr::c8*)gGamePath.c_str());
 			break;
 		case GUI_ID_QUIT: // File -> Quit
 			gDevice->closeDevice();
@@ -367,9 +406,10 @@ int main()
 //	menu->addItem(L"View", -1, true, true);
 	gui::IGUIContextMenu* submenu;
 	submenu = menu->getSubMenu(0);
-	submenu->addItem(L"Open Model File ...", GUI_ID_OPEN_ENT);
-	submenu->addItem(L"Open Rig File ...", GUI_ID_OPEN_RIG);
-	submenu->addItem(L"Open Anim File ...", GUI_ID_OPEN_ANIM);
+	submenu->addItem(L"Load Model File ...", GUI_ID_LOAD_ENT);
+	submenu->addItem(L"Load Rig File ...", GUI_ID_LOAD_RIG);
+	submenu->addItem(L"Load Anim File ...", GUI_ID_LOAD_ANIM);
+	submenu->addItem(L"Load Add File ...", GUI_ID_ADD_MESH);
 	submenu->addSeparator();
 	submenu->addItem(L"Quit", GUI_ID_QUIT);
 
@@ -383,31 +423,33 @@ int main()
 	gDevice->setWindowCaption(gCaption.c_str());
 
     gW3ENT = new IO_MeshLoader_W3ENT(smgr, fs);
-	io::IReadFile* file = fs->createAndOpenFile(io::path(gStartUpEnt));
-	IAnimatedMesh* mesh = gW3ENT->createMesh(file);
-
-
-	gModel = gDevice->getSceneManager()->addAnimatedMeshSceneNode(mesh);
-	if (gModel)
-	{
-		gModel->setScale(core::vector3df(30.f, 30.f, 30.f));
-		gModel->setRotation(core::vector3df(gModel->getRotation().X, gModel->getRotation().Y-90, gModel->getRotation().Z-90));
-		setMaterialsSettings(gModel);
-		//	loadMeshPostProcess();
-	}
-	loadRig(gDevice, gModel, gStartUpRig);
-	enableRigging(gModel, true);
-	loadAnims(gDevice, gModel, gStartUpAnim);
-
 	gCamera = gDevice->getSceneManager()->addCameraSceneNodeMaya(nullptr);
-	gCamera->setPosition(core::vector3df(0.f, 30.f, -40.f));
-	core::vector3df target = gModel->getPosition(); target.Y += 30.;
-	gCamera->setTarget(target);
 	const f32 aspectRatio = static_cast<float>(800) / 600;
-	gCamera->setAspectRatio(aspectRatio);
+    gCamera->setAspectRatio(aspectRatio);
 	gCamera->setFarValue(1000.f);
+	//io::IReadFile* file = fs->createAndOpenFile(io::path(gStartUpEnt));
+	//IAnimatedMesh* mesh = gW3ENT->createMesh(file);
 
-	while (gDevice->run() && driver )
+
+	//gModel = gDevice->getSceneManager()->addAnimatedMeshSceneNode(mesh);
+	//if (gModel)
+	//{
+	//	gModel->setScale(core::vector3df(50.f, 50.f, 50.f));
+	//	gModel->setRotation(core::vector3df(gModel->getRotation().X, gModel->getRotation().Y-90, gModel->getRotation().Z-90));
+	//	setMaterialsSettings(gModel);
+	//	//	loadMeshPostProcess();
+	//}
+	//loadRig(gDevice, gModel, gStartUpRig);
+	//enableRigging(gModel, false);
+	//loadAnims(gDevice, gModel, gStartUpAnim);
+
+
+	//gCamera->setPosition(core::vector3df(0.f, 30.f, -40.f));
+	//core::vector3df target = gModel->getPosition(); target.Y += 10.;
+	//gCamera->setTarget(target);
+
+
+	while (gDevice->run() && driver)
 	{
 		if (gDevice->isWindowActive())
 		{
