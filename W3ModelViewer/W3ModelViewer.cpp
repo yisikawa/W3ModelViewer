@@ -85,23 +85,24 @@ void loadModel(const c8* fn)
 
 bool addMesh(const c8* fn)
 {
-	io::path filename(fn);
+	// Clear the previous data
+	TW3_DataCache::_instance.clear();
 
+	io::path filename(fn);
 	io::IFileSystem* fs = gDevice->getFileSystem();
-	io::IReadFile* file = fs->createAndOpenFile(io::path(fn));
+	io::IReadFile* file = fs->createAndOpenFile(io::path(fn));	
 	IAnimatedMesh* mesh = gW3ENT->createMesh(file);
 	if (mesh)
 	{
-		gModel = gDevice->getSceneManager()->addAnimatedMeshSceneNode(mesh);
+		ISkinnedMesh* newMesh = copySkinnedMesh(gDevice->getSceneManager(), gModel->getMesh(), true);
+		combineMeshes(newMesh, mesh, true);
+		newMesh->finalize();
+		gModel->setMesh(newMesh);
+		setMaterialsSettings(gModel);
+		//	loadMeshPostProcess();
+		return true;
 	}
-
-	ISkinnedMesh* newMesh = copySkinnedMesh(gDevice->getSceneManager(), gModel->getMesh(), true);
-	combineMeshes(newMesh, mesh, true);
-	newMesh->finalize();
-	gModel->setMesh(newMesh);
-	setMaterialsSettings(gModel);
-//	loadMeshPostProcess();
-	return true;
+	return false;
 }
 
 class MyEventReceiver : public IEventReceiver
@@ -427,27 +428,6 @@ int main()
 	const f32 aspectRatio = static_cast<float>(800) / 600;
     gCamera->setAspectRatio(aspectRatio);
 	gCamera->setFarValue(1000.f);
-	//io::IReadFile* file = fs->createAndOpenFile(io::path(gStartUpEnt));
-	//IAnimatedMesh* mesh = gW3ENT->createMesh(file);
-
-
-	//gModel = gDevice->getSceneManager()->addAnimatedMeshSceneNode(mesh);
-	//if (gModel)
-	//{
-	//	gModel->setScale(core::vector3df(50.f, 50.f, 50.f));
-	//	gModel->setRotation(core::vector3df(gModel->getRotation().X, gModel->getRotation().Y-90, gModel->getRotation().Z-90));
-	//	setMaterialsSettings(gModel);
-	//	//	loadMeshPostProcess();
-	//}
-	//loadRig(gDevice, gModel, gStartUpRig);
-	//enableRigging(gModel, false);
-	//loadAnims(gDevice, gModel, gStartUpAnim);
-
-
-	//gCamera->setPosition(core::vector3df(0.f, 30.f, -40.f));
-	//core::vector3df target = gModel->getPosition(); target.Y += 10.;
-	//gCamera->setTarget(target);
-
 
 	while (gDevice->run() && driver)
 	{

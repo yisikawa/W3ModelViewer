@@ -26,10 +26,6 @@ void IO_MeshLoader_W3ENT::clear()
     Strings.clear();
     Files.clear();
     Meshes.clear();
-//    ConfigLoadSkeleton = false;
-//    ConfigLoadOnlyBestLOD = false;
-//    ConfigGameTexturesPath = "";
-//    ConfigGamePath = "";
 }
 
 //! Constructor
@@ -104,7 +100,6 @@ IAnimatedMesh* IO_MeshLoader_W3ENT::createMesh(io::IReadFile* f)
 
 	return AnimatedMesh;
 }
-
 
 void checkMaterial(video::SMaterial mat)
 {
