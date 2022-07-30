@@ -33,11 +33,11 @@ core::stringc gStartUpModelFile;
 core::stringw gMessageText;
 core::stringw gCaption;
 IO_MeshLoader_W3ENT* gW3ENT;
-const core::stringc gGamePath = "f:/uncooked/";
-const core::stringc gTexPath = "f:/uncooked/";
-core::stringc gStartUpEnt = "f:/uncooked/characters/models/animals/cat/t_02__cat.w2ent";
-core::stringc gStartUpRig = "f:/uncooked/characters/base_entities/cat_base/cat_base.w2rig";
-core::stringc gStartUpAnim = "f:/uncooked/animations/animals/cat/cat_animation.w2anims";
+const core::stringc gGamePath = "z:/uncooked/";
+const core::stringc gTexPath = "z:/uncooked/";
+core::stringc gStartUpEnt = "z:/uncooked/characters/models/animals/cat/t_02__cat.w2ent";
+core::stringc gStartUpRig = "z:/uncooked/characters/base_entities/cat_base/cat_base.w2rig";
+core::stringc gStartUpAnim = "z:/uncooked/animations/animals/cat/cat_animation.w2anims";
 
 
 // For the gui id's
@@ -261,7 +261,8 @@ void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node)
 		if (material.MaterialType == video::EMT_NORMAL_MAP_SOLID
 			|| material.MaterialType == video::EMT_PARALLAX_MAP_SOLID)
 		{
-			material.MaterialType = video::EMT_SOLID;
+//			material.MaterialType = video::EMT_SOLID;
+			material.MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF;
 		}
 		else if (material.MaterialType == video::EMT_NORMAL_MAP_TRANSPARENT_ADD_COLOR
 			|| material.MaterialType == video::EMT_PARALLAX_MAP_TRANSPARENT_ADD_COLOR)
@@ -276,7 +277,8 @@ void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node)
 	}
 
 	node->setMaterialFlag(video::EMF_LIGHTING, false);
-	node->setMaterialFlag(video::EMF_BACK_FACE_CULLING, false);
+	//node->setMaterialFlag(video::EMF_FRONT_FACE_CULLING, false);
+	//node->setMaterialFlag(video::EMF_BACK_FACE_CULLING, false);
 
 	for (u32 i = 1; i < _IRR_MATERIAL_MAX_TEXTURES_; ++i)
 		node->setMaterialTexture(i, nullptr);
