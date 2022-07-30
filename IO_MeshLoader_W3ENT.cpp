@@ -875,9 +875,9 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                     px = readCompressedFloat(dataFile, compressionSize);
                     py = readCompressedFloat(dataFile, compressionSize);
                     pz = readCompressedFloat(dataFile, compressionSize);
-                    //pkey = meshToAnimate->addPositionKey(joint);
-                    //pkey->position = core::vector3df(px,py,pz);
-                    //pkey->frame = (irr::f32)keyframe;
+                    pkey = meshToAnimate->addPositionKey(joint);
+                    pkey->position = core::vector3df(px,py,pz);
+                    pkey->frame = (irr::f32)keyframe;
                 }
                 else if (infos.type == EATT_ORIENTATION)
                 {
@@ -921,9 +921,9 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                     sy = readCompressedFloat(dataFile, compressionSize);
                     sz = readCompressedFloat(dataFile, compressionSize);
 
-                    //skey = meshToAnimate->addScaleKey(joint);
-                    //skey->scale = core::vector3df(sx, sy, sz);
-                    //skey->frame = (irr::f32)keyframe;
+                    skey = meshToAnimate->addScaleKey(joint);
+                    skey->scale = core::vector3df(sx, sy, sz);
+                    skey->frame = (irr::f32)keyframe;
                 }
             }
         }
