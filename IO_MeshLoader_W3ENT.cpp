@@ -1010,6 +1010,35 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
     FrameOffset += numFrames;
 }
 
+core::matrix4 toRotationMatrix(core::quaternion q) {
+    auto xy2 = q.X * q.Y * 2;
+    auto xz2 = q.X * q.Z * 2;
+    auto xw2 = q.X * q.W * 2;
+    auto yz2 = q.Y * q.Z * 2;
+    auto yw2 = q.Y * q.W * 2;
+    auto zw2 = q.Z * q.W * 2;
+    auto ww2 = q.W * q.W * 2;
+    core::matrix4 rot;
+    rot(0, 0) = (irr::f32)(ww2 + 2 * q.X * q.X - 1);
+    rot(0, 1) = (irr::f32)(xy2 + zw2);
+    rot(0, 2) = (irr::f32)(xz2 - yw2);
+    rot(0, 3) = (irr::f32)0.;
+    rot(1, 0) = (irr::f32)(xy2 - zw2);
+    rot(1, 1) = (irr::f32)(ww2 + 2 * q.Y * q.Y - 1);
+    rot(1, 2) = (irr::f32)(yz2 + xw2);
+    rot(1, 3) = (irr::f32)0.;
+    rot(2, 0) = (irr::f32)(xz2 + yw2);
+    rot(2, 1) = (irr::f32)(yz2 - xw2);
+    rot(2, 2) = (irr::f32)(ww2 + 2 * q.Z * q.Z - 1);
+    rot(2, 3) = (irr::f32)0.;
+    rot(3, 0) = (irr::f32)0.;
+    rot(3, 1) = (irr::f32)0.;
+    rot(3, 2) = (irr::f32)0.;
+    rot(3, 3) = (irr::f32)1.;
+
+    return rot;
+}
+
 TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, struct W3_DataInfos infos)
 {
     file->seek(infos.adress + 1);
@@ -1060,6 +1089,7 @@ TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, struct W3_D
     file->seek(-2, true);
     //std::cout << file->getPos() << std::endl;
 
+
     for (u32 i = 0; i < skeleton.nbBones; ++i)
     {
         // position (vector 4) + quaternion (4 float) + scale (vector 4)
@@ -1084,13 +1114,13 @@ TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, struct W3_D
         core::matrix4 posMat;
         posMat.setTranslation(position);
 
-        core::matrix4 rotMat;
-        core::vector3df euler;
-        orientation.toEuler(euler);
+        core::matrix4 rotMat = toRotationMatrix(orientation);
+        //core::vector3df euler;
+        //orientation.toEuler(euler);
 
-        chechNaNErrors(euler);
+        //chechNaNErrors(euler);
 
-        rotMat.setRotationRadians(euler);
+        //rotMat.setRotationRadians(euler);
 
         core::matrix4 scaleMat;
         scaleMat.setScale(scale);
