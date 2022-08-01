@@ -989,7 +989,6 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
         file->seek(propHeader.endPos);
     }
 
-    if (numFrames <= 1) return;
     f32 animationSpeed = (f32)numFrames / animDuration;
     meshToAnimate->setAnimationSpeed(animationSpeed);
 
