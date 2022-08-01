@@ -425,7 +425,7 @@ core::array<core::array<struct SAnimationBufferBitwiseCompressedData> > IO_MeshL
     inf.push_back(core::array<struct SAnimationBufferBitwiseCompressedData>());
 
     int i = 0;              // array index
-    while(i <= arraySize)   // the array index = bone index
+    while(i <= arraySize)   // the array index = bone index => rig index
     {
         struct SPropertyHeader propHeader;
         if (!ReadPropertyHeader(file, propHeader))
@@ -850,11 +850,11 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
     scene::ISkinnedMesh::SScaleKey* skey;
 
 
-    for (u32 i = 0; i < inf.size(); ++i)
+    for (u32 i = 1; i < inf.size(); ++i)
     {
         scene::ISkinnedMesh::SJoint* joint = meshToAnimate->getAllJoints()[i];
 
-        for (u32 j = 0; j < inf[i].size(); ++j)
+        for (u32 j = 1; j < inf[i].size(); ++j)
         {
             struct SAnimationBufferBitwiseCompressedData infos = inf[i][j];
             dataFile->seek(infos.dataAddr);
@@ -988,6 +988,7 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
         file->seek(propHeader.endPos);
     }
 
+    if (numFrames <= 1) return;
     f32 animationSpeed = (f32)numFrames / animDuration;
     meshToAnimate->setAnimationSpeed(animationSpeed);
 
