@@ -1,1 +1,0 @@
-"ABOCM_AsFloat_XYZSignedWInLastBit"

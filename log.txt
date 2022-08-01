@@ -1,0 +1,10 @@
+i = 52
+
+dt
+
+{array=0x0866fe98 "nonStreamableBones" allocated=29 used=19 ...}
+
+i = 55
+bones
+
+i=63

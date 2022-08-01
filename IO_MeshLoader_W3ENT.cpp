@@ -126,53 +126,54 @@ bool IO_MeshLoader_W3ENT::W3_load(io::IReadFile* file)
     file->seek(contentChunkStart);
     for (s32 i = 0; i < contentChunkSize; ++i)
     {
-        struct W3_DataInfos* infos = new struct W3_DataInfos;
+        struct W3_DataInfos infos;
+
         u16 dataType = readU16(file);
         core::stringc dataTypeName = Strings[dataType];
 
         file->seek(6, true);
 
-        file->read(&infos->size, 4);
-        file->read(&infos->adress, 4);
+        file->read(&infos.size, 4);
+        file->read(&infos.adress, 4);
 
         file->seek(8, true);
 
         s32 back = file->getPos();
         if (dataTypeName == "CMesh")
         {
-            meshes.push_back(*infos);
+            meshes.push_back(infos);
         }
         else if (dataTypeName == "CMaterialInstance")
         {
             mat = new video::SMaterial;
-            *mat = IO_MeshLoader_W3ENT::W3_CMaterialInstance(file, *infos);
+            *mat = IO_MeshLoader_W3ENT::W3_CMaterialInstance(file, infos);
             checkMaterial(*mat);
             Materials.insert(std::make_pair(i+1, *mat));
         }
         else if (dataTypeName == "CEntityTemplate")
         {
-            W3_CUnknown(file, *infos);
+            W3_CUnknown(file, infos);
 //            W3_CEntityTemplate(file, *infos);
         }
         else if (dataTypeName == "CEntity")
         {
-            W3_CEntity(file, *infos);
+            W3_CEntity(file, infos);
         }
         else if (dataTypeName == "CMeshComponent")
         {
-            W3_CMeshComponent(file, *infos);
+            W3_CMeshComponent(file, infos);
         }
         else if (dataTypeName == "CSkeleton")
         {
-            W3_CSkeleton(file, *infos);
+            W3_CSkeleton(file, infos);
         }
         else if (dataTypeName == "CAnimationBufferBitwiseCompressed" && meshToAnimate)
         {
-            W3_CAnimationBufferBitwiseCompressed(file, *infos);
+            W3_CAnimationBufferBitwiseCompressed(file, infos);
         }
         else
         {
-            W3_CUnknown(file, *infos);
+            W3_CUnknown(file, infos);
         }
         file->seek(back);
     }
