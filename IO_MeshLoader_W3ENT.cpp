@@ -1006,9 +1006,10 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
     {
         readAnimBuffer(inf, dataFile, compress);
         dataFile->drop();
+        FrameOffset += numFrames;
     }
 
-    FrameOffset += numFrames;
+
 }
 
 core::matrix4 toRotationMatrix(core::quaternion q) {
