@@ -1,0 +1,4 @@
+name,kind,,,,,,,,
+cat01,-m,1,characters\models\animals\cat\t_01__cat.w2ent,-r,1,characters\base_entities\cat_base\cat_base.w2rig,-a,1,animations\animals\cat\cat_animation.w2anims
+cat01cs,-m,1,characters\models\animals\cat\t_01__cat_cs.w2ent,-r,1,characters\base_entities\cat_base\cat_base.w2rig,-a,1,animations\animals\cat\cat_animation.w2anims
+cat02,-m,1,characters\models\animals\cat\t_02__cat.w2ent,-r,1,characters\base_entities\cat_base\cat_base.w2rig,-a,1,animations\animals\cat\cat_animation.w2anims
