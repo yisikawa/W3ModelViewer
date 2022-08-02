@@ -855,7 +855,7 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
     {
         scene::ISkinnedMesh::SJoint* joint = meshToAnimate->getAllJoints()[i];
 
-        for (u32 j = 1; j < inf[i].size(); ++j)
+        for (u32 j = 0; j < inf[i].size(); ++j)
         {
             struct SAnimationBufferBitwiseCompressedData infos = inf[i][j];
             dataFile->seek(infos.dataAddr);
