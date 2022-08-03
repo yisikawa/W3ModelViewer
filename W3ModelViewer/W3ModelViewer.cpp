@@ -35,9 +35,6 @@ core::stringw gCaption;
 IO_MeshLoader_W3ENT* gW3ENT;
 core::stringc gGamePath = "f:/uncooked/";
 core::stringc gTexPath = "f:/uncooked/";
-core::stringc gStartUpEnt = "z:/uncooked/characters/models/animals/cat/t_02__cat.w2ent";
-core::stringc gStartUpRig = "z:/uncooked/characters/base_entities/cat_base/cat_base.w2rig";
-core::stringc gStartUpAnim = "z:/uncooked/animations/animals/cat/cat_animation.w2anims";
 
 
 // For the gui id's
