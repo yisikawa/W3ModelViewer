@@ -33,8 +33,8 @@ core::stringc gStartUpModelFile;
 core::stringw gMessageText;
 core::stringw gCaption;
 IO_MeshLoader_W3ENT* gW3ENT;
-core::stringc gGamePath = "f:/uncooked/";
-core::stringc gTexPath = "f:/uncooked/";
+core::stringc gGamePath = "z:/uncooked/";
+core::stringc gTexPath = "z:/uncooked/";
 
 
 // For the gui id's

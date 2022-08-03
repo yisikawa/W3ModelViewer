@@ -145,10 +145,9 @@ bool IO_MeshLoader_W3ENT::W3_load(io::IReadFile* file)
         }
         else if (dataTypeName == "CMaterialInstance")
         {
-            mat = new video::SMaterial;
-            *mat = IO_MeshLoader_W3ENT::W3_CMaterialInstance(file, infos);
-            checkMaterial(*mat);
-            Materials.insert(std::make_pair(i+1, *mat));
+            video::SMaterial mat = W3_CMaterialInstance(file, infos);
+            checkMaterial(mat);
+            Materials.insert(std::make_pair(i+1, mat));
         }
         else if (dataTypeName == "CEntityTemplate")
         {
@@ -283,7 +282,7 @@ bool IO_MeshLoader_W3ENT::W3_ReadBuffer(io::IReadFile* file, SBufferInfos buffer
                     TW3_DataCache::_instance.addVertexEntry(boneId, bufferId, i, fWeightStrength);
                 }
             }
-
+            delete[] skinningData;
         }
 
         buffer->Vertices_Standard.push_back(video::S3DVertex());
