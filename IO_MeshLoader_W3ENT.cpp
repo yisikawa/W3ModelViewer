@@ -493,7 +493,8 @@ core::array<video::SMaterial> IO_MeshLoader_W3ENT::ReadMaterialsProperty(io::IRe
         if (matFileID < Files.size()) // Refer to a w2mi file
         {
             std::cout << "w2mi file = " << Files[matFileID].c_str() << std::endl;
-            materials.push_back(ReadMaterialFile(ConfigGamePath + Files[matFileID]));
+//            materials.push_back(ReadMaterialFile(ConfigGamePath + Files[matFileID]));
+            materials.push_back(ReadW2MIFileOnly(ConfigGamePath + Files[matFileID]));
             //file->seek(3, true);
         }
         else
@@ -1443,6 +1444,101 @@ video::SMaterial IO_MeshLoader_W3ENT::ReadW2MIFile(core::stringc filename)
     }
 
     return material;
+}
+
+video::SMaterial IO_MeshLoader_W3ENT::ReadW2MIFileOnly(core::stringc filename)
+{
+    video::SMaterial mat;
+    struct RedEngineFileHeader header;
+
+    io::IReadFile* file = FileSystem->createAndOpenFile(filename);
+    if (!file) return mat;
+
+    loadTW3FileHeader(file, header);
+
+    file->seek(12);
+    core::array<s32> headerData = readDataArray<s32>(file, 38);
+    s32 contentChunkStart = headerData[19];
+    s32 contentChunkSize = headerData[20];
+
+    core::array<struct W3_DataInfos> meshes;
+    file->seek(contentChunkStart);
+    for (s32 i = 0; i < contentChunkSize; ++i)
+    {
+        struct W3_DataInfos infos;
+
+        u16 dataType = readU16(file);
+        core::stringc dataTypeName = header.Strings[dataType];
+
+        file->seek(6, true);
+        file->read(&infos.size, 4);
+        file->read(&infos.adress, 4);
+        file->seek(8, true);
+
+        s32 back = file->getPos();
+        if (dataTypeName == "CMaterialInstance")
+        {
+            file->seek(infos.adress + 1);
+            const s32 endOfChunk = infos.adress + infos.size;
+ 
+            while (file->getPos() < endOfChunk)
+            {
+                struct SPropertyHeader propHeader;
+                if (!ReadPropertyHeader(file, propHeader))
+                {
+                    file->seek(-2, true);
+                    s32 nbProperty = readS32(file);
+                    std::cout << "nb property = " << nbProperty << std::endl;
+
+                    // Read the properties of the material
+                    for (u32 j = 0; j < nbProperty; ++j)
+                    {
+                        const s32 back = file->getPos();
+
+                        s32 propSize = readS32(file);
+
+                        u16 propId, propTypeId;
+                        file->read(&propId, 2);
+                        file->read(&propTypeId, 2);
+
+                        if (propId >= header.Strings.size())
+                            break;
+
+                        const s32 textureLayer = getTextureLayerFromTextureType(header.Strings[propId]);
+                        if (textureLayer != -1)
+                        {
+                            u8 texId = readU8(file);
+                            texId = 255 - texId;
+
+                            if (texId < header.Files.size())
+                            {
+                                video::ITexture* texture = nullptr;
+                                texture = getTexture(header.Files[texId]);
+
+                                if (texture)
+                                {
+                                    mat.setTexture(textureLayer, texture);
+
+                                    if (textureLayer == 1)  // normal map
+                                        mat.MaterialType = video::EMT_NORMAL_MAP_SOLID;
+                                    else
+                                        mat.MaterialType = video::EMT_SOLID;
+                                }
+                            }
+                        }
+
+                        file->seek(back + propSize);
+                    }
+                    break;
+                }
+                file->seek(propHeader.endPos);
+            }
+            checkMaterial(mat);
+            return mat;
+        }
+        file->seek(back);
+    }
+    return mat;
 }
 
 video::SMaterial IO_MeshLoader_W3ENT::W3_CMaterialInstance(io::IReadFile* file, struct W3_DataInfos infos)

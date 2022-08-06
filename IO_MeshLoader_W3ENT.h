@@ -253,6 +253,7 @@ private:
     // read external files
     video::SMaterial ReadMaterialFile(core::stringc filename);
     video::SMaterial ReadW2MIFile(core::stringc filename);
+    video::SMaterial ReadW2MIFileOnly(core::stringc filename);
     ISkinnedMesh* ReadW2MESHFile(core::stringc filename);
 
     bool checkBones(io::IReadFile* file, char nbBones);
