@@ -14,17 +14,10 @@ crab,-m,1,characters\models\animals\crab\model\b_01__crab.w2mesh,-r,1,characters
 crow,-m,1,characters\models\animals\crow\crow_body_01.w2ent,-r,1,characters\base_entities\crow_base\crow_base.w2rig,-a,1,animations\animals\crow\crow_animation.w2anims
 deer01,-m,1,characters\models\animals\deer\t_01__deer.w2ent,-r,1,characters\base_entities\deer_base\deer_base.w2rig,-a,1,animations\animals\deer\deer_animation.w2anims
 deer02,-m,1,characters\models\animals\deer\t_02__deer.w2ent,-r,1,characters\base_entities\deer_base\deer_base.w2rig,-a,1,animations\animals\deer\deer_animation.w2anims
-deer03,-m,1,characters\models\animals\deer\t_03__deer.w2ent,-r,1,characters\base_entities\deer_base\deer_base.w2rig,-a,1,animations\animals\deer\deer_animation.w2anims
 deer04,-m,1,characters\models\animals\deer\t_04__deer.w2ent,-r,1,characters\base_entities\deer_base\deer_base.w2rig,-a,1,animations\animals\deer\deer_animation.w2anims
 dog,-m,1,characters\models\animals\dog\dog.w2ent,-r,1,characters\base_entities\dog_base\dog_base.w2rig,-a,1,animations\animals\dog\dog_animation.w2anims
 dog01,-m,1,characters\models\animals\dog\dog_01.w2ent,-r,1,characters\base_entities\dog_base\dog_base.w2rig,-a,1,animations\animals\dog\dog_animation.w2anims
 dog02,-m,1,characters\models\animals\dog\dog_02.w2ent,-r,1,characters\base_entities\dog_base\dog_base.w2rig,-a,1,animations\animals\dog\dog_animation.w2anims
-fish01,-m,1,characters\models\animals\fish\t_01__fish.w2ent,-r,1,characters\base_entities\fish_base\fish_base.w2rig,-a,1,animations\animals\fish\fish_animation.w2anims
-fish02,-m,1,characters\models\animals\fish\t_02__fish.w2ent,-r,1,characters\base_entities\fish_base\fish_base.w2rig,-a,1,animations\animals\fish\fish_animation.w2anims
-fish03,-m,1,characters\models\animals\fish\t_03__fish.w2ent,-r,1,characters\base_entities\fish_base\fish_base.w2rig,-a,1,animations\animals\fish\fish_animation.w2anims
-fish04,-m,1,characters\models\animals\fish\t_04__fish.w2ent,-r,1,characters\base_entities\fish_base\fish_base.w2rig,-a,1,animations\animals\fish\fish_animation.w2anims
-fish05,-m,1,characters\models\animals\fish\t_05__fish.w2ent,-r,1,characters\base_entities\fish_base\fish_base.w2rig,-a,1,animations\animals\fish\fish_animation.w2anims
-fish06,-m,1,characters\models\animals\fish\t_06__fish.w2ent,-r,1,characters\base_entities\fish_base\fish_base.w2rig,-a,1,animations\animals\fish\fish_animation.w2anims
 goat01,-m,1,characters\models\animals\goat\t_01__goat.w2ent,-r,1,characters\base_entities\goat_base\goat_base.w2rig,-a,1,animations\animals\goat\goat_animation.w2anims
 goat02,-m,1,characters\models\animals\goat\t_02__goat.w2ent,-r,1,characters\base_entities\goat_base\goat_base.w2rig,-a,1,animations\animals\goat\goat_animation.w2anims
 goat03,-m,1,characters\models\animals\goat\t_03__goat_quest.w2ent,-r,1,characters\base_entities\goat_base\goat_base.w2rig,-a,1,animations\animals\goat\goat_animation.w2anims

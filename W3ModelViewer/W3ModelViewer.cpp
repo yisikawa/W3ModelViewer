@@ -56,7 +56,7 @@ struct ModelList
 	core::array<core::stringc> animFiles;
 };
 
-core::array<struct ModelList> gAnimals,gMonsters;
+core::array<struct ModelList> gAnimals,gMonsters,gBackgrounds;
 // For the gui id's
 enum 
 {
@@ -67,6 +67,7 @@ enum
 	GUI_ID_QUIT,
 	GUI_ID_ANIMALS_LIST,
 	GUI_ID_MONSTERS_LIST,
+	GUI_ID_BACKGROUNDS_LIST,
 	GUI_ID_MAX
 };
 
@@ -137,6 +138,10 @@ public:
 				else if (id == GUI_ID_MONSTERS_LIST)
 				{
 					OnMonstersListSelected((IGUIComboBox*)event.GUIEvent.Caller);
+				}
+				else if (id == GUI_ID_BACKGROUNDS_LIST)
+				{
+					OnBackgroundsListSelected((IGUIComboBox*)event.GUIEvent.Caller);
 				}
 				break;
 			default:
@@ -211,6 +216,22 @@ public:
 			}
 		}
 	}
+
+	void OnBackgroundsListSelected(IGUIComboBox* combo)
+	{
+		s32 pos = combo->getSelected();
+		if (pos <= 0) return;
+		if (gBackgrounds[pos - 1].meshFiles.size() >= 1) {
+			core::stringc file = gGamePath + gBackgrounds[pos - 1].meshFiles[0];
+			loadModel(file.c_str());
+			for (int i = 1; i < gBackgrounds[pos - 1].meshFiles.size(); i++)
+			{
+				core::stringc file = gGamePath + gBackgrounds[pos - 1].meshFiles[i];
+				addMesh(file.c_str());
+			}
+		}
+	}
+
 };
 
 
@@ -317,7 +338,7 @@ void loadModel(const c8* fn)
 	gModel = gDevice->getSceneManager()->addAnimatedMeshSceneNode(mesh);
 	if (gModel)
 	{
-		gModel->setScale(core::vector3df(30.f, 30.f, 30.f));
+		gModel->setScale(core::vector3df(15.f, 15.f, 15.f));
 		gModel->setRotation(core::vector3df(gModel->getRotation().X, gModel->getRotation().Y - 90, gModel->getRotation().Z - 90));
 		setMaterialsSettings(gModel);
 		gCamera->setPosition(core::vector3df(0.f, 30.f, -40.f));
@@ -515,9 +536,9 @@ void addModelList(core::array<struct ModelList> *list, core::stringc fileName)
 
 int main()
 {
-
 	addModelList(&gAnimals, "../animals.csv");
 	addModelList(&gMonsters, "../monsters.csv");
+	addModelList(&gBackgrounds, "../backgrounds.csv");
 	std::string filePath = "../config.ini";
 	gGamePath = GetConfigString(filePath, "System", "TW_GAME_PATH").c_str();
 	gTexPath = GetConfigString(filePath, "System", "TW_TW3_TEX_PATH").c_str();
@@ -562,8 +583,8 @@ int main()
 	gui::IGUIToolBar* bar = env->addToolBar();
 	gui::IGUIComboBox* animals = env->addComboBox(core::rect<s32>(10, 4, 160, 23), bar, GUI_ID_ANIMALS_LIST);
 	gui::IGUIComboBox* monsters = env->addComboBox(core::rect<s32>(170, 4, 320, 23), bar, GUI_ID_MONSTERS_LIST);
-	u32 size1 = gAnimals.size();
-	u32 size2 = gMonsters.size();
+	gui::IGUIComboBox* backgrounds = env->addComboBox(core::rect<s32>(330, 4, 480, 23), bar, GUI_ID_BACKGROUNDS_LIST);
+
 	animals->addItem(L"No Animals");
 	for (int i = 0; i < gAnimals.size(); i++)
 	{
@@ -579,6 +600,14 @@ int main()
 		wchar_t name[100];
 		mbstowcs_s(&ret, name, gMonsters[i].modelName.c_str(), _TRUNCATE);
 		monsters->addItem((const wchar_t*)name);
+	}
+	backgrounds->addItem(L"No Backgrounds");
+	for (int i = 0; i < gBackgrounds.size(); i++)
+	{
+		size_t ret;
+		wchar_t name[100];
+		mbstowcs_s(&ret, name, gBackgrounds[i].modelName.c_str(), _TRUNCATE);
+		backgrounds->addItem((const wchar_t*)name);
 	}
     gW3ENT = new IO_MeshLoader_W3ENT(smgr, fs);
 	gCamera = gDevice->getSceneManager()->addCameraSceneNodeMaya(nullptr);
