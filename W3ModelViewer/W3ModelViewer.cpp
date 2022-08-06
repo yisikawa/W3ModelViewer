@@ -37,10 +37,24 @@ core::stringc gStartUpModelFile;
 core::stringw gMessageText;
 core::stringw gCaption;
 IO_MeshLoader_W3ENT* gW3ENT;
-core::stringc gGamePath = "z:/uncooked/";
-core::stringc gTexPath = "z:/uncooked/";
+core::stringc gGamePath = "";
+core::stringc gTexPath = "";
 
+struct ModelList
+{
+	ModelList() : 
+		modelName(core::stringc()),
+		meshFiles(core::array<core::stringc>()),
+		rigFiles(core::array<core::stringc>()),
+		animFiles(core::array<core::stringc>())
+	{}
+	core::stringc modelName;
+	core::array<core::stringc> meshFiles;
+	core::array<core::stringc> rigFiles;
+	core::array<core::stringc> animFiles;
+};
 
+core::array<struct ModelList> gAnimal,gMonster;
 // For the gui id's
 enum EGUI_IDS
 {
@@ -393,9 +407,11 @@ std::string GetConfigString(const std::string& filePath, const char* pSectionNam
 
 int main()
 {
+	gAnimal.clear();
+	gMonster.clear();
 	std::string filePath = "../config.ini";
-	auto gamePath = GetConfigString(filePath, "System", "TW_GAME_PATH");
-	auto textPath = GetConfigString(filePath, "System", "TW_TW3_TEX_PATH");
+	gGamePath = GetConfigString(filePath, "System", "TW_GAME_PATH").c_str();
+	gTexPath = GetConfigString(filePath, "System", "TW_TW3_TEX_PATH").c_str();
 	auto WindowWidth = atoi(GetConfigString(filePath, "System", "WindowWidth").c_str());
 	auto WindowHeight = atoi(GetConfigString(filePath, "System", "WindowHeight").c_str());
 
@@ -444,8 +460,6 @@ int main()
 
     gW3ENT = new IO_MeshLoader_W3ENT(smgr, fs);
 	gCamera = gDevice->getSceneManager()->addCameraSceneNodeMaya(nullptr);
-	//const f32 aspectRatio = static_cast<float>(WindowWidth / WindowHeight);
- //   gCamera->setAspectRatio(aspectRatio);
 	gCamera->setFarValue(1000.f);
 
 	while (gDevice->run() && driver)
