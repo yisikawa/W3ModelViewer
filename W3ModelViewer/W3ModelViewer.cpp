@@ -20,6 +20,8 @@ using namespace gui;
 #pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
 #endif
 
+void loadModel(const c8* fn);
+bool addMesh(const c8* fn);
 void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node);
 bool loadRig(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_node, const io::path filename);
 bool loadAnims(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_node, const io::path filename);
@@ -48,59 +50,6 @@ enum EGUI_IDS
 	GUI_ID_MAX
 };
 
-void loadModel(const c8* fn)
-{
-	// modify the name if it a .pk3 file
-
-	io::path filename(fn);
-
-	io::path extension;
-	core::getFileNameExtension(extension, filename);
-	extension.make_lower();
-
-	// if a texture is loaded apply it to the current model..
-	if (extension != ".w2ent" && extension != ".w2mesh") return;
-	if( gW3ENT ) gW3ENT->clear();
-	TW3_DataCache::_instance.clear();
-	io::IFileSystem* fs = gDevice->getFileSystem();
-	io::IReadFile* file = fs->createAndOpenFile(io::path(fn));
-	IAnimatedMesh* mesh = gW3ENT->createMesh(file);
-	if ( mesh && gModel )
-		gModel->remove();
-	gModel = gDevice->getSceneManager()->addAnimatedMeshSceneNode(mesh);
-	if (gModel)
-	{
-		gModel->setScale(core::vector3df(30.f, 30.f, 30.f));
-		gModel->setRotation(core::vector3df(gModel->getRotation().X, gModel->getRotation().Y - 90, gModel->getRotation().Z - 90));
-		setMaterialsSettings(gModel);
-		gCamera->setPosition(core::vector3df(0.f, 30.f, -40.f));
-		core::vector3df target = gModel->getPosition(); target.Y += 10.;
-		gCamera->setTarget(target);
-		//	loadMeshPostProcess();
-	}
-}
-
-bool addMesh(const c8* fn)
-{
-	// Clear the previous data
-	TW3_DataCache::_instance.clear();
-
-	io::path filename(fn);
-	io::IFileSystem* fs = gDevice->getFileSystem();
-	io::IReadFile* file = fs->createAndOpenFile(io::path(fn));	
-	IAnimatedMesh* mesh = gW3ENT->createMesh(file);
-	if (mesh)
-	{
-		ISkinnedMesh* newMesh = copySkinnedMesh(gDevice->getSceneManager(), gModel->getMesh(), true);
-		combineMeshes(newMesh, mesh, true);
-		newMesh->finalize();
-		gModel->setMesh(newMesh);
-		setMaterialsSettings(gModel);
-		//	loadMeshPostProcess();
-		return true;
-	}
-	return false;
-}
 
 class MyEventReceiver : public IEventReceiver
 {
@@ -195,11 +144,7 @@ public:
 	}
 };
 
-class MeshSize
-{
-public:
-	float _scaleFactor = 1.f;
-};
+
 void enableWireframe(scene::IAnimatedMeshSceneNode* node,bool enabled)
 {
 	if (node)
@@ -280,6 +225,59 @@ void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node)
 	for (u32 i = 1; i < _IRR_MATERIAL_MAX_TEXTURES_; ++i)
 		node->setMaterialTexture(i, nullptr);
 }
+void loadModel(const c8* fn)
+{
+	// modify the name if it a .pk3 file
+
+	io::path filename(fn);
+
+	io::path extension;
+	core::getFileNameExtension(extension, filename);
+	extension.make_lower();
+
+	// if a texture is loaded apply it to the current model..
+	if (extension != ".w2ent" && extension != ".w2mesh") return;
+	if (gW3ENT) gW3ENT->clear();
+	TW3_DataCache::_instance.clear();
+	io::IFileSystem* fs = gDevice->getFileSystem();
+	io::IReadFile* file = fs->createAndOpenFile(io::path(fn));
+	IAnimatedMesh* mesh = gW3ENT->createMesh(file);
+	if (mesh && gModel)
+		gModel->remove();
+	gModel = gDevice->getSceneManager()->addAnimatedMeshSceneNode(mesh);
+	if (gModel)
+	{
+		gModel->setScale(core::vector3df(30.f, 30.f, 30.f));
+		gModel->setRotation(core::vector3df(gModel->getRotation().X, gModel->getRotation().Y - 90, gModel->getRotation().Z - 90));
+		setMaterialsSettings(gModel);
+		gCamera->setPosition(core::vector3df(0.f, 30.f, -40.f));
+		core::vector3df target = gModel->getPosition(); target.Y += 10.;
+		gCamera->setTarget(target);
+		//	loadMeshPostProcess();
+	}
+}
+
+bool addMesh(const c8* fn)
+{
+	// Clear the previous data
+	TW3_DataCache::_instance.clear();
+
+	io::path filename(fn);
+	io::IFileSystem* fs = gDevice->getFileSystem();
+	io::IReadFile* file = fs->createAndOpenFile(io::path(fn));
+	IAnimatedMesh* mesh = gW3ENT->createMesh(file);
+	if (mesh)
+	{
+		ISkinnedMesh* newMesh = copySkinnedMesh(gDevice->getSceneManager(), gModel->getMesh(), true);
+		combineMeshes(newMesh, mesh, true);
+		newMesh->finalize();
+		gModel->setMesh(newMesh);
+		setMaterialsSettings(gModel);
+		//	loadMeshPostProcess();
+		return true;
+	}
+	return false;
+}
 
 bool loadRig(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_node, const io::path filename)
 {
@@ -349,6 +347,12 @@ bool loadAnims(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_n
 }
 
 /*
+class MeshSize
+{
+public:
+	float _scaleFactor = 1.f;
+};
+
 void QIrrlichtWidget::loadMeshPostProcess()
 {
 	const scene::IAnimatedMesh* mesh = _currentLodData->_node->getMesh();_scaleFactor
@@ -374,7 +378,6 @@ void QIrrlichtWidget::loadMeshPostProcess()
 	setMaterialsSettings(_currentLodData->_node);
 }
 */
-
 
 
 int main()

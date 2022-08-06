@@ -906,7 +906,7 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                         fw = -bits12ToFloat(w);
 
                         orientation = core::quaternion(fx, fy, fz, fw);
-                        //orientation.normalize();
+                        orientation.normalize();
                         orientation.toEuler(euler);
                         euler *= core::RADTODEG;
                         rkey = meshToAnimate->addRotationKey(joint);
