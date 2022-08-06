@@ -3,6 +3,8 @@
 #include <Windows.h>  // GetPrivateProfileString
 #include <array>     // array
 #include <string>        // string
+#include <fstream>
+#include <sstream>
 #include <iostream>
 #include <Irrlicht.h>
 #include <irrString.h>
@@ -54,18 +56,19 @@ struct ModelList
 	core::array<core::stringc> animFiles;
 };
 
-core::array<struct ModelList> gAnimal,gMonster;
+core::array<struct ModelList> gAnimals,gMonsters;
 // For the gui id's
-enum EGUI_IDS
+enum 
 {
-	GUI_ID_LOAD_ENT = 1,
-	GUI_ID_LOAD_RIG = 2,
-	GUI_ID_LOAD_ANIM = 3,
-	GUI_ID_ADD_MESH = 4,
+	GUI_ID_LOAD_ENT,
+	GUI_ID_LOAD_RIG,
+	GUI_ID_LOAD_ANIM,
+	GUI_ID_ADD_MESH,
 	GUI_ID_QUIT,
+	GUI_ID_ANIMALS_LIST,
+	GUI_ID_MONSTERS_LIST,
 	GUI_ID_MAX
 };
-
 
 class MyEventReceiver : public IEventReceiver
 {
@@ -93,13 +96,13 @@ public:
 					// load the model file, selected in the file open dialog
 					switch (dialog->getID())
 					{
-					case 11:
+					case GUI_ID_LOAD_ENT:
 						if (extension == ".w2ent" || extension == ".w2mesh" )
 						{
 							loadModel(core::stringc(dialog->getFileName()).c_str());
 						}
 						break;
-					case 12:
+					case GUI_ID_LOAD_RIG:
 						if (extension == ".w2rig")
 						{
 							gW3ENT->Skeleton.clear();
@@ -107,13 +110,13 @@ public:
 							enableRigging(gModel, true);
 						}
 						break;
-					case 13:
+					case GUI_ID_LOAD_ANIM:
 						if (extension == ".w2anims")
 						{
 							loadAnims(gDevice, gModel, io::path(core::stringc(dialog->getFileName()).c_str()));
 						}
 						break;
-					case 14:
+					case GUI_ID_ADD_MESH:
 						if (extension == ".w2ent" || extension == ".w2mesh")
 						{
 							addMesh(core::stringc(dialog->getFileName()).c_str());
@@ -121,6 +124,19 @@ public:
 						break;
 					}
 
+				}
+				break;
+
+			case EGET_COMBO_BOX_CHANGED:
+
+				// control anti-aliasing/filtering
+				if (id == GUI_ID_ANIMALS_LIST)
+				{
+					OnAnimalsListSelected((IGUIComboBox*)event.GUIEvent.Caller);
+				}
+				else if (id == GUI_ID_MONSTERS_LIST)
+				{
+					OnMonstersListSelected((IGUIComboBox*)event.GUIEvent.Caller);
 				}
 				break;
 			default:
@@ -142,20 +158,57 @@ public:
 		switch (id)
 		{
 		case GUI_ID_LOAD_ENT: // FilOnButtonSetScalinge -> Open Model
-			env->addFileOpenDialog(L"Please select a model file to load",true,0,11,false,(irr::c8*)gGamePath.c_str());
+			env->addFileOpenDialog(L"Please select a model file to load",true,0,
+				GUI_ID_LOAD_ENT,false,(irr::c8*)gGamePath.c_str());
 			break;
 		case GUI_ID_LOAD_RIG: // File -> Set Model Archive
-			env->addFileOpenDialog(L"Please select a Rig file to load", true, 0, 12, false, (irr::c8*)gGamePath.c_str());
+			env->addFileOpenDialog(L"Please select a Rig file to load", true, 0,
+				GUI_ID_LOAD_RIG, false, (irr::c8*)gGamePath.c_str());
 			break;
 		case GUI_ID_LOAD_ANIM: // File -> LoadAsOctree
-			env->addFileOpenDialog(L"Please select a Animation file to load", true, 0, 13, false, (irr::c8*)gGamePath.c_str());
+			env->addFileOpenDialog(L"Please select a Animation file to load", true, 0,
+				GUI_ID_LOAD_ANIM, false, (irr::c8*)gGamePath.c_str());
 			break;
 		case GUI_ID_ADD_MESH: // File -> LoadAsOctree
-			env->addFileOpenDialog(L"Please select a Mesh file to add", true, 0, 14, false, (irr::c8*)gGamePath.c_str());
+			env->addFileOpenDialog(L"Please select a Mesh file to add", true, 0,
+				GUI_ID_ADD_MESH, false, (irr::c8*)gGamePath.c_str());
 			break;
 		case GUI_ID_QUIT: // File -> Quit
 			gDevice->closeDevice();
 			break;
+		}
+	}
+
+	/*
+		Handle the event that one of the texture-filters was selected in the corresponding combobox.
+	*/
+	void OnAnimalsListSelected(IGUIComboBox* combo)
+	{
+		s32 pos = combo->getSelected();
+		if (pos <= 0) return;
+		if (gAnimals[pos - 1].meshFiles.size() >= 1) {
+			core::stringc file = gGamePath + gAnimals[pos - 1].meshFiles[0];
+			loadModel(file.c_str());
+			for (int i = 1; i < gAnimals[pos - 1].meshFiles.size(); i++)
+			{
+				core::stringc file = gGamePath + gAnimals[pos - 1].meshFiles[i];
+				addMesh(file.c_str());
+			}
+		}
+	}
+
+	void OnMonstersListSelected(IGUIComboBox* combo)
+	{
+		s32 pos = combo->getSelected();
+		if (pos <= 0) return;
+		if (gMonsters[pos - 1].meshFiles.size() >= 1) {
+			core::stringc file = gGamePath + gMonsters[pos - 1].meshFiles[0];
+			loadModel(file.c_str());
+			for (int i = 1; i < gMonsters[pos - 1].meshFiles.size(); i++)
+			{
+				core::stringc file = gGamePath + gMonsters[pos - 1].meshFiles[i];
+				addMesh(file.c_str());
+			}
 		}
 	}
 };
@@ -241,6 +294,7 @@ void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node)
 	for (u32 i = 1; i < _IRR_MATERIAL_MAX_TEXTURES_; ++i)
 		node->setMaterialTexture(i, nullptr);
 }
+
 void loadModel(const c8* fn)
 {
 	// modify the name if it a .pk3 file
@@ -405,10 +459,65 @@ std::string GetConfigString(const std::string& filePath, const char* pSectionNam
 	return &buf.front();
 }
 
+void addModelList(core::array<struct ModelList> *list, core::stringc fileName)
+{
+
+	std::string str_buf;
+	std::string str_split_buf;
+
+	for (int i = 0; i < list->size(); i++)
+		list[i].clear();
+	list->clear();
+	std::ifstream ifs_csv(fileName.c_str());
+	while ( getline(ifs_csv, str_buf) )
+	{
+		struct ModelList item;
+		std::istringstream i_stream(str_buf);
+		getline(i_stream, str_split_buf, ',');
+		item.modelName = str_split_buf.c_str();
+		while (getline(i_stream, str_split_buf, ',')) {
+			// csvファイルに書き込む
+			if (str_split_buf == "-m")
+			{
+				getline(i_stream, str_split_buf, ',');
+				u32 num = atoi(str_split_buf.c_str());
+				for (u32 i = 0; i < num; i++)
+				{
+					getline(i_stream, str_split_buf, ',');
+					item.meshFiles.push_back(str_split_buf.c_str());
+				}
+			}
+			else if (str_split_buf == "-r")
+			{
+				getline(i_stream, str_split_buf, ',');
+				u32 num = atoi(str_split_buf.c_str());
+				for (u32 i = 0; i < num; i++)
+				{
+					getline(i_stream, str_split_buf, ',');
+					item.rigFiles.push_back(str_split_buf.c_str());
+				}
+			}
+			else if (str_split_buf == "-a")
+			{
+				getline(i_stream, str_split_buf, ',');
+				u32 num = atoi(str_split_buf.c_str());
+				for (u32 i = 0; i < num; i++)
+				{
+					getline(i_stream, str_split_buf, ',');
+					item.animFiles.push_back(str_split_buf.c_str());
+				}
+
+			}
+		}
+		list->push_back(item);
+	}
+}
+
 int main()
 {
-	gAnimal.clear();
-	gMonster.clear();
+
+	addModelList(&gAnimals, "../animals.csv");
+	addModelList(&gMonsters, "../monsters.csv");
 	std::string filePath = "../config.ini";
 	gGamePath = GetConfigString(filePath, "System", "TW_GAME_PATH").c_str();
 	gTexPath = GetConfigString(filePath, "System", "TW_TW3_TEX_PATH").c_str();
@@ -424,7 +533,7 @@ int main()
 	gDevice->setResizable(true);
 	gDevice->getSceneManager()->getParameters()->setAttribute("TW_GAME_PATH", "Z:/uncooked/");
 	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_TEX_PATH", "Z:/uncooked/");
-	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_SKEL", true);
+	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_SKEL", false);
 	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_BEST_LOD_ONLY", false);
 
 	io::IFileSystem* fs = gDevice->getFileSystem();
@@ -451,13 +560,26 @@ int main()
 
 	// create toolbar
 	gui::IGUIToolBar* bar = env->addToolBar();
-	IGUIStaticText* fpstext = env->addStaticText(L"",
-		core::rect<s32>(400, 4, 570, 23), true, false, bar);
-	gCaption += " - [";
-	gCaption += driver->getName();
-	gCaption += "]";
-	gDevice->setWindowCaption(gCaption.c_str());
-
+	gui::IGUIComboBox* animals = env->addComboBox(core::rect<s32>(10, 4, 160, 23), bar, GUI_ID_ANIMALS_LIST);
+	gui::IGUIComboBox* monsters = env->addComboBox(core::rect<s32>(170, 4, 320, 23), bar, GUI_ID_MONSTERS_LIST);
+	u32 size1 = gAnimals.size();
+	u32 size2 = gMonsters.size();
+	animals->addItem(L"No Animals");
+	for (int i = 0; i < gAnimals.size(); i++)
+	{
+		size_t ret;
+		wchar_t name[100];
+		mbstowcs_s(&ret,name,gAnimals[i].modelName.c_str(), _TRUNCATE);
+		animals->addItem((const wchar_t*)name);
+	}
+	monsters->addItem(L"No Monsters");
+	for (int i = 0; i < gMonsters.size(); i++)
+	{
+		size_t ret;
+		wchar_t name[100];
+		mbstowcs_s(&ret, name, gMonsters[i].modelName.c_str(), _TRUNCATE);
+		monsters->addItem((const wchar_t*)name);
+	}
     gW3ENT = new IO_MeshLoader_W3ENT(smgr, fs);
 	gCamera = gDevice->getSceneManager()->addCameraSceneNodeMaya(nullptr);
 	gCamera->setFarValue(1000.f);
