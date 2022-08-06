@@ -1,6 +1,8 @@
 ﻿// W3ModelViewer.cpp : このファイルには 'main' 関数が含まれています。プログラム実行の開始と終了がそこで行われます。
 //
-
+#include <Windows.h>  // GetPrivateProfileString
+#include <array>     // array
+#include <string>        // string
 #include <iostream>
 #include <Irrlicht.h>
 #include <irrString.h>
@@ -379,12 +381,27 @@ void QIrrlichtWidget::loadMeshPostProcess()
 }
 */
 
+std::string GetConfigString(const std::string& filePath, const char* pSectionName, const char* pKeyName)
+{
+	if (filePath.empty()) {
+		return "";
+	}
+	std::array<char, MAX_PATH> buf = {};
+	GetPrivateProfileStringA(pSectionName, pKeyName, "", &buf.front(), static_cast<DWORD>(buf.size()), filePath.c_str());
+	return &buf.front();
+}
 
 int main()
 {
+	std::string filePath = "../config.ini";
+	auto gamePath = GetConfigString(filePath, "System", "TW_GAME_PATH");
+	auto textPath = GetConfigString(filePath, "System", "TW_TW3_TEX_PATH");
+	auto WindowWidth = atoi(GetConfigString(filePath, "System", "WindowWidth").c_str());
+	auto WindowHeight = atoi(GetConfigString(filePath, "System", "WindowHeight").c_str());
 
 	MyEventReceiver receiver;
-    gDevice = createDevice(video::EDT_DIRECT3D9, core::dimension2d<u32>(800, 600),
+    gDevice = createDevice(video::EDT_DIRECT3D9,
+		core::dimension2d<u32>(WindowWidth, WindowHeight),
 		16,false,false,false,&receiver);
     if (gDevice == 0)
         return 1; // could not create selected driver
@@ -427,8 +444,8 @@ int main()
 
     gW3ENT = new IO_MeshLoader_W3ENT(smgr, fs);
 	gCamera = gDevice->getSceneManager()->addCameraSceneNodeMaya(nullptr);
-	const f32 aspectRatio = static_cast<float>(800) / 600;
-    gCamera->setAspectRatio(aspectRatio);
+	//const f32 aspectRatio = static_cast<float>(WindowWidth / WindowHeight);
+ //   gCamera->setAspectRatio(aspectRatio);
 	gCamera->setFarValue(1000.f);
 
 	while (gDevice->run() && driver)
