@@ -56,7 +56,8 @@ struct ModelList
 	core::array<core::stringc> animFiles;
 };
 
-core::array<struct ModelList> gAnimals,gMonsters,gBackgrounds;
+core::array<struct ModelList> gAnimals,gMonsters,gBackgrounds,gMainNpcs;
+
 // For the gui id's
 enum 
 {
@@ -68,6 +69,7 @@ enum
 	GUI_ID_ANIMALS_LIST,
 	GUI_ID_MONSTERS_LIST,
 	GUI_ID_BACKGROUNDS_LIST,
+	GUI_ID_MAIN_NPCS_LIST,
 	GUI_ID_MAX
 };
 
@@ -142,6 +144,10 @@ public:
 				else if (id == GUI_ID_BACKGROUNDS_LIST)
 				{
 					OnBackgroundsListSelected((IGUIComboBox*)event.GUIEvent.Caller);
+				}
+				else if (id == GUI_ID_MAIN_NPCS_LIST)
+				{
+					OnMainNpcsListSelected((IGUIComboBox*)event.GUIEvent.Caller);
 				}
 				break;
 			default:
@@ -231,7 +237,21 @@ public:
 			}
 		}
 	}
-
+	void OnMainNpcsListSelected(IGUIComboBox* combo)
+	{
+		s32 pos = combo->getSelected();
+		if (pos <= 0) return;
+		if (gMainNpcs[pos - 1].meshFiles.size() >= 1) {
+			core::stringc file = gGamePath + gMainNpcs[pos - 1].meshFiles[0];
+			loadModel(file.c_str());
+			for (int i = 1; i < gMainNpcs[pos - 1].meshFiles.size(); i++)
+			{
+				core::stringc file = gGamePath + gMainNpcs[pos - 1].meshFiles[i];
+				addMesh(file.c_str());
+			}
+		}
+	}
+	
 };
 
 
@@ -539,6 +559,7 @@ int main()
 	addModelList(&gAnimals, "../animals.csv");
 	addModelList(&gMonsters, "../monsters.csv");
 	addModelList(&gBackgrounds, "../backgrounds.csv");
+	addModelList(&gMainNpcs, "../mainnpcs.csv");
 	std::string filePath = "../config.ini";
 	gGamePath = GetConfigString(filePath, "System", "TW_GAME_PATH").c_str();
 	gTexPath = GetConfigString(filePath, "System", "TW_TW3_TEX_PATH").c_str();
@@ -584,6 +605,7 @@ int main()
 	gui::IGUIComboBox* animals = env->addComboBox(core::rect<s32>(10, 4, 160, 23), bar, GUI_ID_ANIMALS_LIST);
 	gui::IGUIComboBox* monsters = env->addComboBox(core::rect<s32>(170, 4, 320, 23), bar, GUI_ID_MONSTERS_LIST);
 	gui::IGUIComboBox* backgrounds = env->addComboBox(core::rect<s32>(330, 4, 480, 23), bar, GUI_ID_BACKGROUNDS_LIST);
+	gui::IGUIComboBox* mainnpcs = env->addComboBox(core::rect<s32>(490, 4, 640, 23), bar, GUI_ID_MAIN_NPCS_LIST);
 
 	animals->addItem(L"No Animals");
 	for (int i = 0; i < gAnimals.size(); i++)
@@ -608,6 +630,14 @@ int main()
 		wchar_t name[100];
 		mbstowcs_s(&ret, name, gBackgrounds[i].modelName.c_str(), _TRUNCATE);
 		backgrounds->addItem((const wchar_t*)name);
+	}
+	mainnpcs->addItem(L"No Main Npcs");
+	for (int i = 0; i < gMainNpcs.size(); i++)
+	{
+		size_t ret;
+		wchar_t name[100];
+		mbstowcs_s(&ret, name, gMainNpcs[i].modelName.c_str(), _TRUNCATE);
+		mainnpcs->addItem((const wchar_t*)name);
 	}
     gW3ENT = new IO_MeshLoader_W3ENT(smgr, fs);
 	gCamera = gDevice->getSceneManager()->addCameraSceneNodeMaya(nullptr);

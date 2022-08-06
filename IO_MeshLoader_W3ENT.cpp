@@ -1419,9 +1419,10 @@ scene::ISkinnedMesh* IO_MeshLoader_W3ENT::ReadW2MESHFile(core::stringc filename)
 video::SMaterial IO_MeshLoader_W3ENT::ReadMaterialFile(core::stringc filename)
 {
     if (core::hasFileExtension(filename, "w2mi"))
-        return ReadW2MIFile(filename);
+        return ReadW2MIFileOnly(filename);
     else if (core::hasFileExtension(filename, "w2mg"))
-        return video::SMaterial(); // shader, not handled 
+        return ReadW2MIFileOnly(filename);
+ //       return video::SMaterial(); // shader, not handled 
 }
 
 video::SMaterial IO_MeshLoader_W3ENT::ReadW2MIFile(core::stringc filename)
