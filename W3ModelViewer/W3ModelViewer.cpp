@@ -313,8 +313,8 @@ void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node)
 		if (material.MaterialType == video::EMT_NORMAL_MAP_SOLID
 			|| material.MaterialType == video::EMT_PARALLAX_MAP_SOLID)
 		{
-//			material.MaterialType = video::EMT_SOLID;
-			material.MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF;
+			material.MaterialType = video::EMT_SOLID;
+//			material.MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF;
 		}
 		else if (material.MaterialType == video::EMT_NORMAL_MAP_TRANSPARENT_ADD_COLOR
 			|| material.MaterialType == video::EMT_PARALLAX_MAP_TRANSPARENT_ADD_COLOR)
