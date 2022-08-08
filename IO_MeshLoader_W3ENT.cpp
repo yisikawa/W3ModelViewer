@@ -681,6 +681,8 @@ video::SMaterial IO_MeshLoader_W3ENT::ReadIMaterialProperty(io::IReadFile* file)
 
                     if (textureLayer == 1)  // normal map
                         mat.MaterialType = video::EMT_NORMAL_MAP_SOLID;
+                    else
+                        mat.MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF;
                 }
             }
         }
