@@ -558,7 +558,7 @@ void addModelList(core::array<struct ModelList> *list, core::stringc fileName)
 		getline(i_stream, str_split_buf, ',');
 		item.modelName = str_split_buf.c_str();
 		while (getline(i_stream, str_split_buf, ',')) {
-			// csvファイルに書き込む
+			// csvファイルを読み込む
 			if (str_split_buf == "-m")
 			{
 				getline(i_stream, str_split_buf, ',');
