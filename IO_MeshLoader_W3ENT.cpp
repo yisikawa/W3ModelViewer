@@ -1216,6 +1216,7 @@ bool IO_MeshLoader_W3ENT::checkBones(io::IReadFile* file, char nbBones)
     for (char i = 0; i < nbBones; ++i)
     {
         u16 jointName = readU16(file);
+        core::stringc str = Strings[jointName].c_str();
         if (jointName == 0 || jointName >= Strings.size())
         {
             file->seek(back);
