@@ -216,6 +216,18 @@ public:
 				addMesh(file.c_str());
 			}
 		}
+		if(gAnimals[pos - 1].rigFiles.size()>=1 )
+		{
+			core::stringc file = gGamePath + gAnimals[pos - 1].rigFiles[0];
+			gW3ENT->Skeleton.clear();
+			loadRig(gDevice, gModel, io::path(file));
+		}
+		if (gAnimals[pos - 1].animFiles.size() >= 1)
+		{
+			core::stringc file = gGamePath + gAnimals[pos - 1].animFiles[0];
+			loadAnims(gDevice, gModel, io::path(file));
+
+		}
 	}
 
 	void OnMonstersListSelected(IGUIComboBox* combo)
