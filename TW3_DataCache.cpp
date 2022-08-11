@@ -26,12 +26,14 @@ void TW3_DataCache::clear()
 
 void TW3_DataCache::addBoneEntry(core::stringc name, core::matrix4 boneOffset)
 {
-    _bones.push_back(struct BoneEntry(name, boneOffset));
+    struct BoneEntry *boneEntry = new struct BoneEntry(name, boneOffset);
+    _bones.push_back(*boneEntry);
 }
 
 void TW3_DataCache::addVertexEntry(u32 boneID, u16 meshBufferID, u32 vertexID, f32 strenght)
 {
-    _vertices.push_back(struct VertexSkinningEntry(boneID, _bufferID + meshBufferID, vertexID, strenght));
+    struct VertexSkinningEntry *vertexSkinningEntry = new struct VertexSkinningEntry(boneID, _bufferID + meshBufferID, vertexID, strenght);
+    _vertices.push_back(*vertexSkinningEntry);
 }
 
 void TW3_DataCache::apply()

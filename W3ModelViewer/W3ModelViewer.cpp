@@ -630,7 +630,7 @@ int main()
 	gDevice->setResizable(true);
 	gDevice->getSceneManager()->getParameters()->setAttribute("TW_GAME_PATH", "Z:/uncooked/");
 	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_TEX_PATH", "Z:/uncooked/");
-	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_SKEL", false);
+	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_SKEL", true);
 	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_BEST_LOD_ONLY", false);
 
 	io::IFileSystem* fs = gDevice->getFileSystem();
