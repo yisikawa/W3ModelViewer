@@ -1,8 +1,8 @@
 #include "IrrAssimpUtils.h"
 
-#ifdef _MSC_VER
-#pragma comment (lib, "assimp-vc143-mtd.lib")
-#endif // _MSC_VER
+//#ifdef _MSC_VER
+//#pragma comment (lib, "assimp-vc143-mtd.lib")
+//#endif // _MSC_VER
 
 aiString irrToAssimpPath(const irr::io::path& path)
 {

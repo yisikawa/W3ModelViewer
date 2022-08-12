@@ -2,9 +2,9 @@
 
 #include <ISceneManager.h>
 
-#ifdef _MSC_VER
-#pragma comment (lib, "assimp-vc143-mtd.lib")
-#endif // _MSC_VER
+//#ifdef _MSC_VER
+//#pragma comment (lib, "assimp-vc143-mtd.lib")
+//#endif // _MSC_VER
 
 using namespace irr;
 
