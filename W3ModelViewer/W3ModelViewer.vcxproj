@@ -71,12 +71,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\irrlicht-1.8.5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\irrlicht-1.8.5\lib\Win32-visualstudio;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\irrlicht-1.8.5\include;C:\assimp\x86-Debug\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\irrlicht-1.8.5\lib\Win32-visualstudio;C:\assimp\x86-Debug\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\irrlicht-1.8.5\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\irrlicht-1.8.5\lib\Win32-visualstudio;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\irrlicht-1.8.5\include;C:\assimp\x86-Release\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\irrlicht-1.8.5\lib\Win32-visualstudio;C:\assimp\x86-Release\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -136,6 +136,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\IO_MeshLoader_W3ENT.cpp" />
+    <ClCompile Include="..\IrrAssimp.cpp" />
+    <ClCompile Include="..\IrrAssimpExport.cpp" />
+    <ClCompile Include="..\IrrAssimpImport.cpp" />
+    <ClCompile Include="..\IrrAssimpUtils.cpp" />
     <ClCompile Include="..\MeshCombiner.cpp" />
     <ClCompile Include="..\TW3_CSkeleton.cpp" />
     <ClCompile Include="..\TW3_DataCache.cpp" />
@@ -145,6 +149,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\IO_MeshLoader_W3ENT.h" />
+    <ClInclude Include="..\IrrAssimp.h" />
+    <ClInclude Include="..\IrrAssimpExport.h" />
+    <ClInclude Include="..\IrrAssimpImport.h" />
+    <ClInclude Include="..\IrrAssimpUtils.h" />
     <ClInclude Include="..\MeshCombiner.h" />
     <ClInclude Include="..\TW3_CSkeleton.h" />
     <ClInclude Include="..\TW3_DataCache.h" />
