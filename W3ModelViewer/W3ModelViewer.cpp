@@ -13,6 +13,7 @@
 #include <IFileSystem.h>
 #include "../IO_MeshLoader_W3ENT.h"
 #include "../MeshCombiner.h"
+#include "../CGUIFileSaveDialog.h"
 
 using namespace irr;
 using namespace scene;
@@ -65,6 +66,7 @@ enum
 	GUI_ID_LOAD_RIG,
 	GUI_ID_LOAD_ANIM,
 	GUI_ID_ADD_MESH,
+	GUI_ID_EXPORT,
 	GUI_ID_QUIT,
 	GUI_ID_ANIMALS_LIST,
 	GUI_ID_MONSTERS_LIST,
@@ -77,7 +79,9 @@ enum
 
 class MyEventReceiver : public IEventReceiver
 {
+
 public:
+	CGUIFileSaveDialog* saveDialog;
 	virtual bool OnEvent(const SEvent& event)
 	{
 		if (event.EventType == EET_GUI_EVENT)
@@ -173,8 +177,10 @@ public:
 	*/
 	void OnMenuItemSelected(IGUIContextMenu* menu)
 	{
+
 		s32 id = menu->getItemCommandId(menu->getSelectedItem());
 		IGUIEnvironment* env = gDevice->getGUIEnvironment();
+
 
 		switch (id)
 		{
@@ -193,6 +199,10 @@ public:
 		case GUI_ID_ADD_MESH: // File -> LoadAsOctree
 			env->addFileOpenDialog(L"Please select a Mesh file to add", true, 0,
 				GUI_ID_ADD_MESH, false, (irr::c8*)gGamePath.c_str());
+			break;
+		case GUI_ID_EXPORT: // File -> LoadAsOctree
+			saveDialog = new CGUIFileSaveDialog(L"Export file", env, env->getRootGUIElement(), GUI_ID_EXPORT);
+
 			break;
 		case GUI_ID_QUIT: // File -> Quit
 			gDevice->closeDevice();
@@ -652,6 +662,7 @@ int main()
 	submenu->addItem(L"Load Rig File ...", GUI_ID_LOAD_RIG);
 	submenu->addItem(L"Load Anim File ...", GUI_ID_LOAD_ANIM);
 	submenu->addItem(L"Load Add File ...", GUI_ID_ADD_MESH);
+	submenu->addItem(L"Export File ...", GUI_ID_EXPORT);
 	submenu->addSeparator();
 	submenu->addItem(L"Quit", GUI_ID_QUIT);
 

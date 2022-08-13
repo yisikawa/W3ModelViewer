@@ -6,6 +6,7 @@
 #ifndef __C_GUI_FILE_SAVE_DIALOG_H_INCLUDED__
 #define __C_GUI_FILE_SAVE_DIALOG_H_INCLUDED__
 
+
 #include "IGUIFileOpenDialog.h"
 #include "IGUIButton.h"
 #include "IGUIListBox.h"
@@ -22,19 +23,24 @@ namespace irr
         public:
 
             //! constructor
-            CGUIFileSaveDialog(const wchar_t* title, IGUIEnvironment* environment, IGUIElement* parent, s32 id);
+            CGUIFileSaveDialog(const wchar_t* title,
+                IGUIEnvironment* environment,
+                IGUIElement* parent, s32 id);
 
             //! destructor
             virtual ~CGUIFileSaveDialog();
 
             //! returns the filename of the selected file. Returns NULL, if no file was selected.
-            virtual const wchar_t* getFileName() const;
+            virtual const wchar_t* getFileName() const override;
+
+            //! returns the filename of the selected file. Returns NULL, if no file was selected.
+            virtual const io::path& getDirectoryName()  override;
 
             //! called if an event happened.
-            virtual bool OnEvent(const SEvent& event);
+            virtual bool OnEvent(const SEvent& event) override;
 
             //! draws the element and its children
-            virtual void draw();
+            virtual void draw() override;
 
             //! Returns the filename of the selected file. Returns NULL, if no file was selected.
       //      virtual const wchar_t* getFilename();
@@ -52,6 +58,7 @@ namespace irr
 
             core::position2d<s32> DragStart;
             core::stringw FileName;
+            core::stringw DirectoryName;
             bool Dragging;
             IGUIButton* CloseButton;
             IGUIButton* OKButton;

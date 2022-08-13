@@ -15,7 +15,7 @@ namespace irr
     {
 
         const s32 FOD_WIDTH = 350;
-        const s32 FOD_HEIGHT = 250;
+        const s32 FOD_HEIGHT = 265;
 
 
         //! constructor
@@ -131,7 +131,11 @@ namespace irr
             return FileName.c_str();
         }
 
-
+        //! returns the filename of the selected file. Returns NULL, if no file was selected.
+        const io::path& CGUIFileSaveDialog::getDirectoryName()
+        {
+            return DirectoryName.c_str();
+        }
 
         //! called if an event happened.
         bool CGUIFileSaveDialog::OnEvent(const SEvent& event)
