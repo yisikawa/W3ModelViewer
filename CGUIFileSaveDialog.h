@@ -25,7 +25,8 @@ namespace irr
             //! constructor
             CGUIFileSaveDialog(const wchar_t* title,
                 IGUIEnvironment* environment,
-                IGUIElement* parent, s32 id);
+                IGUIElement* parent, s32 id,
+                io::path::char_type* startDir);
 
             //! destructor
             virtual ~CGUIFileSaveDialog();
@@ -67,6 +68,7 @@ namespace irr
             IGUIElement* FileNameText;
             IGUIElement* EventParent;
             io::IFileSystem* FileSystem;
+            io::path::char_type* StartDir;
             IGUIEditBox* FileEdit;
 
             io::IFileList* FileList;

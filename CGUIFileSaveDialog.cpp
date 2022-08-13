@@ -20,13 +20,14 @@ namespace irr
 
         //! constructor
         CGUIFileSaveDialog::CGUIFileSaveDialog(const wchar_t* title,
-            IGUIEnvironment* environment, IGUIElement* parent, s32 id)
+            IGUIEnvironment* environment, IGUIElement* parent, s32 id,
+            io::path::char_type* startDir)
             : IGUIFileOpenDialog(environment, parent, id,
                 core::rect<s32>((parent->getAbsolutePosition().getWidth() - FOD_WIDTH) / 2,
                     (parent->getAbsolutePosition().getHeight() - FOD_HEIGHT) / 2,
                     (parent->getAbsolutePosition().getWidth() - FOD_WIDTH) / 2 + FOD_WIDTH,
                     (parent->getAbsolutePosition().getHeight() - FOD_HEIGHT) / 2 + FOD_HEIGHT)),
-            Dragging(false), FileNameText(0), FileList(0)
+            Dragging(false), FileNameText(0), FileList(0),StartDir(startDir)
         {
 #ifdef _DEBUG
             IGUIElement::setDebugName("CGUIFileSaveDialog");
@@ -88,13 +89,14 @@ namespace irr
             FileNameText->grab();
 
             FileSystem = Environment->getFileSystem();
+            FileSystem->changeWorkingDirectoryTo(StartDir);
 
             if (FileSystem)
                 FileSystem->grab();
 
             fillListBox();
 
-            FileEdit->setText(irr::core::stringw(FileSystem->getWorkingDirectory()).c_str());
+           FileEdit->setText(irr::core::stringw(FileSystem->getWorkingDirectory()+"/").c_str());
         }
 
 
@@ -171,7 +173,11 @@ namespace irr
                     if (FileList && FileSystem)
                     {
                         if (FileList->isDirectory(selected))
-                            FileName = L"";
+                        {
+                            DirectoryName = FileList->getFullFileName(selected);
+                            FileName = DirectoryName+"/"; // L"";
+                        }
+
                         else
                             FileName = FileList->getFullFileName(selected);
 
@@ -189,7 +195,8 @@ namespace irr
                         {
                             FileSystem->changeWorkingDirectoryTo(FileList->getFileName(selected));
                             fillListBox();
-                            FileName = L"";
+                            DirectoryName = FileList->getFullFileName(selected);
+                            FileName = DirectoryName+"/"; // L"";
                         }
                         else
                         {

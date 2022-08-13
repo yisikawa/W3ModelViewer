@@ -71,9 +71,11 @@ IAnimatedMesh* IO_MeshLoader_W3ENT::createMesh(io::IReadFile* f)
 
     #ifdef _IRR_WCHAR_FILESYSTEM
         ConfigGamePath = SceneManager->getParameters()->getAttributeAsStringW("TW_GAME_PATH");
+        ConfigExportPath = SceneManager->getParameters()->getAttributeAsStringW("TW_EXPORT_PATH");
         ConfigGameTexturesPath = SceneManager->getParameters()->getAttributeAsStringW("TW_TW3_TEX_PATH");
     #else
         ConfigGamePath = SceneManager->getParameters()->getAttributeAsString("TW_GAME_PATH");
+        ConfigExportPath = SceneManager->getParameters()->getAttributeAsStringW("TW_EXPORT_PATH");
         ConfigGameTexturesPath = SceneManager->getParameters()->getAttributeAsString("TW_TW3_TEX_PATH");
     #endif
 

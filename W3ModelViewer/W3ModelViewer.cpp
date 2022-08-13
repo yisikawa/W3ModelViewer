@@ -41,6 +41,7 @@ core::stringw gMessageText;
 core::stringw gCaption;
 IO_MeshLoader_W3ENT* gW3ENT;
 core::stringc gGamePath = "";
+core::stringc gExportPath = "";
 core::stringc gTexPath = "";
 
 struct ModelList
@@ -81,7 +82,8 @@ class MyEventReceiver : public IEventReceiver
 {
 
 public:
-	CGUIFileSaveDialog* saveDialog;
+	;
+
 	virtual bool OnEvent(const SEvent& event)
 	{
 		if (event.EventType == EET_GUI_EVENT)
@@ -100,6 +102,7 @@ public:
 				{
 					io::path extension;
 					IGUIFileOpenDialog* dialog =(IGUIFileOpenDialog*)event.GUIEvent.Caller;
+//					CGUIFileSaveDialog* dialog2 = (CGUIFileSaveDialog*)event.GUIEvent.Caller;
 					core::getFileNameExtension(extension, core::stringc(dialog->getFileName()).c_str());
 					extension.make_lower();
 					// load the model file, selected in the file open dialog
@@ -130,6 +133,9 @@ public:
 						{
 							addMesh(core::stringc(dialog->getFileName()).c_str());
 						}
+						break;
+					case GUI_ID_EXPORT:
+						core::stringc tex = core::stringc(dialog->getFileName()).c_str();
 						break;
 					}
 
@@ -177,7 +183,7 @@ public:
 	*/
 	void OnMenuItemSelected(IGUIContextMenu* menu)
 	{
-
+		CGUIFileSaveDialog* dialog;
 		s32 id = menu->getItemCommandId(menu->getSelectedItem());
 		IGUIEnvironment* env = gDevice->getGUIEnvironment();
 
@@ -201,8 +207,8 @@ public:
 				GUI_ID_ADD_MESH, false, (irr::c8*)gGamePath.c_str());
 			break;
 		case GUI_ID_EXPORT: // File -> LoadAsOctree
-			saveDialog = new CGUIFileSaveDialog(L"Export file", env, env->getRootGUIElement(), GUI_ID_EXPORT);
-
+			dialog = new CGUIFileSaveDialog(L"Export file", env, env->getRootGUIElement(), GUI_ID_EXPORT, (irr::c8*)gExportPath.c_str());
+			dialog->drop();
 			break;
 		case GUI_ID_QUIT: // File -> Quit
 			gDevice->closeDevice();
@@ -627,6 +633,7 @@ int main()
 	addModelList(&gGeralt, "../geralt.csv");
 	std::string filePath = "../config.ini";
 	gGamePath = GetConfigString(filePath, "System", "TW_GAME_PATH").c_str();
+	gExportPath = GetConfigString(filePath, "System", "TW_EXPORT_PATH").c_str();
 	gTexPath = GetConfigString(filePath, "System", "TW_TW3_TEX_PATH").c_str();
 	auto WindowWidth = atoi(GetConfigString(filePath, "System", "WindowWidth").c_str());
 	auto WindowHeight = atoi(GetConfigString(filePath, "System", "WindowHeight").c_str());
@@ -638,8 +645,9 @@ int main()
     if (gDevice == 0)
         return 1; // could not create selected driver
 	gDevice->setResizable(true);
-	gDevice->getSceneManager()->getParameters()->setAttribute("TW_GAME_PATH", "Z:/uncooked/");
-	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_TEX_PATH", "Z:/uncooked/");
+	gDevice->getSceneManager()->getParameters()->setAttribute("TW_GAME_PATH", gGamePath.c_str());
+	gDevice->getSceneManager()->getParameters()->setAttribute("TW_EXPORT_PATH", gExportPath.c_str());
+	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_TEX_PATH", gTexPath.c_str());
 	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_SKEL", true);
 	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_BEST_LOD_ONLY", false);
 

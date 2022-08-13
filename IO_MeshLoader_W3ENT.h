@@ -199,6 +199,7 @@ private:
     bool ConfigLoadOnlyBestLOD;
     io::path ConfigGameTexturesPath;
     io::path ConfigGamePath;
+    io::path ConfigExportPath;
 
     core::array<scene::ISkinnedMesh*> Meshes;
 
