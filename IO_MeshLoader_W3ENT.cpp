@@ -1212,7 +1212,7 @@ void IO_MeshLoader_W3ENT::W3_CEntity(io::IReadFile* file, struct W3_DataInfos in
     file->seek(infos.adress + 1);
 }
 
-bool IO_MeshLoader_W3ENT::checkBones(io::IReadFile* file, char nbBones)
+bool IO_MeshLoader_W3ENT::checkBones(io::IReadFile* file, unsigned char nbBones)
 {
     const long back = file->getPos();
     for (char i = 0; i < nbBones; ++i)
