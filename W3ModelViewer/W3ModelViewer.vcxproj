@@ -137,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\CGUIFileSaveDialog.cpp" />
     <ClCompile Include="..\IO_MeshLoader_W3ENT.cpp" />
     <ClCompile Include="..\IrrAssimp.cpp" />
     <ClCompile Include="..\IrrAssimpExport.cpp" />
@@ -150,6 +151,7 @@
     <ClCompile Include="W3ModelViewer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\CGUIFileSaveDialog.h" />
     <ClInclude Include="..\IO_MeshLoader_W3ENT.h" />
     <ClInclude Include="..\IrrAssimp.h" />
     <ClInclude Include="..\IrrAssimpExport.h" />
