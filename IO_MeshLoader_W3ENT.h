@@ -257,7 +257,7 @@ private:
     video::SMaterial ReadW2MIFileOnly(core::stringc filename);
     ISkinnedMesh* ReadW2MESHFile(core::stringc filename);
 
-    bool checkBones(io::IReadFile* file, unsigned char nbBones);
+    bool checkBones(io::IReadFile* file, char nbBones);
 };
 
 } // end namespace scene
