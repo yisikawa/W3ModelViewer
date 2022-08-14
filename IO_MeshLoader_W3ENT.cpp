@@ -1218,12 +1218,12 @@ bool IO_MeshLoader_W3ENT::checkBones(io::IReadFile* file, char nbBones)
     for (char i = 0; i < nbBones; ++i)
     {
         u16 jointName = readU16(file);
-        core::stringc str = Strings[jointName].c_str();
         if (jointName == 0 || jointName >= Strings.size())
         {
             file->seek(back);
             return false;
         }
+        core::stringc str = Strings[jointName].c_str();
 
     }
     file->seek(back);
@@ -1308,6 +1308,7 @@ void IO_MeshLoader_W3ENT::ReadBones(io::IReadFile* file)
     // TODO
     long pos;
     char nbRead;
+    u32 count = 0;
     do
     {
         pos = file->getPos();
@@ -1318,10 +1319,13 @@ void IO_MeshLoader_W3ENT::ReadBones(io::IReadFile* file)
             if (!checkBones(file, nbRead))
             {
                 nbRead = -1;
+                return;
             }
         }
 
         if (file->getPos() >= file->getSize())
+            return;
+        if (++count >= 200)
             return;
     }   while (nbRead != NbBonesPos);
 
