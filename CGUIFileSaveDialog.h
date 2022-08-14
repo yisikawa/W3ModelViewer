@@ -37,6 +37,7 @@ namespace irr
             //! returns the filename of the selected file. Returns NULL, if no file was selected.
             virtual const io::path& getDirectoryName()  override;
 
+
             //! called if an event happened.
             virtual bool OnEvent(const SEvent& event) override;
 

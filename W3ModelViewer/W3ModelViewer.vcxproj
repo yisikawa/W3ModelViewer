@@ -138,6 +138,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\CGUIFileSaveDialog.cpp" />
+    <ClCompile Include="..\ConfigString.cpp" />
     <ClCompile Include="..\IO_MeshLoader_W3ENT.cpp" />
     <ClCompile Include="..\IrrAssimp.cpp" />
     <ClCompile Include="..\IrrAssimpExport.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="..\IrrAssimpImport.h" />
     <ClInclude Include="..\IrrAssimpUtils.h" />
     <ClInclude Include="..\MeshCombiner.h" />
+    <ClInclude Include="..\SkinnedVertex.h" />
     <ClInclude Include="..\TW3_CSkeleton.h" />
     <ClInclude Include="..\TW3_DataCache.h" />
     <ClInclude Include="..\Utils_Halffloat.h" />

@@ -1,26 +1,11 @@
 #ifndef TW3_DATACACHE_H
 #define TW3_DATACACHE_H
 
-#include <ISkinnedMesh.h>
-
-#include <vector>
-
-class SkinnedVertex
-{
-public:
-    SkinnedVertex() :
-        moved(false),
-        position(irr::core::vector3df(0.f, 0.f, 0.f)),
-        normal(irr::core::vector3df(0.f, 0.f, 0.f))
-    {
-    }
-
-    bool moved;
-    irr::core::vector3df position;
-    irr::core::vector3df normal;
-};
+#include "SkinnedVertex.h"
 
 using namespace irr;
+
+
 
 struct BoneEntry
 {

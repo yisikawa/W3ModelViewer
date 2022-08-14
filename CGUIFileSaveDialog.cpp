@@ -136,7 +136,7 @@ namespace irr
         //! returns the filename of the selected file. Returns NULL, if no file was selected.
         const io::path& CGUIFileSaveDialog::getDirectoryName()
         {
-            return DirectoryName.c_str();
+            return DirectoryName;
         }
 
         //! called if an event happened.
@@ -179,7 +179,11 @@ namespace irr
                         }
 
                         else
+                        {
                             FileName = FileList->getFullFileName(selected);
+                            DirectoryName = FileSystem->getFileDir(FileName);
+                        }
+                            
 
                         FileEdit->setText(FileName.c_str());
                     }
@@ -201,6 +205,7 @@ namespace irr
                         else
                         {
                             FileName = FileList->getFullFileName(selected);
+                            DirectoryName = FileSystem->getFileDir(FileName);
                             return true;
                         }
                     }
@@ -210,6 +215,7 @@ namespace irr
                 break;
             case EET_KEY_INPUT_EVENT:
                 FileName = FileEdit->getText();
+                DirectoryName = FileSystem->getFileDir(FileName);
                 break;
             case EET_MOUSE_INPUT_EVENT:
                 switch (event.MouseInput.Event)

@@ -1,11 +1,9 @@
 ﻿// W3ModelViewer.cpp : このファイルには 'main' 関数が含まれています。プログラム実行の開始と終了がそこで行われます。
 //
-#include <Windows.h>  // GetPrivateProfileString
-#include <array>     // array
-#include <string>        // string
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <filesystem>
 #include <Irrlicht.h>
 #include <irrString.h>
 #include <irrArray.h>
@@ -14,6 +12,7 @@
 #include "../IO_MeshLoader_W3ENT.h"
 #include "../MeshCombiner.h"
 #include "../CGUIFileSaveDialog.h"
+#include "../IrrAssimp.h"
 
 using namespace irr;
 using namespace scene;
@@ -31,7 +30,9 @@ void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node);
 bool loadRig(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_node, const io::path filename);
 bool loadAnims(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_node, const io::path filename);
 void enableRigging(scene::IAnimatedMeshSceneNode* node, bool enabled);
-
+std::string GetConfigString(const std::string& filePath, const char* pSectionName, const char* pKeyName);
+void ExportModel(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_node, const io::path directory,
+	const io::path filename, struct ExporterInfos exporter);
 //Some global variables 
 IrrlichtDevice* gDevice = nullptr;
 scene::IAnimatedMeshSceneNode* gModel = nullptr;
@@ -43,6 +44,7 @@ IO_MeshLoader_W3ENT* gW3ENT;
 core::stringc gGamePath = "";
 core::stringc gExportPath = "";
 core::stringc gTexPath = "";
+core::array<struct ExporterInfos> gExporters;
 
 struct ModelList
 {
@@ -77,6 +79,75 @@ enum
 	GUI_ID_GERALT_LIST,
 	GUI_ID_MAX
 };
+struct IrrlichtExporterInfos
+{
+	IrrlichtExporterInfos(scene::EMESH_WRITER_TYPE irrExporter = scene::EMWT_OBJ, s32 irrFlags = scene::EMWF_NONE)
+		: _irrExporter(irrExporter)
+		, _irrFlags(irrFlags)
+	{}
+
+	scene::EMESH_WRITER_TYPE _irrExporter;
+	s32 _irrFlags;
+};
+
+enum ExportType
+{
+	Exporter_Irrlicht,
+	Exporter_Redkit,
+	Exporter_Assimp
+};
+
+struct ExporterInfos
+{
+	ExportType _exporterType;
+	core::stringc _exporterName;
+	core::stringc _extension;
+
+	// Assimp specifics
+	core::stringc _assimpExporterId;
+
+	// Irrlicht specifics
+	IrrlichtExporterInfos _irrlichtInfos;
+};
+
+
+
+void registerExporters()
+{
+	gExporters.clear();
+
+	gExporters.push_back({ Exporter_Irrlicht, ".obj (Wavefront OBJ)"                , ".obj"     , ""    , IrrlichtExporterInfos(scene::EMWT_OBJ       , scene::EMWF_NONE) });
+	gExporters.push_back({ Exporter_Irrlicht, ".dae (Collada)"                      , ".dae"     , ""    , IrrlichtExporterInfos(scene::EMWT_COLLADA   , scene::EMWF_NONE) });
+	gExporters.push_back({ Exporter_Irrlicht, ".ply (Polygon File Format (ascii))"  , ".ply"     , ""    , IrrlichtExporterInfos(scene::EMWT_PLY       , scene::EMWF_NONE) });
+	gExporters.push_back({ Exporter_Irrlicht, ".ply (Polygon File Format (binary))" , ".ply"     , ""    , IrrlichtExporterInfos(scene::EMWT_PLY       , scene::EMWF_WRITE_BINARY) });
+	gExporters.push_back({ Exporter_Irrlicht, ".stl (STereoLithography (ascii))"    , ".stl"     , ""    , IrrlichtExporterInfos(scene::EMWT_STL       , scene::EMWF_NONE) });
+	gExporters.push_back({ Exporter_Irrlicht, ".stl (STereoLithography (binary))"   , ".stl"     , ""    , IrrlichtExporterInfos(scene::EMWT_STL       , scene::EMWF_WRITE_BINARY) });
+	gExporters.push_back({ Exporter_Irrlicht, ".irrmesh (Irrlicht mesh)"            , ".irrmesh" , ""    , IrrlichtExporterInfos(scene::EMWT_IRR_MESH  , scene::EMWF_NONE) });
+
+	core::array<core::stringc> noAssimpExportExtensions;
+	for (int i = 0; i < gExporters.size(); ++i)
+	{
+		const core::stringc extension = gExporters[i]._extension;
+		noAssimpExportExtensions.push_back(extension);
+	}
+
+	core::array<struct ExportFormat> formats = IrrAssimp::getExportFormats();
+	for (u32 i = 0; i < formats.size(); ++i)
+	{
+		const struct ExportFormat format = formats[i];
+		const core::stringc extension = core::stringc(".") + format.fileExtension.c_str();
+		if (noAssimpExportExtensions.binary_search(extension) == -1)
+		{
+			const core::stringc exportString = extension + " by Assimp library (" + format.description.c_str() + ")";
+			gExporters.push_back({ Exporter_Assimp, exportString, extension, format.id.c_str(), IrrlichtExporterInfos() });
+		}
+	}
+	for (int i = 0; i < gExporters.size(); ++i)
+	{
+		core::stringc str = gExporters[i]._exporterName;
+	}
+	return;
+}
 
 class MyEventReceiver : public IEventReceiver
 {
@@ -135,7 +206,9 @@ public:
 						}
 						break;
 					case GUI_ID_EXPORT:
-						core::stringc tex = core::stringc(dialog->getFileName()).c_str();
+						core::stringc str0 = core::stringc(dialog->getFileName()).c_str();
+						core::stringc str = env->getFileSystem()->getFileDir(str0);
+						ExportModel(gDevice, gModel, str,str0, gExporters[18]);
 						break;
 					}
 
@@ -526,6 +599,93 @@ bool loadAnims(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_n
 	return true;
 }
 
+
+
+// Convert and copy a single texture
+bool convertAndCopyTexture(const io::path texturePath, const io::path exportFolder, bool shouldCopyTextures, const io::path& outputTexturePath)
+{
+	video::IImage* image = gDevice->getVideoDriver()->createImageFromFile(texturePath);
+	if (image)
+	{
+		gDevice->getVideoDriver()->writeImageToFile(image, outputTexturePath);
+		image->drop();
+	}
+	return true;
+}
+// irr::scene::IMesh* mesh, irr::core::stringc format, irr::core::stringc path
+// convert and copy the diffuse textures of a mesh
+void convertAndCopyTextures(scene::IMesh* mesh, const io::path exportFolder, bool shouldCopyTextures)
+{
+	for (u32 i = 0; i < mesh->getMeshBufferCount(); ++i)
+	{
+		scene::IMeshBuffer* buffer = mesh->getMeshBuffer(i);
+		video::ITexture* diffuseTexture = buffer->getMaterial().getTexture(0);
+		if (diffuseTexture)
+		{
+			core::stringc texturePath = diffuseTexture->getName().getPath();
+			core::stringc outputTexturePath;
+			if (convertAndCopyTexture(texturePath, exportFolder, shouldCopyTextures, outputTexturePath)) // TODO: Log something if file not exist ?
+			{
+				// We apply the nex texture to the mesh, so the exported file will use it
+				// TODO: Restore the original texture on the mesh after the export ?
+				video::ITexture* tex = gDevice->getSceneManager()->getVideoDriver()->getTexture(outputTexturePath);
+				buffer->getMaterial().setTexture(0, tex);
+			}
+		}
+	}
+}
+
+void ExportModel(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_node, const io::path directory,
+	const io::path filename, struct ExporterInfos exporter)
+{
+
+	if (exporter._exporterType != Exporter_Redkit && (!_current_node || !_current_node->getMesh()))
+		return ;
+
+	//if (Settings::_copyTexturesEnabled)
+	//{
+	//	// Will be exported in a subfolder
+	//	exportFolderPath = exportFolderPath + filename + "_export/";
+	//	QDir dir;
+	//	dir.mkdir(exportFolderPath);
+	//}
+
+	const io::path exportMeshPath = filename + exporter._extension;
+	const io::path exportFolderPath = directory;
+	io::IWriteFile* file = gDevice->getFileSystem()->createAndWriteFile(exportMeshPath);
+	if (!file)
+		return;
+
+	if (exporter._exporterType != Exporter_Redkit)
+	{
+		convertAndCopyTextures(_current_node->getMesh(), exportFolderPath, true);
+	}
+
+	//std::cout << filename.c_str() << std::endl;
+
+	if (exporter._exporterType == Exporter_Irrlicht)
+	{
+		scene::IMeshWriter* mw = nullptr;
+		mw = gDevice->getSceneManager()->createMeshWriter(exporter._irrlichtInfos._irrExporter);
+		if (mw)
+		{
+			mw->writeMesh(file, _current_node->getMesh(), exporter._irrlichtInfos._irrFlags);
+			mw->drop();
+		}
+
+	}
+	else
+	{
+		IrrAssimp assimp(gDevice->getSceneManager());
+		assimp.exportMesh(_current_node->getMesh(), exporter._assimpExporterId.c_str(), exportMeshPath);
+
+	}
+
+	if (file)
+		file->drop();
+
+}
+
 /*
 class MeshSize
 {
@@ -559,15 +719,7 @@ void QIrrlichtWidget::loadMeshPostProcess()
 }
 */
 
-std::string GetConfigString(const std::string& filePath, const char* pSectionName, const char* pKeyName)
-{
-	if (filePath.empty()) {
-		return "";
-	}
-	std::array<char, MAX_PATH> buf = {};
-	GetPrivateProfileStringA(pSectionName, pKeyName, "", &buf.front(), static_cast<DWORD>(buf.size()), filePath.c_str());
-	return &buf.front();
-}
+
 
 void addModelList(core::array<struct ModelList> *list, core::stringc fileName)
 {
@@ -625,6 +777,7 @@ void addModelList(core::array<struct ModelList> *list, core::stringc fileName)
 
 int main()
 {
+	registerExporters();
 	addModelList(&gAnimals, "../animals.csv");
 	addModelList(&gMonsters, "../monsters.csv");
 	addModelList(&gBackgrounds, "../backgrounds.csv");

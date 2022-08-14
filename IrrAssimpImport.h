@@ -1,7 +1,6 @@
 #ifndef IRRASSIMPIMPORT_H
 #define IRRASSIMPIMPORT_H
 
-#include <ISkinnedMesh.h>
 #include <IMeshLoader.h>
 
 #include <assimp/scene.h>          // Output data structure
@@ -10,20 +9,7 @@
 
 #include "IrrAssimpUtils.h"
 
-class SkinnedVertex
-{
-public:
-    SkinnedVertex() :
-        moved(false),
-        position(irr::core::vector3df(0.f, 0.f, 0.f)),
-        normal(irr::core::vector3df(0.f, 0.f, 0.f))
-    {
-    }
-
-    bool moved;
-    irr::core::vector3df position;
-    irr::core::vector3df normal;
-};
+#include "SkinnedVertex.h"
 
 class IrrAssimpImport : public irr::scene::IMeshLoader
 {
