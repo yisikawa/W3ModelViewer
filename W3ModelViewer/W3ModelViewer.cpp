@@ -24,7 +24,7 @@ using namespace gui;
 #pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
 #endif
 
-void loadModel(const c8* fn);
+void loadModel(const c8* fn, const c8* name);
 bool addMesh(const c8* fn);
 void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node);
 bool loadRig(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_node, const io::path filename);
@@ -182,7 +182,7 @@ public:
 					case GUI_ID_LOAD_ENT:
 						if (extension == ".w2ent" || extension == ".w2mesh" )
 						{
-							loadModel(core::stringc(dialog->getFileName()).c_str());
+							loadModel(core::stringc(dialog->getFileName()).c_str(),"");
 						}
 						break;
 					case GUI_ID_LOAD_RIG:
@@ -207,8 +207,8 @@ public:
 						break;
 					case GUI_ID_EXPORT:
 						core::stringc str0 = core::stringc(dialog->getFileName()).c_str();
-						core::stringc str = env->getFileSystem()->getFileDir(str0);
-						ExportModel(gDevice, gModel, str,str0, gExporters[18]);
+						core::stringc str = env->getFileSystem()->getFileDir(str0)+"/";
+						ExportModel(gDevice, gModel, str,str0, gExporters[7]);
 						break;
 					}
 
@@ -298,7 +298,7 @@ public:
 		if (pos <= 0) return;
 		if (gAnimals[pos - 1].meshFiles.size() >= 1) {
 			core::stringc file = gGamePath + gAnimals[pos - 1].meshFiles[0];
-			loadModel(file.c_str());
+			loadModel(file.c_str(), gAnimals[pos - 1].modelName.c_str());
 			for (int i = 1; i < gAnimals[pos - 1].meshFiles.size(); i++)
 			{
 				core::stringc file = gGamePath + gAnimals[pos - 1].meshFiles[i];
@@ -325,7 +325,7 @@ public:
 		if (pos <= 0) return;
 		if (gMonsters[pos - 1].meshFiles.size() >= 1) {
 			core::stringc file = gGamePath + gMonsters[pos - 1].meshFiles[0];
-			loadModel(file.c_str());
+			loadModel(file.c_str(), gMonsters[pos - 1].modelName.c_str());
 			for (int i = 1; i < gMonsters[pos - 1].meshFiles.size(); i++)
 			{
 				core::stringc file = gGamePath + gMonsters[pos - 1].meshFiles[i];
@@ -340,7 +340,7 @@ public:
 		if (pos <= 0) return;
 		if (gBackgrounds[pos - 1].meshFiles.size() >= 1) {
 			core::stringc file = gGamePath + gBackgrounds[pos - 1].meshFiles[0];
-			loadModel(file.c_str());
+			loadModel(file.c_str(),gBackgrounds[pos - 1].modelName.c_str());
 			for (int i = 1; i < gBackgrounds[pos - 1].meshFiles.size(); i++)
 			{
 				core::stringc file = gGamePath + gBackgrounds[pos - 1].meshFiles[i];
@@ -355,7 +355,7 @@ public:
 		if (pos <= 0) return;
 		if (gMainNpcs[pos - 1].meshFiles.size() >= 1) {
 			core::stringc file = gGamePath + gMainNpcs[pos - 1].meshFiles[0];
-			loadModel(file.c_str());
+			loadModel(file.c_str(), gMainNpcs[pos - 1].modelName.c_str());
 			for (int i = 1; i < gMainNpcs[pos - 1].meshFiles.size(); i++)
 			{
 				core::stringc file = gGamePath + gMainNpcs[pos - 1].meshFiles[i];
@@ -370,7 +370,7 @@ public:
 		if (pos <= 0) return;
 		if (gSecondNpcs[pos - 1].meshFiles.size() >= 1) {
 			core::stringc file = gGamePath + gSecondNpcs[pos - 1].meshFiles[0];
-			loadModel(file.c_str());
+			loadModel(file.c_str(), gSecondNpcs[pos - 1].modelName.c_str());
 			for (int i = 1; i < gSecondNpcs[pos - 1].meshFiles.size(); i++)
 			{
 				core::stringc file = gGamePath + gSecondNpcs[pos - 1].meshFiles[i];
@@ -386,7 +386,7 @@ public:
 		if (pos <= 0) return;
 		if (gGeralt[pos - 1].meshFiles.size() >= 1) {
 			core::stringc file = gGamePath + gGeralt[pos - 1].meshFiles[0];
-			loadModel(file.c_str());
+			loadModel(file.c_str(), gGeralt[pos - 1].modelName.c_str());
 			for (int i = 1; i < gGeralt[pos - 1].meshFiles.size(); i++)
 			{
 				core::stringc file = gGamePath + gGeralt[pos - 1].meshFiles[i];
@@ -478,12 +478,24 @@ void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node)
 		node->setMaterialTexture(i, nullptr);
 }
 
-void loadModel(const c8* fn)
+void loadModel(const c8* fn, const c8* name)
 {
 	// modify the name if it a .pk3 file
-
+	core::stringc modelName;
 	io::path filename(fn);
+	if (name == "")
+	{
+		s32 sep = filename.findLastChar("/");
+		modelName = filename.subString(sep + 1, filename.size() - sep - 1);
 
+		sep = modelName.findLastChar(".");
+		if (sep > 0 )
+			modelName = modelName.subString(0, sep);
+		else
+			modelName = modelName;
+	}
+	else
+		modelName = name;
 	io::path extension;
 	core::getFileNameExtension(extension, filename);
 	extension.make_lower();
@@ -500,6 +512,7 @@ void loadModel(const c8* fn)
 	gModel = gDevice->getSceneManager()->addAnimatedMeshSceneNode(mesh);
 	if (gModel)
 	{
+		gModel->setName(modelName);
 		gModel->setScale(core::vector3df(15.f, 15.f, 15.f));
 		gModel->setRotation(core::vector3df(gModel->getRotation().X, gModel->getRotation().Y - 90, gModel->getRotation().Z - 90));
 		setMaterialsSettings(gModel);
@@ -623,9 +636,14 @@ void convertAndCopyTextures(scene::IMesh* mesh, const io::path exportFolder, boo
 		if (diffuseTexture)
 		{
 			core::stringc texturePath = diffuseTexture->getName().getPath();
-			core::stringc outputTexturePath;
-			if (convertAndCopyTexture(texturePath, exportFolder, shouldCopyTextures, outputTexturePath)) // TODO: Log something if file not exist ?
+			s32 sep = texturePath.findLastChar("/");
+			core::stringc filename = texturePath.subString(sep + 1, texturePath.size() - sep - 1);
+			core::stringc outputTexturePath = exportFolder+filename;
+			video::IImage* image = gDevice->getVideoDriver()->createImageFromFile(texturePath);
+			if (image)
 			{
+				gDevice->getVideoDriver()->writeImageToFile(image, outputTexturePath);
+				image->drop();
 				// We apply the nex texture to the mesh, so the exported file will use it
 				// TODO: Restore the original texture on the mesh after the export ?
 				video::ITexture* tex = gDevice->getSceneManager()->getVideoDriver()->getTexture(outputTexturePath);
@@ -641,16 +659,11 @@ void ExportModel(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current
 
 	if (exporter._exporterType != Exporter_Redkit && (!_current_node || !_current_node->getMesh()))
 		return ;
-
-	//if (Settings::_copyTexturesEnabled)
-	//{
-	//	// Will be exported in a subfolder
-	//	exportFolderPath = exportFolderPath + filename + "_export/";
-	//	QDir dir;
-	//	dir.mkdir(exportFolderPath);
-	//}
-
-	const io::path exportMeshPath = filename + exporter._extension;
+	core::stringc basename = filename;
+	s32 sep = filename.findLastChar(".");
+	if( sep>0 )
+		basename = filename.subString(0,sep);
+	const io::path exportMeshPath = basename + exporter._extension;
 	const io::path exportFolderPath = directory;
 	io::IWriteFile* file = gDevice->getFileSystem()->createAndWriteFile(exportMeshPath);
 	if (!file)
@@ -661,7 +674,6 @@ void ExportModel(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current
 		convertAndCopyTextures(_current_node->getMesh(), exportFolderPath, true);
 	}
 
-	//std::cout << filename.c_str() << std::endl;
 
 	if (exporter._exporterType == Exporter_Irrlicht)
 	{
