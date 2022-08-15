@@ -447,6 +447,12 @@ public:
 				addMesh(file.c_str());
 			}
 		}
+		//if (gGeralt[pos - 1].rigFiles.size() >= 1)
+		//{
+		//	core::stringc file = gGamePath + gGeralt[pos - 1].rigFiles[0];
+		//	gW3ENT->Skeleton.clear();
+		//	loadRig(gDevice, gModel, io::path(file));
+		//}
 	}
 };
 
