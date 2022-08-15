@@ -69,7 +69,13 @@ enum
 	GUI_ID_LOAD_RIG,
 	GUI_ID_LOAD_ANIM,
 	GUI_ID_ADD_MESH,
-	GUI_ID_EXPORT,
+	GUI_ID_EXPORT_DAE,
+	GUI_ID_EXPORT_X,
+	GUI_ID_EXPORT_OBJ_MAT,
+	GUI_ID_EXPORT_OBJ_NOMAT,
+	GUI_ID_EXPORT_3DS,
+	GUI_ID_EXPORT_FBX_BIN,
+	GUI_ID_EXPORT_FBX_ASC,
 	GUI_ID_QUIT,
 	GUI_ID_ANIMALS_LIST,
 	GUI_ID_MONSTERS_LIST,
@@ -114,35 +120,34 @@ struct ExporterInfos
 
 void registerExporters()
 {
+	core::array<core::stringc> noAssimpExportExtensions;
+	noAssimpExportExtensions.push_back(".x");
+	noAssimpExportExtensions.push_back(".obj");
+	noAssimpExportExtensions.push_back(".dae");
+	noAssimpExportExtensions.push_back(".fbx");
+	noAssimpExportExtensions.push_back(".3ds");
+	noAssimpExportExtensions.sort();
 	gExporters.clear();
 
-	gExporters.push_back({ Exporter_Irrlicht, ".obj (Wavefront OBJ)"                , ".obj"     , ""    , IrrlichtExporterInfos(scene::EMWT_OBJ       , scene::EMWF_NONE) });
-	gExporters.push_back({ Exporter_Irrlicht, ".dae (Collada)"                      , ".dae"     , ""    , IrrlichtExporterInfos(scene::EMWT_COLLADA   , scene::EMWF_NONE) });
-	gExporters.push_back({ Exporter_Irrlicht, ".ply (Polygon File Format (ascii))"  , ".ply"     , ""    , IrrlichtExporterInfos(scene::EMWT_PLY       , scene::EMWF_NONE) });
-	gExporters.push_back({ Exporter_Irrlicht, ".ply (Polygon File Format (binary))" , ".ply"     , ""    , IrrlichtExporterInfos(scene::EMWT_PLY       , scene::EMWF_WRITE_BINARY) });
-	gExporters.push_back({ Exporter_Irrlicht, ".stl (STereoLithography (ascii))"    , ".stl"     , ""    , IrrlichtExporterInfos(scene::EMWT_STL       , scene::EMWF_NONE) });
-	gExporters.push_back({ Exporter_Irrlicht, ".stl (STereoLithography (binary))"   , ".stl"     , ""    , IrrlichtExporterInfos(scene::EMWT_STL       , scene::EMWF_WRITE_BINARY) });
-	gExporters.push_back({ Exporter_Irrlicht, ".irrmesh (Irrlicht mesh)"            , ".irrmesh" , ""    , IrrlichtExporterInfos(scene::EMWT_IRR_MESH  , scene::EMWF_NONE) });
-
-	core::array<core::stringc> noAssimpExportExtensions;
-	for (int i = 0; i < gExporters.size(); ++i)
-	{
-		const core::stringc extension = gExporters[i]._extension;
-		noAssimpExportExtensions.push_back(extension);
-	}
+	//core::array<core::stringc> noAssimpExportExtensions;
+	//for (int i = 0; i < gExporters.size(); ++i)
+	//{
+	//	const core::stringc extension = gExporters[i]._extension;
+	//	noAssimpExportExtensions.push_back(extension);
+	//}
 
 	core::array<struct ExportFormat> formats = IrrAssimp::getExportFormats();
 	for (u32 i = 0; i < formats.size(); ++i)
 	{
 		const struct ExportFormat format = formats[i];
 		const core::stringc extension = core::stringc(".") + format.fileExtension.c_str();
-		if (noAssimpExportExtensions.binary_search(extension) == -1)
+		if (noAssimpExportExtensions.binary_search(extension)!=-1)
 		{
 			const core::stringc exportString = extension + " by Assimp library (" + format.description.c_str() + ")";
 			gExporters.push_back({ Exporter_Assimp, exportString, extension, format.id.c_str(), IrrlichtExporterInfos() });
 		}
 	}
-	for (int i = 0; i < gExporters.size(); ++i)
+	for (u32 i = 0; i < gExporters.size(); ++i)
 	{
 		core::stringc str = gExporters[i]._exporterName;
 	}
@@ -176,6 +181,8 @@ public:
 //					CGUIFileSaveDialog* dialog2 = (CGUIFileSaveDialog*)event.GUIEvent.Caller;
 					core::getFileNameExtension(extension, core::stringc(dialog->getFileName()).c_str());
 					extension.make_lower();
+					core::stringc str0 = core::stringc(dialog->getFileName()).c_str();
+					core::stringc str = env->getFileSystem()->getFileDir(str0) + "/";
 					// load the model file, selected in the file open dialog
 					switch (dialog->getID())
 					{
@@ -205,10 +212,26 @@ public:
 							addMesh(core::stringc(dialog->getFileName()).c_str());
 						}
 						break;
-					case GUI_ID_EXPORT:
-						core::stringc str0 = core::stringc(dialog->getFileName()).c_str();
-						core::stringc str = env->getFileSystem()->getFileDir(str0)+"/";
-						ExportModel(gDevice, gModel, str,str0, gExporters[7]);
+					case GUI_ID_EXPORT_DAE:
+						ExportModel(gDevice, gModel,	str,str0, gExporters[0]);
+						break;
+					case GUI_ID_EXPORT_X:
+						ExportModel(gDevice, gModel, str, str0, gExporters[1]);
+						break;
+					case GUI_ID_EXPORT_OBJ_MAT:
+						ExportModel(gDevice, gModel, str, str0, gExporters[2]);
+						break;
+					case GUI_ID_EXPORT_OBJ_NOMAT:
+						ExportModel(gDevice, gModel, str, str0, gExporters[3]);
+						break;
+					case GUI_ID_EXPORT_3DS:
+						ExportModel(gDevice, gModel, str, str0, gExporters[4]);
+						break;
+					case GUI_ID_EXPORT_FBX_BIN:
+						ExportModel(gDevice, gModel, str, str0, gExporters[5]);
+						break;
+					case GUI_ID_EXPORT_FBX_ASC:
+						ExportModel(gDevice, gModel, str, str0, gExporters[6]);
 						break;
 					}
 
@@ -279,8 +302,39 @@ public:
 			env->addFileOpenDialog(L"Please select a Mesh file to add", true, 0,
 				GUI_ID_ADD_MESH, false, (irr::c8*)gGamePath.c_str());
 			break;
-		case GUI_ID_EXPORT: // File -> LoadAsOctree
-			dialog = new CGUIFileSaveDialog(L"Export file", env, env->getRootGUIElement(), GUI_ID_EXPORT, (irr::c8*)gExportPath.c_str());
+		case GUI_ID_EXPORT_DAE: // File -> LoadAsOctree
+			dialog = new CGUIFileSaveDialog(L"Export COLLADA Files",
+				env, env->getRootGUIElement(), GUI_ID_EXPORT_DAE, (irr::c8*)gExportPath.c_str());
+			dialog->drop();
+			break;
+		case GUI_ID_EXPORT_X: // File -> LoadAsOctree
+			dialog = new CGUIFileSaveDialog(L"Export X Files",
+				env, env->getRootGUIElement(), GUI_ID_EXPORT_X, (irr::c8*)gExportPath.c_str());
+			dialog->drop();
+			break;
+		case GUI_ID_EXPORT_OBJ_MAT: // File -> LoadAsOctree
+			dialog = new CGUIFileSaveDialog(L"Export Wavefront OBJ format",
+				env, env->getRootGUIElement(), GUI_ID_EXPORT_OBJ_MAT, (irr::c8*)gExportPath.c_str());
+			dialog->drop();
+		break;
+		case GUI_ID_EXPORT_OBJ_NOMAT: // File -> LoadAsOctree
+			dialog = new CGUIFileSaveDialog(L"Export Wavefront OBJ format without material files",
+				env, env->getRootGUIElement(), GUI_ID_EXPORT_OBJ_NOMAT, (irr::c8*)gExportPath.c_str());
+			dialog->drop();
+			break;
+		case GUI_ID_EXPORT_3DS: // File -> LoadAsOctree
+			dialog = new CGUIFileSaveDialog(L"Export Autodesk 3DS (legacy)",
+				env, env->getRootGUIElement(), GUI_ID_EXPORT_3DS, (irr::c8*)gExportPath.c_str());
+			dialog->drop();
+		break;
+		case GUI_ID_EXPORT_FBX_BIN: // File -> LoadAsOctree
+			dialog = new CGUIFileSaveDialog(L"Export Autodesk FBX (binary)",
+				env, env->getRootGUIElement(), GUI_ID_EXPORT_FBX_BIN, (irr::c8*)gExportPath.c_str());
+			dialog->drop();
+			break;
+		case GUI_ID_EXPORT_FBX_ASC: // File -> LoadAsOctree
+			dialog = new CGUIFileSaveDialog(L"Export Autodesk FBX (ascii)",
+				env, env->getRootGUIElement(), GUI_ID_EXPORT_FBX_ASC, (irr::c8*)gExportPath.c_str());
 			dialog->drop();
 			break;
 		case GUI_ID_QUIT: // File -> Quit
@@ -299,7 +353,7 @@ public:
 		if (gAnimals[pos - 1].meshFiles.size() >= 1) {
 			core::stringc file = gGamePath + gAnimals[pos - 1].meshFiles[0];
 			loadModel(file.c_str(), gAnimals[pos - 1].modelName.c_str());
-			for (int i = 1; i < gAnimals[pos - 1].meshFiles.size(); i++)
+			for (u32 i = 1; i < gAnimals[pos - 1].meshFiles.size(); i++)
 			{
 				core::stringc file = gGamePath + gAnimals[pos - 1].meshFiles[i];
 				addMesh(file.c_str());
@@ -326,7 +380,7 @@ public:
 		if (gMonsters[pos - 1].meshFiles.size() >= 1) {
 			core::stringc file = gGamePath + gMonsters[pos - 1].meshFiles[0];
 			loadModel(file.c_str(), gMonsters[pos - 1].modelName.c_str());
-			for (int i = 1; i < gMonsters[pos - 1].meshFiles.size(); i++)
+			for (u32 i = 1; i < gMonsters[pos - 1].meshFiles.size(); i++)
 			{
 				core::stringc file = gGamePath + gMonsters[pos - 1].meshFiles[i];
 				addMesh(file.c_str());
@@ -341,7 +395,7 @@ public:
 		if (gBackgrounds[pos - 1].meshFiles.size() >= 1) {
 			core::stringc file = gGamePath + gBackgrounds[pos - 1].meshFiles[0];
 			loadModel(file.c_str(),gBackgrounds[pos - 1].modelName.c_str());
-			for (int i = 1; i < gBackgrounds[pos - 1].meshFiles.size(); i++)
+			for (u32 i = 1; i < gBackgrounds[pos - 1].meshFiles.size(); i++)
 			{
 				core::stringc file = gGamePath + gBackgrounds[pos - 1].meshFiles[i];
 				addMesh(file.c_str());
@@ -356,7 +410,7 @@ public:
 		if (gMainNpcs[pos - 1].meshFiles.size() >= 1) {
 			core::stringc file = gGamePath + gMainNpcs[pos - 1].meshFiles[0];
 			loadModel(file.c_str(), gMainNpcs[pos - 1].modelName.c_str());
-			for (int i = 1; i < gMainNpcs[pos - 1].meshFiles.size(); i++)
+			for (u32 i = 1; i < gMainNpcs[pos - 1].meshFiles.size(); i++)
 			{
 				core::stringc file = gGamePath + gMainNpcs[pos - 1].meshFiles[i];
 				addMesh(file.c_str());
@@ -371,7 +425,7 @@ public:
 		if (gSecondNpcs[pos - 1].meshFiles.size() >= 1) {
 			core::stringc file = gGamePath + gSecondNpcs[pos - 1].meshFiles[0];
 			loadModel(file.c_str(), gSecondNpcs[pos - 1].modelName.c_str());
-			for (int i = 1; i < gSecondNpcs[pos - 1].meshFiles.size(); i++)
+			for (u32 i = 1; i < gSecondNpcs[pos - 1].meshFiles.size(); i++)
 			{
 				core::stringc file = gGamePath + gSecondNpcs[pos - 1].meshFiles[i];
 				addMesh(file.c_str());
@@ -387,7 +441,7 @@ public:
 		if (gGeralt[pos - 1].meshFiles.size() >= 1) {
 			core::stringc file = gGamePath + gGeralt[pos - 1].meshFiles[0];
 			loadModel(file.c_str(), gGeralt[pos - 1].modelName.c_str());
-			for (int i = 1; i < gGeralt[pos - 1].meshFiles.size(); i++)
+			for (u32 i = 1; i < gGeralt[pos - 1].meshFiles.size(); i++)
 			{
 				core::stringc file = gGamePath + gGeralt[pos - 1].meshFiles[i];
 				addMesh(file.c_str());
@@ -739,7 +793,7 @@ void addModelList(core::array<struct ModelList> *list, core::stringc fileName)
 	std::string str_buf;
 	std::string str_split_buf;
 
-	for (int i = 0; i < list->size(); i++)
+	for (u32 i = 0; i < list->size(); i++)
 		list[i].clear();
 	list->clear();
 	std::ifstream ifs_csv(fileName.c_str());
@@ -831,14 +885,22 @@ int main()
 //	menu->addItem(L"View", -1, true, true);
 	gui::IGUIContextMenu* submenu;
 	submenu = menu->getSubMenu(0);
-	submenu->addItem(L"Load Model File ...", GUI_ID_LOAD_ENT);
-	submenu->addItem(L"Load Rig File ...", GUI_ID_LOAD_RIG);
-	submenu->addItem(L"Load Anim File ...", GUI_ID_LOAD_ANIM);
-	submenu->addItem(L"Load Add File ...", GUI_ID_ADD_MESH);
-	submenu->addItem(L"Export File ...", GUI_ID_EXPORT);
+	submenu->addItem(L"Load Model File ...", GUI_ID_LOAD_ENT,true,false);
+	submenu->addItem(L"Load Rig File ...", GUI_ID_LOAD_RIG,true, false);
+	submenu->addItem(L"Load Anim File ...", GUI_ID_LOAD_ANIM, true, false);
+	submenu->addItem(L"Load Add File ...", GUI_ID_ADD_MESH, true, false);
+	submenu->addItem(L"Export File ...", -1,true,true);
 	submenu->addSeparator();
-	submenu->addItem(L"Quit", GUI_ID_QUIT);
+	submenu->addItem(L"Quit", GUI_ID_QUIT, true, false);
 
+	submenu = menu->getSubMenu(0)->getSubMenu(4);
+	submenu->addItem(L"COLLADA .dae by Assimp", GUI_ID_EXPORT_DAE);
+	submenu->addItem(L"X Files .x by Assimp", GUI_ID_EXPORT_X);
+	submenu->addItem(L"OBJ with Mat .obj by Assimp", GUI_ID_EXPORT_OBJ_MAT);
+	submenu->addItem(L"OBJ No Mat .obj by Assimp", GUI_ID_EXPORT_OBJ_NOMAT);
+	submenu->addItem(L"Autodesk 3DS .3ds by Assimp", GUI_ID_EXPORT_3DS);
+	submenu->addItem(L"Autodesk FBX (bin) .fbx by Assimp", GUI_ID_EXPORT_FBX_BIN);
+	submenu->addItem(L"Autodesk FBX (asc) .fbx by Assimp", GUI_ID_EXPORT_FBX_ASC);
 	// create toolbar
 	gui::IGUIToolBar* bar = env->addToolBar();
 	gui::IGUIComboBox* animals = env->addComboBox(core::rect<s32>(10, 4, 160, 23), bar, GUI_ID_ANIMALS_LIST);
@@ -849,7 +911,7 @@ int main()
 	gui::IGUIComboBox* geralt = env->addComboBox(core::rect<s32>(810, 4, 960, 23), bar, GUI_ID_GERALT_LIST);
 
 	animals->addItem(L"No Animals");
-	for (int i = 0; i < gAnimals.size(); i++)
+	for (u32 i = 0; i < gAnimals.size(); i++)
 	{
 		size_t ret;
 		wchar_t name[100];
@@ -857,7 +919,7 @@ int main()
 		animals->addItem((const wchar_t*)name);
 	}
 	monsters->addItem(L"No Monsters");
-	for (int i = 0; i < gMonsters.size(); i++)
+	for (u32 i = 0; i < gMonsters.size(); i++)
 	{
 		size_t ret;
 		wchar_t name[100];
@@ -865,7 +927,7 @@ int main()
 		monsters->addItem((const wchar_t*)name);
 	}
 	backgrounds->addItem(L"No Backgrounds");
-	for (int i = 0; i < gBackgrounds.size(); i++)
+	for (u32 i = 0; i < gBackgrounds.size(); i++)
 	{
 		size_t ret;
 		wchar_t name[100];
@@ -873,7 +935,7 @@ int main()
 		backgrounds->addItem((const wchar_t*)name);
 	}
 	mainnpcs->addItem(L"No Main Npcs");
-	for (int i = 0; i < gMainNpcs.size(); i++)
+	for (u32 i = 0; i < gMainNpcs.size(); i++)
 	{
 		size_t ret;
 		wchar_t name[100];
@@ -881,7 +943,7 @@ int main()
 		mainnpcs->addItem((const wchar_t*)name);
 	}
 	secondnpcs->addItem(L"No Secondly Npcs");
-	for (int i = 0; i < gSecondNpcs.size(); i++)
+	for (u32 i = 0; i < gSecondNpcs.size(); i++)
 	{
 		size_t ret;
 		wchar_t name[100];
@@ -889,7 +951,7 @@ int main()
 		secondnpcs->addItem((const wchar_t*)name);
 	}
 	geralt->addItem(L"No Geralt");
-	for (int i = 0; i < gGeralt.size(); i++)
+	for (u32 i = 0; i < gGeralt.size(); i++)
 	{
 		size_t ret;
 		wchar_t name[100];
@@ -910,9 +972,7 @@ int main()
 			env->drawAll();
 
 			driver->endScene();
-			// update information about current frame-rate
-			core::stringw str(L"FPS: ");
-			str.append(core::stringw(driver->getFPS()));
+
 		}
 		else
 			gDevice->yield();

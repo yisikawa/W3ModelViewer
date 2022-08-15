@@ -113,7 +113,6 @@ void checkMaterial(video::SMaterial mat)
 
 bool IO_MeshLoader_W3ENT::W3_load(io::IReadFile* file)
 {
-    video::SMaterial* mat;
     struct RedEngineFileHeader header;
     loadTW3FileHeader(file, header);
     Strings = header.Strings;
@@ -487,7 +486,7 @@ core::array<video::SMaterial> IO_MeshLoader_W3ENT::ReadMaterialsProperty(io::IRe
 
     core::array<video::SMaterial> materials;
 
-    for (u32 i = 0; i < nbChunks; ++i)
+    for (s32 i = 0; i < nbChunks; ++i)
     {
         u32 matID = readU32(file);
         u32 matFileID = 0xFFFFFFFF - matID;
@@ -653,7 +652,7 @@ video::SMaterial IO_MeshLoader_W3ENT::ReadIMaterialProperty(io::IReadFile* file)
     std::cout << "nb property = " << nbProperty << std::endl;
 
     // Read the properties of the material
-    for (u32 i = 0; i < nbProperty; ++i)
+    for (s32 i = 0; i < nbProperty; ++i)
     {
         const s32 back = file->getPos();
 
@@ -702,7 +701,7 @@ core::array<core::vector3df> IO_MeshLoader_W3ENT::ReadBonesPosition(io::IReadFil
     file->seek(1, true);
 
     core::array<core::vector3df> positions;
-    for (u32 i = 0; i < nbBones; ++i)
+    for (s32 i = 0; i < nbBones; ++i)
     {
         file->seek(8, true);
         float x = ReadFloatProperty(file);
@@ -1502,7 +1501,7 @@ video::SMaterial IO_MeshLoader_W3ENT::ReadW2MIFileOnly(core::stringc filename)
                     std::cout << "nb property = " << nbProperty << std::endl;
 
                     // Read the properties of the material
-                    for (u32 j = 0; j < nbProperty; ++j)
+                    for (s32 j = 0; j < nbProperty; ++j)
                     {
                         const s32 back = file->getPos();
 

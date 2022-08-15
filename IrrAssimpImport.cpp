@@ -387,7 +387,7 @@ void IrrAssimpImport::createAnimation()
 
         if (anim->mTicksPerSecond != 0.f)
         {
-            m_irrMesh->setAnimationSpeed(anim->mTicksPerSecond);
+            m_irrMesh->setAnimationSpeed((f32)anim->mTicksPerSecond);
         }
 
         //std::cout << "numChannels : " << anim->mNumChannels << std::endl;
@@ -401,7 +401,7 @@ void IrrAssimpImport::createAnimation()
                 aiVectorKey key = nodeAnim->mPositionKeys[k];
 
                 scene::ISkinnedMesh::SPositionKey* irrKey = m_irrMesh->addPositionKey(joint);
-                irrKey->frame = key.mTime + frameOffset;
+                irrKey->frame = key.mTime + (f32)frameOffset;
                 irrKey->position = assimpToIrrVector3(key.mValue);
             }
             for (unsigned int k = 0; k < nodeAnim->mNumRotationKeys; ++k)
@@ -409,7 +409,7 @@ void IrrAssimpImport::createAnimation()
                 aiQuatKey key = nodeAnim->mRotationKeys[k];
 
                 scene::ISkinnedMesh::SRotationKey* irrKey = m_irrMesh->addRotationKey(joint);
-                irrKey->frame = key.mTime + frameOffset;
+                irrKey->frame = key.mTime + (f32)frameOffset;
                 irrKey->rotation = assimpToIrrQuaternion(key.mValue);
             }
             for (unsigned int k = 0; k < nodeAnim->mNumScalingKeys; ++k)
@@ -417,7 +417,7 @@ void IrrAssimpImport::createAnimation()
                 aiVectorKey key = nodeAnim->mScalingKeys[k];
 
                 scene::ISkinnedMesh::SScaleKey* irrKey = m_irrMesh->addScaleKey(joint);
-                irrKey->frame = key.mTime + frameOffset;
+                irrKey->frame = key.mTime + (f32)frameOffset;
                 irrKey->scale = assimpToIrrVector3(key.mValue);
             }
 
