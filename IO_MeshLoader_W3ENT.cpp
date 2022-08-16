@@ -6,10 +6,10 @@
 #include <IFileSystem.h>
 #include <IMeshManipulator.h>
 
-#include "Utils_RedEngine.h"
+//#include "Utils_RedEngine.h"
 #include "Utils_Halffloat.h"
-#include "Utils_Loaders_Irr.h"
-#include "MeshCombiner.h"
+//#include "Utils_Loaders_Irr.h"
+//#include "MeshCombiner.h"
 
 namespace irr
 {
@@ -1145,33 +1145,6 @@ TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, struct W3_D
     Skeleton = skeleton;
 
     return skeleton;
-}
-
-void IO_MeshLoader_W3ENT::W3_CMeshComponent(io::IReadFile* file, struct W3_DataInfos infos)
-{
-    file->seek(infos.adress + 1);
-
-    struct SPropertyHeader propHeader;
-    while (ReadPropertyHeader(file, propHeader))
-    {
-        if (propHeader.propName == "mesh")
-        {
-            u32 meshComponentValue = readU32(file);
-            u32 fileId = 0xFFFFFFFF - meshComponentValue;
-            TW3_DataCache::_instance._bufferID += AnimatedMesh->getMeshBufferCount();
-            scene::ISkinnedMesh* mesh = ReadW2MESHFile(ConfigGamePath + Files[fileId]);
-            TW3_DataCache::_instance._bufferID -= AnimatedMesh->getMeshBufferCount();
-            if (mesh)
-            {
-                // Merge in the main mesh
-                combineMeshes(AnimatedMesh, mesh, true);
-                //Meshes.push_back(mesh);
-            }
-        }
-
-        file->seek(propHeader.endPos);
-    }
-
 }
 
 void IO_MeshLoader_W3ENT::W3_CEntityTemplate(io::IReadFile* file, struct W3_DataInfos infos)

@@ -398,6 +398,12 @@ void OnMainNpcsListSelected(IGUIComboBox* combo)
 			addMesh(file.c_str());
 		}
 	}
+	//if (gMainNpcs[pos - 1].rigFiles.size() >= 1)
+	//{
+	//	core::stringc file = gGamePath + gMainNpcs[pos - 1].rigFiles[0];
+	//	gW3ENT->Skeleton.clear();
+	//	loadRig(gDevice, gModel, io::path(file));
+	//}
 }
 
 void OnSecondNpcsListSelected(IGUIComboBox* combo)

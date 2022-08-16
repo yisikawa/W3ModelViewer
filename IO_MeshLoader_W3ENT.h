@@ -5,7 +5,7 @@
 
 #include <IMeshLoader.h>
 #include <ISkinnedMesh.h>
-
+#include "Utils_Loaders_Irr.h"
 #include "TW3_CSkeleton.h"
 #include "TW3_DataCache.h"
 #include "Utils_RedEngine.h"
@@ -207,7 +207,32 @@ private:
     bool W3_load(io::IReadFile* file);
     void W3_CMesh(io::IReadFile* file, struct W3_DataInfos infos);
     video::SMaterial W3_CMaterialInstance(io::IReadFile* file, struct W3_DataInfos infos);
-    void W3_CMeshComponent(io::IReadFile* file, struct W3_DataInfos infos);
+    void W3_CMeshComponent(io::IReadFile* file, struct W3_DataInfos infos)
+    {
+        file->seek(infos.adress + 1);
+
+        struct SPropertyHeader propHeader;
+        while (ReadPropertyHeader(file, propHeader))
+        {
+            if (propHeader.propName == "mesh")
+            {
+                u32 meshComponentValue = readU32(file);
+                u32 fileId = 0xFFFFFFFF - meshComponentValue;
+                TW3_DataCache::_instance._bufferID += AnimatedMesh->getMeshBufferCount();
+                scene::ISkinnedMesh* mesh = ReadW2MESHFile(ConfigGamePath + Files[fileId]);
+                TW3_DataCache::_instance._bufferID -= AnimatedMesh->getMeshBufferCount();
+                if (mesh)
+                {
+                    // Merge in the main mesh
+                    combineMeshes(AnimatedMesh, mesh, true);
+                    //Meshes.push_back(mesh);
+                }
+            }
+
+            file->seek(propHeader.endPos);
+        }
+
+    }
     void W3_CEntityTemplate(io::IReadFile* file, struct W3_DataInfos infos);   // Not handled yet
     void W3_CEntity(io::IReadFile* file, struct W3_DataInfos infos);           // Not handled yet
     TW3_CSkeleton W3_CSkeleton(io::IReadFile* file, struct W3_DataInfos infos);
