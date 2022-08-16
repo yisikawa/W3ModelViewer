@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <irrlicht.h>
 #include "IO_MeshLoader_W3ENT.h"
 #include "CGUIFileSaveDialog.h"
 #include "IrrAssimp.h"
@@ -298,6 +299,12 @@ void OnMonstersListSelected(IGUIComboBox* combo)
 			core::stringc file = gGamePath + gMonsters[pos - 1].meshFiles[i];
 			addMesh(file.c_str());
 		}
+	}
+	if (gMonsters[pos - 1].rigFiles.size() >= 1)
+	{
+		core::stringc file = gGamePath + gMonsters[pos - 1].rigFiles[0];
+		gW3ENT->Skeleton.clear();
+		loadRig(gDevice, gModel, io::path(file));
 	}
 }
 

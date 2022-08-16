@@ -482,6 +482,7 @@ core::vector3df IO_MeshLoader_W3ENT::ReadVector3Property(io::IReadFile* file)
 
 core::array<video::SMaterial> IO_MeshLoader_W3ENT::ReadMaterialsProperty(io::IReadFile* file)
 {
+    video::SMaterial mat;
     s32 nbChunks = readS32(file);
 
     core::array<video::SMaterial> materials;
@@ -495,7 +496,8 @@ core::array<video::SMaterial> IO_MeshLoader_W3ENT::ReadMaterialsProperty(io::IRe
         {
             std::cout << "w2mi file = " << Files[matFileID].c_str() << std::endl;
 //            materials.push_back(ReadMaterialFile(ConfigGamePath + Files[matFileID]));
-            materials.push_back(ReadW2MIFileOnly(ConfigGamePath + Files[matFileID]));
+            mat = ReadW2MIFileOnly(ConfigGamePath + Files[matFileID]);
+            materials.push_back(mat);
             //file->seek(3, true);
         }
         else
@@ -683,6 +685,7 @@ video::SMaterial IO_MeshLoader_W3ENT::ReadIMaterialProperty(io::IReadFile* file)
                     if (textureLayer == 1)  // normal map
                         mat.MaterialType = video::EMT_NORMAL_MAP_SOLID;
                     else
+//                        mat.MaterialType = video::EMT_SOLID;
                         mat.MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF;
                 }
             }
@@ -1282,9 +1285,10 @@ void IO_MeshLoader_W3ENT::W3_CMesh(io::IReadFile* file, struct W3_DataInfos info
 
    for (u32 i = 0; i < meshes.size(); ++i)
    {
-        if (!W3_ReadBuffer(file, bufferInfos, meshes[i]))
+       if (materials[meshes[i].materialID].TextureLayer->Texture == NULL)
+           continue;
+       if (!W3_ReadBuffer(file, bufferInfos, meshes[i]))
             continue;
-
         AnimatedMesh->getMeshBuffer(AnimatedMesh->getMeshBufferCount() - 1)->getMaterial() = materials[meshes[i].materialID];
 
    }
