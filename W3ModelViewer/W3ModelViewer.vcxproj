@@ -149,6 +149,7 @@
     <ClCompile Include="..\TW3_DataCache.cpp" />
     <ClCompile Include="..\Utils_Loaders_Irr.cpp" />
     <ClCompile Include="..\Utils_RedEngine.cpp" />
+    <ClCompile Include="..\W3_ui.cpp" />
     <ClCompile Include="W3ModelViewer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +166,7 @@
     <ClInclude Include="..\Utils_Halffloat.h" />
     <ClInclude Include="..\Utils_Loaders_Irr.h" />
     <ClInclude Include="..\Utils_RedEngine.h" />
+    <ClInclude Include="..\W3_ui.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
