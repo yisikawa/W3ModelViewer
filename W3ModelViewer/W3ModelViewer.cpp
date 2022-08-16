@@ -108,6 +108,10 @@ void loadModel(const c8* fn, const c8* name)
 		gCamera->setTarget(target);
 		//	loadMeshPostProcess();
 	}
+	gui::IGUIContextMenu* menu = (gui::IGUIContextMenu*)gDevice->getGUIEnvironment()->getRootGUIElement()->getElementFromId(GUI_ID_TOGGLE_INFO, true);
+	if (menu)
+		for (int item = 1; item < 6; ++item)
+			menu->setItemChecked(item, false);
 }
 
 bool addMesh(const c8* fn)

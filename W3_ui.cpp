@@ -251,6 +251,68 @@ void OnMenuItemSelected(IGUIContextMenu* menu)
 			env, env->getRootGUIElement(), GUI_ID_EXPORT_FBX_ASC, (irr::c8*)gExportPath.c_str());
 		dialog->drop();
 		break;
+	case GUI_ID_INFO_OFF: // View -> Debug Information
+		menu->setItemChecked(menu->getSelectedItem() + 1, false);
+		menu->setItemChecked(menu->getSelectedItem() + 2, false);
+		menu->setItemChecked(menu->getSelectedItem() + 3, false);
+		menu->setItemChecked(menu->getSelectedItem() + 4, false);
+		menu->setItemChecked(menu->getSelectedItem() + 5, false);
+		menu->setItemChecked(menu->getSelectedItem() + 6, false);
+		if (gModel)
+			gModel->setDebugDataVisible(scene::EDS_OFF);
+		break;
+	case GUI_ID_BOUNDING_BOX: // View -> Debug Information
+		menu->setItemChecked(menu->getSelectedItem(), !menu->isItemChecked(menu->getSelectedItem()));
+		if (gModel)
+			gModel->setDebugDataVisible((scene::E_DEBUG_SCENE_TYPE)(gModel->isDebugDataVisible() ^ scene::EDS_BBOX));
+		break;
+	case GUI_ID_NORMALS: // View -> Debug Information
+		menu->setItemChecked(menu->getSelectedItem(), !menu->isItemChecked(menu->getSelectedItem()));
+		if (gModel)
+			gModel->setDebugDataVisible((scene::E_DEBUG_SCENE_TYPE)(gModel->isDebugDataVisible() ^ scene::EDS_NORMALS));
+		break;
+	case GUI_ID_SKELETON: // View -> Debug Information
+		menu->setItemChecked(menu->getSelectedItem(), !menu->isItemChecked(menu->getSelectedItem()));
+		if (gModel)
+			gModel->setDebugDataVisible((scene::E_DEBUG_SCENE_TYPE)(gModel->isDebugDataVisible() ^ scene::EDS_SKELETON));
+		break;
+	case GUI_ID_WIRE_OVERLAY: // View -> Debug Information
+		menu->setItemChecked(menu->getSelectedItem(), !menu->isItemChecked(menu->getSelectedItem()));
+		if (gModel)
+			gModel->setDebugDataVisible((scene::E_DEBUG_SCENE_TYPE)(gModel->isDebugDataVisible() ^ scene::EDS_MESH_WIRE_OVERLAY));
+		break;
+	case GUI_ID_HALF_TRANSPARENT: // View -> Debug Information
+		menu->setItemChecked(menu->getSelectedItem(), !menu->isItemChecked(menu->getSelectedItem()));
+		if (gModel)
+			gModel->setDebugDataVisible((scene::E_DEBUG_SCENE_TYPE)(gModel->isDebugDataVisible() ^ scene::EDS_HALF_TRANSPARENCY));
+		break;
+	case GUI_ID_BUFFERS_BOUNDING_BOXES: // View -> Debug Information
+		menu->setItemChecked(menu->getSelectedItem(), !menu->isItemChecked(menu->getSelectedItem()));
+		if (gModel)
+			gModel->setDebugDataVisible((scene::E_DEBUG_SCENE_TYPE)(gModel->isDebugDataVisible() ^ scene::EDS_BBOX_BUFFERS));
+		break;
+	case GUI_ID_INFO_ALL: // View -> Debug Information
+		menu->setItemChecked(menu->getSelectedItem() - 1, true);
+		menu->setItemChecked(menu->getSelectedItem() - 2, true);
+		menu->setItemChecked(menu->getSelectedItem() - 3, true);
+		menu->setItemChecked(menu->getSelectedItem() - 4, true);
+		menu->setItemChecked(menu->getSelectedItem() - 5, true);
+		menu->setItemChecked(menu->getSelectedItem() - 6, true);
+		if (gModel)
+			gModel->setDebugDataVisible(scene::EDS_FULL);
+		break;
+	case GUI_ID_MAT_SOLID: // View -> Material -> Solid
+		if (gModel)
+			gModel->setMaterialType(video::EMT_SOLID);
+		break;
+	case GUI_ID_MAT_TRANSPARENT: // View -> Material -> Transparent
+		if (gModel)
+			gModel->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
+		break;
+	case GUI_ID_MAT_ALPHA_REF: // View -> Material -> Reflection
+		if (gModel)
+			gModel->setMaterialType(video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF);
+		break;
 	case GUI_ID_QUIT: // File -> Quit
 		gDevice->closeDevice();
 		break;
@@ -499,7 +561,7 @@ void init_ui()
 	// create menu
 	gui::IGUIContextMenu* menu = env->addMenu();
 	menu->addItem(L"File", -1, true, true);
-	//	menu->addItem(L"View", -1, true, true);
+	menu->addItem(L"View", -1, true, true);
 	gui::IGUIContextMenu* submenu;
 	submenu = menu->getSubMenu(0);
 	submenu->addItem(L"Load Model File ...", GUI_ID_LOAD_ENT, true, false);
@@ -518,6 +580,25 @@ void init_ui()
 	submenu->addItem(L"Autodesk 3DS .3ds by Assimp", GUI_ID_EXPORT_3DS);
 	submenu->addItem(L"Autodesk FBX (bin) .fbx by Assimp", GUI_ID_EXPORT_FBX_BIN);
 	submenu->addItem(L"Autodesk FBX (asc) .fbx by Assimp", GUI_ID_EXPORT_FBX_ASC);
+
+	submenu = menu->getSubMenu(1);
+	submenu->addItem(L"toggle information", GUI_ID_TOGGLE_INFO, true, true);
+	submenu->addItem(L"model material", -1, true, true);
+
+	submenu = menu->getSubMenu(1)->getSubMenu(0);
+	submenu->addItem(L"Off", GUI_ID_INFO_OFF);
+	submenu->addItem(L"Bounding Box", GUI_ID_BOUNDING_BOX);
+	submenu->addItem(L"Normals", GUI_ID_NORMALS);
+	submenu->addItem(L"Skeleton", GUI_ID_SKELETON);
+	submenu->addItem(L"Wire overlay", GUI_ID_WIRE_OVERLAY);
+	submenu->addItem(L"Half-Transparent", GUI_ID_HALF_TRANSPARENT);
+	submenu->addItem(L"Buffers bounding boxes", GUI_ID_BUFFERS_BOUNDING_BOXES);
+	submenu->addItem(L"All", GUI_ID_INFO_ALL);
+
+	submenu = menu->getSubMenu(1)->getSubMenu(1);
+	submenu->addItem(L"Solid", GUI_ID_MAT_SOLID);
+	submenu->addItem(L"Transparent", GUI_ID_MAT_TRANSPARENT);
+	submenu->addItem(L"Alpha Channel", GUI_ID_MAT_ALPHA_REF);
 	// create toolbar
 	gui::IGUIToolBar* bar = env->addToolBar();
 	gui::IGUIComboBox* animals = env->addComboBox(core::rect<s32>(10, 4, 160, 23), bar, GUI_ID_ANIMALS_LIST);
