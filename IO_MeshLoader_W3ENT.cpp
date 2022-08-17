@@ -685,8 +685,8 @@ video::SMaterial IO_MeshLoader_W3ENT::ReadIMaterialProperty(io::IReadFile* file)
                     if (textureLayer == 1)  // normal map
                         mat.MaterialType = video::EMT_NORMAL_MAP_SOLID;
                     else
-//                        mat.MaterialType = video::EMT_SOLID;
-                        mat.MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF;
+                        mat.MaterialType = video::EMT_SOLID;
+//                        mat.MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF;
                 }
             }
         }
@@ -1405,7 +1405,7 @@ video::SMaterial IO_MeshLoader_W3ENT::ReadMaterialFile(core::stringc filename)
 {
     if (core::hasFileExtension(filename, "w2mi"))
         return video::SMaterial();
- //       return ReadW2MIFile(filename);
+//        return ReadW2MIFile(filename);
     else if (core::hasFileExtension(filename, "w2mg"))
  //       return ReadW2MIFileOnly(filename);
         return video::SMaterial(); // shader, not handled 
@@ -1437,6 +1437,7 @@ video::SMaterial IO_MeshLoader_W3ENT::ReadW2MIFileOnly(core::stringc filename)
 {
     video::SMaterial mat;
     struct RedEngineFileHeader header;
+    core::array<video::SMaterial> materials;
 
     io::IReadFile* file = FileSystem->createAndOpenFile(filename);
     if (!file) return mat;
@@ -1517,6 +1518,18 @@ video::SMaterial IO_MeshLoader_W3ENT::ReadW2MIFileOnly(core::stringc filename)
                         file->seek(back + propSize);
                     }
                     break;
+                }
+//                else if (propHeader.propName == "baseMaterial")
+                else if ( propHeader.propName == "materials" )
+                {
+                    u32 fileId = readU32(file);
+                    fileId = 0xFFFFFFFF - fileId;
+                    if (core::hasFileExtension(header.Files[fileId], "w2mi"))
+                    {
+                        mat = ReadW2MIFileOnly(ConfigGamePath + header.Files[fileId]);
+                        if (mat.TextureLayer->Texture)
+                            return mat;
+                    }
                 }
                 file->seek(propHeader.endPos);
             }
