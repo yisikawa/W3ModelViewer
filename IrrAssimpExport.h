@@ -14,13 +14,13 @@ class IrrAssimpExport
     public:
         IrrAssimpExport();
         virtual ~IrrAssimpExport();
-        void writeFile(irr::scene::IMesh* mesh, irr::core::stringc format, irr::core::stringc filename);
+        void writeFile(irr::scene::IAnimatedMesh* mesh, irr::core::stringc format, irr::core::stringc filename);
 
     private:
         aiScene* m_assimpScene;
 
-        void createMeshes(const irr::scene::IMesh* irrMesh);
-        void createMaterials(const irr::scene::IMesh* irrMesh);
+        void createMeshes(const irr::scene::IAnimatedMesh* irrMesh);
+        void createMaterials(const irr::scene::IAnimatedMesh* irrMesh);
         void createAnimations(const irr::scene::ISkinnedMesh* irrMesh);
         aiNode* createNode(const irr::scene::ISkinnedMesh::SJoint* irrJoint);
 

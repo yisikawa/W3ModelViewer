@@ -23,7 +23,7 @@ IrrAssimp::~IrrAssimp()
 
 }
 
-void IrrAssimp::exportMesh(irr::scene::IMesh* mesh, irr::core::stringc format, irr::core::stringc path)
+void IrrAssimp::exportMesh(irr::scene::IAnimatedMesh* mesh, irr::core::stringc format, irr::core::stringc path)
 {
     m_exporter.writeFile(mesh, format, path);
 }

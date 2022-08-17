@@ -218,7 +218,7 @@ bool convertAndCopyTexture(const io::path texturePath, const io::path exportFold
 }
 // irr::scene::IMesh* mesh, irr::core::stringc format, irr::core::stringc path
 // convert and copy the diffuse textures of a mesh
-void convertAndCopyTextures(scene::IMesh* mesh, const io::path exportFolder, bool shouldCopyTextures)
+void convertAndCopyTextures(scene::IAnimatedMesh* mesh, const io::path exportFolder, bool shouldCopyTextures)
 {
 	for (u32 i = 0; i < mesh->getMeshBufferCount(); ++i)
 	{

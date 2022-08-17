@@ -32,7 +32,7 @@ class IrrAssimp
         /*  Export a mesh.
             The "format" parameter correspond to the Assimp format ID.
         */
-        void exportMesh(irr::scene::IMesh* mesh, irr::core::stringc format, irr::core::stringc path);
+        void exportMesh(irr::scene::IAnimatedMesh* mesh, irr::core::stringc format, irr::core::stringc path);
 
         // Return the error of the last loading. Return an empty string if no error.
         irr::core::stringc getError();

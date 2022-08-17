@@ -244,7 +244,7 @@ void IrrAssimpExport::createAnimations(const irr::scene::ISkinnedMesh* irrMesh)
     m_assimpScene->mAnimations[0] = animation;
 }
 
-void IrrAssimpExport::createMaterials(const scene::IMesh* irrMesh)
+void IrrAssimpExport::createMaterials(const scene::IAnimatedMesh* irrMesh)
 {
     m_assimpScene->mNumMaterials = irrMesh->getMeshBufferCount();
     m_assimpScene->mMaterials = new aiMaterial*[m_assimpScene->mNumMaterials];
@@ -291,7 +291,7 @@ void IrrAssimpExport::createMaterials(const scene::IMesh* irrMesh)
     }
 }
 
-void IrrAssimpExport::createMeshes(const scene::IMesh* irrMesh)
+void IrrAssimpExport::createMeshes(const scene::IAnimatedMesh* irrMesh)
 {
     m_assimpScene->mNumMeshes = irrMesh->getMeshBufferCount();
     m_assimpScene->mMeshes = new aiMesh*[m_assimpScene->mNumMeshes];
@@ -376,10 +376,10 @@ void IrrAssimpExport::createMeshes(const scene::IMesh* irrMesh)
     }
 }
 
-void IrrAssimpExport::writeFile(scene::IMesh* mesh, core::stringc format, core::stringc filename)
+void IrrAssimpExport::writeFile(scene::IAnimatedMesh* mesh, core::stringc format, core::stringc filename)
 {
     scene::ISkinnedMesh* irrSkinnedMesh = nullptr;
-#if (IRRLICHT_VERSION_MAJOR >= 2) || (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR >= 9)
+#if (IRRLICHT_VERSION_MAJOR >= 2) || (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR >= 8)
     if (mesh->getMeshType() == scene::EAMT_SKINNED)
     {
         irrSkinnedMesh = static_cast<scene::ISkinnedMesh*>(mesh);
