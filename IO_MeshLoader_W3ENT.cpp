@@ -1258,8 +1258,8 @@ void IO_MeshLoader_W3ENT::W3_CMesh(io::IReadFile* file, struct W3_DataInfos info
 
    for (u32 i = 0; i < meshes.size(); ++i)
    {
-       if (materials[meshes[i].materialID].TextureLayer->Texture == NULL)
-           continue;
+       //if (materials[meshes[i].materialID].TextureLayer->Texture == NULL)
+       //    continue;
        if (!W3_ReadBuffer(file, bufferInfos, meshes[i]))
             continue;
         AnimatedMesh->getMeshBuffer(AnimatedMesh->getMeshBufferCount() - 1)->getMaterial() = materials[meshes[i].materialID];
