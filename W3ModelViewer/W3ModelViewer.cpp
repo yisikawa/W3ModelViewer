@@ -160,7 +160,7 @@ bool loadRig(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_nod
 	{
 		// Apply the skinning
 		TW3_DataCache::_instance.setOwner(newMesh);
-		TW3_DataCache::_instance.apply();
+		TW3_DataCache::_instance.boneApply2Rig();
 	}
 
 	newMesh->setDirty();

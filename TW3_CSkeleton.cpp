@@ -4,25 +4,25 @@
 
 #include <iostream>
 
-TW3_CSkeleton::TW3_CSkeleton() : nbBones(0),
-names(core::array<core::stringc>()),
+TW3_CSkeleton::TW3_CSkeleton() : nbRigs(0),
+rigNames(core::array<core::stringc>()),
 parentId(core::array<short>()),
-matrix(core::array<core::matrix4>()),
-positions(core::array<core::vector3df>()),
-rotations(core::array<core::quaternion>()),
-scales(core::array<core::vector3df>())
+rigMatrix(core::array<core::matrix4>()),
+rigPositions(core::array<core::vector3df>()),
+rigRotations(core::array<core::quaternion>()),
+rigScales(core::array<core::vector3df>())
 {
 
 }
 
 void TW3_CSkeleton::clear()
 {
-    names.clear();
+    rigNames.clear();
     parentId.clear();
-    matrix.clear();
-    positions.clear();
-    rotations.clear();
-    scales.clear();
+    rigMatrix.clear();
+    rigPositions.clear();
+    rigRotations.clear();
+    rigScales.clear();
 }
 
 // Definition in IrrAssimpExport
@@ -54,57 +54,58 @@ void computeLocal(const scene::ISkinnedMesh* mesh, scene::ISkinnedMesh::SJoint* 
 
 bool TW3_CSkeleton::applyToModel(scene::ISkinnedMesh* mesh)
 {
+    // Set the hierarchy
+    core::array<scene::ISkinnedMesh::SJoint*> rigRoots;
     // Create the bones
-    for (u32 i = 0; i < nbBones; ++i)
+    for (u32 i = 0; i < nbRigs; ++i)
     {
-        core::stringc boneName = names[i];
-        scene::ISkinnedMesh::SJoint* joint = JointHelper::GetJointByName(mesh, boneName);
+        core::stringc rigName = rigNames[i];
+        scene::ISkinnedMesh::SJoint* joint = JointHelper::GetJointByName(mesh, rigName);
         if (!joint)
         {
             joint = mesh->addJoint();
-            joint->Name = boneName;
+            joint->Name = rigName;
         }
     }
 
-    // Set the hierarchy
-    core::array<scene::ISkinnedMesh::SJoint*> roots;
-    for (u32 i = 0; i < nbBones; ++i)
+
+    for (u32 i = 0; i < nbRigs; ++i)
     {
         scene::ISkinnedMesh::SJoint* joint = mesh->getAllJoints()[i]; // TODO: this is probably buggy (need to use JointHelper::GetJointByName(mesh, names[i]))
         s16 parent = parentId[i];
         if (parent != -1) // root
         {
-            scene::ISkinnedMesh::SJoint* parentJoint = JointHelper::GetJointByName(mesh, names[parent]);
+            scene::ISkinnedMesh::SJoint* parentJoint = JointHelper::GetJointByName(mesh, rigNames[parent]);
             if (parentJoint)
                 parentJoint->Children.push_back(joint);
         }
         else
         {
-            roots.push_back(joint);
+            rigRoots.push_back(joint);
         }
     }
 
     // Set the transformations
-    for (u32 i = 0; i < nbBones; ++i)
+    for (u32 i = 0; i < nbRigs; ++i)
     {
-        core::stringc boneName = names[i];
+        core::stringc rigName = rigNames[i];
 
-        scene::ISkinnedMesh::SJoint* joint = JointHelper::GetJointByName(mesh, boneName);
+        scene::ISkinnedMesh::SJoint* joint = JointHelper::GetJointByName(mesh, rigName);
         if (!joint)
             continue;
 
-        core::matrix4 mat = matrix[i];
-        joint->LocalMatrix = mat;
+        core::matrix4 rigMat = rigMatrix[i];
+        joint->LocalMatrix = rigMat;
 
-        joint->Animatedposition = positions[i];
-        joint->Animatedrotation = rotations[i];
-        joint->Animatedscale = scales[i];
+        joint->Animatedposition = rigPositions[i];
+        joint->Animatedrotation = rigRotations[i];
+        joint->Animatedscale = rigScales[i];
     }
 
     // Compute the global matrix
-    for (u32 i = 0; i < roots.size(); ++i)
+    for (u32 i = 0; i < rigRoots.size(); ++i)
     {
-        JointHelper::ComputeGlobalMatrixRecursive(mesh, roots[i]);
+        JointHelper::ComputeGlobalMatrixRecursive(mesh, rigRoots[i]);
     }
 
     return true;

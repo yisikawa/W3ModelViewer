@@ -12,14 +12,15 @@ public:
 
     void clear();
 
-    u32 nbBones;
-    core::array<core::stringc> names;
+//    u32 nbBones;
+    u32 nbRigs;
+    core::array<core::stringc> rigNames;
     core::array<short> parentId;
-    core::array<core::matrix4> matrix;
+    core::array<core::matrix4> rigMatrix;
 
-    core::array<core::vector3df> positions;
-    core::array<core::quaternion> rotations;
-    core::array<core::vector3df> scales;
+    core::array<core::vector3df> rigPositions;
+    core::array<core::quaternion> rigRotations;
+    core::array<core::vector3df> rigScales;
 
     bool applyToModel(scene::ISkinnedMesh* mesh);
 };

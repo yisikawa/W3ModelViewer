@@ -1059,19 +1059,19 @@ TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, struct W3_D
         if (propHeader.propName == "bones")
         {
             // array
-            s32 nbBones = readS32(file);
+            s32 nbRigs = readS32(file);
             file->seek(1, true);
 
-            skeleton.nbBones = nbBones;
+            skeleton.nbRigs = nbRigs;
 
-            for (s32 i = 0; i < nbBones; ++i)
+            for (s32 i = 0; i < nbRigs; ++i)
             {
                 struct SPropertyHeader h;
                 ReadPropertyHeader(file, h);  // name + StringANSI
 
                 u8 nameSize = readU8(file);
                 core::stringc name = readString(file, nameSize);
-                skeleton.names.push_back(name);
+                skeleton.rigNames.push_back(name);
 
                 // An other property (nameAsCName)
                 file->seek(13, true); // nameAsCName + CName + size + CName string ID + 3 0x00 octets
@@ -1098,7 +1098,7 @@ TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, struct W3_D
     //std::cout << file->getPos() << std::endl;
 
 
-    for (u32 i = 0; i < skeleton.nbBones; ++i)
+    for (u32 i = 0; i < skeleton.nbRigs; ++i)
     {
         // position (vector 4) + quaternion (4 float) + scale (vector 4)
         core::vector3df position;
@@ -1135,10 +1135,10 @@ TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, struct W3_D
 
         core::matrix4 localTransform = posMat * rotMat * scaleMat;
         orientation.makeInverse();
-        skeleton.matrix.push_back(localTransform);
-        skeleton.positions.push_back(position);
-        skeleton.rotations.push_back(orientation);
-        skeleton.scales.push_back(scale);
+        skeleton.rigMatrix.push_back(localTransform);
+        skeleton.rigPositions.push_back(position);
+        skeleton.rigRotations.push_back(orientation);
+        skeleton.rigScales.push_back(scale);
 
     }
 

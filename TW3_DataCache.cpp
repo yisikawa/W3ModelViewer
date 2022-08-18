@@ -36,7 +36,7 @@ void TW3_DataCache::addVertexEntry(u32 boneID, u16 meshBufferID, u32 vertexID, f
     _vertices.push_back(*vertexSkinningEntry);
 }
 
-void TW3_DataCache::apply()
+void TW3_DataCache::boneApply2Rig()
 {
     if (!_owner)
         return;
@@ -70,10 +70,10 @@ void TW3_DataCache::apply()
     }
 
     // To debug
-    skin();
+    vertex2Skin();
 }
 
-void TW3_DataCache::skin()
+void TW3_DataCache::vertex2Skin()
 {
     buildSkinnedVertexArray();
     for (u32 i = 0; i < _bones.size(); ++i)

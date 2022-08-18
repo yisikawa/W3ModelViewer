@@ -53,8 +53,8 @@ public:
     void addBoneEntry(core::stringc name, core::matrix4 boneOffset);
     void addVertexEntry(u32 boneID, u16 meshBufferID, u32 vertexID, f32 strenght);
     void clear();
-    void apply();
-    void skin();
+    void boneApply2Rig();
+    void vertex2Skin();
 
     u32 _bufferID;
 };
