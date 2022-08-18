@@ -343,7 +343,7 @@ int main()
 	gDevice->getSceneManager()->getParameters()->setAttribute("TW_EXPORT_PATH", gExportPath.c_str());
 	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_TEX_PATH", gTexPath.c_str());
 	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_SKEL", true);
-	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_BEST_LOD_ONLY", false);
+	gDevice->getSceneManager()->getParameters()->setAttribute("TW_TW3_LOAD_BEST_LOD_ONLY", true);
 
 	gW3ENT = new IO_MeshLoader_W3ENT(gDevice->getSceneManager(), gDevice->getFileSystem());
 	gCamera = gDevice->getSceneManager()->addCameraSceneNodeMaya(nullptr);
