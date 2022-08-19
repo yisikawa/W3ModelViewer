@@ -362,12 +362,12 @@ void OnMonstersListSelected(IGUIComboBox* combo)
 			addMesh(file.c_str());
 		}
 	}
-	//if (gMonsters[pos - 1].rigFiles.size() >= 1)
-	//{
-	//	core::stringc file = gGamePath + gMonsters[pos - 1].rigFiles[0];
-	//	gW3ENT->Skeleton.clear();
-	//	loadRig(gDevice, gModel, io::path(file));
-	//}
+	if (gMonsters[pos - 1].rigFiles.size() >= 1)
+	{
+		core::stringc file = gGamePath + gMonsters[pos - 1].rigFiles[0];
+		gW3ENT->Skeleton.clear();
+		loadRig(gDevice, gModel, io::path(file));
+	}
 }
 
 void OnBackgroundsListSelected(IGUIComboBox* combo)
@@ -419,6 +419,12 @@ void OnSecondNpcsListSelected(IGUIComboBox* combo)
 			addMesh(file.c_str());
 		}
 	}
+	if (gSecondNpcs[pos - 1].rigFiles.size() >= 1)
+	{
+		core::stringc file = gGamePath + gSecondNpcs[pos - 1].rigFiles[0];
+		gW3ENT->Skeleton.clear();
+		loadRig(gDevice, gModel, io::path(file));
+	}
 }
 
 
@@ -435,12 +441,12 @@ void OnGeraltListSelected(IGUIComboBox* combo)
 			addMesh(file.c_str());
 		}
 	}
-	//if (gGeralt[pos - 1].rigFiles.size() >= 1)
-	//{
-	//	core::stringc file = gGamePath + gGeralt[pos - 1].rigFiles[0];
-	//	gW3ENT->Skeleton.clear();
-	//	loadRig(gDevice, gModel, io::path(file));
-	//}
+	if (gGeralt[pos - 1].rigFiles.size() >= 1)
+	{
+		core::stringc file = gGamePath + gGeralt[pos - 1].rigFiles[0];
+		gW3ENT->Skeleton.clear();
+		loadRig(gDevice, gModel, io::path(file));
+	}
 }
 
 

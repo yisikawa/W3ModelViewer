@@ -18,7 +18,7 @@ deer03,-r,1,characters\base_entities\deer_base\deer_base.w2rig,-a,1,animations\a
 deer04,-r,1,characters\base_entities\deer_base\deer_base.w2rig,-a,1,animations\animals\deer\deer_animation.w2anims,-m,1,characters\models\animals\deer\t_04__deer.w2ent
 dog,-r,1,characters\base_entities\dog_base\dog_base.w2rig,-a,1,dlc\bob\data\animations\animations\animals\dog\dog_animation.w2anims,-m,1,characters\models\animals\dog\dog.w2ent
 dog01,-r,1,characters\base_entities\dog_base\dog_base.w2rig,-a,1,dlc\bob\data\animations\animations\animals\dog\dog_animation.w2anims,-m,1,characters\models\animals\dog\dog_01.w2ent
-dog02,-r,1,characters\base_entities\dog_base\dog_base.w2rig,-a,1,dlc\bob\data\animations\animations\animals\dog\dog_animation.w2anims,-m,1,characters\models\animals\dog\dog_02.w2ent
+dog02,-r,1,characters\base_entities\dog_base\dog_base.w2rig,-a,1,animations\animals\dog\dog_animation.w2anims,-m,1,characters\models\animals\dog\dog_02.w2ent
 goat01,-r,1,characters\base_entities\goat_base\goat_base.w2rig,-a,1,animations\animals\goat\goat_animation.w2anims,-m,1,characters\models\animals\goat\t_01__goat.w2ent
 goat02,-r,1,characters\base_entities\goat_base\goat_base.w2rig,-a,1,animations\animals\goat\goat_animation.w2anims,-m,1,characters\models\animals\goat\t_02__goat.w2ent
 goat03,-r,1,characters\base_entities\goat_base\goat_base.w2rig,-a,1,animations\animals\goat\goat_animation.w2anims,-m,1,characters\models\animals\goat\t_03__goat_quest.w2ent

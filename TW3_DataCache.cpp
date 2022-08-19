@@ -95,7 +95,22 @@ void TW3_DataCache::checkSkin()
     {
         struct BoneEntry bone = _bones[i];
         s32 indx = _owner->getJointNumber(bone._name.c_str());
-        if (indx <= 0 ) continue;
+        if (indx <= 0)
+        {
+            f32 distMin = 1000.;
+            core::vector3df posb = _bones[i]._offsetMatrix.getTranslation();
+            for (u32 j = 0; j < _owner->getAllJoints().size(); j++)
+            {
+                core::vector3df posj = _owner->getAllJoints()[j]->GlobalMatrix.getTranslation();
+                f32 dist = posb.getDistanceFrom(posj);
+                if (dist < distMin)
+                {
+                    distMin = dist;
+                    indx = j;
+                }
+            }
+//            continue;
+        }
         scene::ISkinnedMesh::SJoint* joint = _owner->getAllJoints()[indx];
         if (joint == nullptr)
         {
