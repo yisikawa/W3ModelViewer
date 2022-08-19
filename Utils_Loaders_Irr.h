@@ -37,7 +37,7 @@ core::stringc readString(io::IReadFile* file, int nbChars);
 core::stringc readStringUntilNull(io::IReadFile* file);
 core::stringc readStringFixedSize(io::IReadFile* file, int nbChars);
 
-void chechNaNErrors(core::vector3df& vector3);
+void checkNaNErrors(core::vector3df& vector3);
 
 // for debugging purposes
 core::stringc getBinaryRepresentation(u8 byte);

@@ -42,7 +42,7 @@ core::stringc readStringFixedSize(io::IReadFile* file, int nbChars)
 }
 
 
-void chechNaNErrors(core::vector3df& vector3)
+void checkNaNErrors(core::vector3df& vector3)
 {
     if (std::isnan(vector3.X) || std::isinf(vector3.X))
         vector3.X = 0.f;

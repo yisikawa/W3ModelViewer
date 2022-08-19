@@ -54,7 +54,7 @@ public:
     void addVertexEntry(u32 boneID, u16 meshBufferID, u32 vertexID, f32 strenght);
     void clear();
     void boneApply2Rig();
-    void vertex2Skin();
+    void checkSkin();
 
     u32 _bufferID;
 };

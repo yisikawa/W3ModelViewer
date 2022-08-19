@@ -58,8 +58,23 @@ void TW3_DataCache::boneApply2Rig()
         s32 jointID = _owner->getJointNumber(_bones[entry._boneID]._name.c_str());
         if (jointID == -1)
         {
-            std::cout << "Fail to skin : joint not found." << std::endl;
-            continue;
+            f32 distMin=1000.;
+            core::vector3df posb = _bones[entry._boneID]._offsetMatrix.getTranslation();
+            for (u32 j = 0; j < _owner->getAllJoints().size(); j++)
+            {
+                core::vector3df posj = _owner->getAllJoints()[j]->GlobalMatrix.getTranslation();
+                f32 dist = posb.getDistanceFrom(posj);
+                if (dist < distMin)
+                {
+                    distMin = dist;
+                    jointID = j;
+                }
+            }
+            //scene::ISkinnedMesh::SJoint* joint = _owner->getAllJoints()[jointID];
+            //core::stringc str = joint->Name;
+            //core::stringc str2 = _bones[entry._boneID]._name.c_str();
+            //std::cout << "Fail to skin : joint not found." << std::endl;
+//            continue;
         }
 
         scene::ISkinnedMesh::SJoint* joint = _owner->getAllJoints()[jointID];
@@ -70,10 +85,10 @@ void TW3_DataCache::boneApply2Rig()
     }
 
     // To debug
-    vertex2Skin();
+    checkSkin();
 }
-
-void TW3_DataCache::vertex2Skin()
+ 
+void TW3_DataCache::checkSkin()
 {
     buildSkinnedVertexArray();
     for (u32 i = 0; i < _bones.size(); ++i)

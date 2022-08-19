@@ -857,7 +857,7 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
     scene::ISkinnedMesh::SScaleKey* skey;
 
 
-    for (u32 i = 1; i < inf.size(); ++i)
+    for (u32 i = 2; i < inf.size(); ++i)
     {
         scene::ISkinnedMesh::SJoint* joint = meshToAnimate->getAllJoints()[i];
 
@@ -1126,7 +1126,7 @@ TW3_CSkeleton IO_MeshLoader_W3ENT::W3_CSkeleton(io::IReadFile* file, struct W3_D
         //core::vector3df euler;
         //orientation.toEuler(euler);
 
-        //chechNaNErrors(euler);
+        //checkNaNErrors(euler);
 
         //rotMat.setRotationRadians(euler);
 
