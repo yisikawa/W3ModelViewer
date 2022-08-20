@@ -151,11 +151,13 @@ bool loadRig(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_nod
 	if (mesh)
 		mesh->drop();
 
-	TW3_CSkeleton skeleton = loader.Skeleton;
+	//TW3_CSkeleton skeleton = loader.Skeleton;
+	gW3ENT->Skeleton = loader.Skeleton;
 
 	scene::ISkinnedMesh* newMesh = copySkinnedMesh(device->getSceneManager(), _current_node->getMesh(), false);
 
-	bool success = skeleton.applyToModel(newMesh);
+	//bool success = skeleton.applyToModel(newMesh);
+	bool success = gW3ENT->Skeleton.applyToModel(newMesh);
 	if (success)
 	{
 		// Apply the skinning
@@ -186,6 +188,7 @@ bool loadAnims(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_n
 
 	// use the loader to add the animation to the new model
 	loader.meshToAnimate = newMesh;
+	loader.Skeleton = gW3ENT->Skeleton;
 	scene::IAnimatedMesh* mesh = loader.createMesh(file);
 	file->drop();
 

@@ -23,6 +23,7 @@ public:
     core::array<core::vector3df> rigScales;
 
     bool applyToModel(scene::ISkinnedMesh* mesh);
+    bool applyToModel2(scene::ISkinnedMesh* mesh);
 };
 
 #endif // TW3_CSKELETON_H

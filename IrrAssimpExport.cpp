@@ -31,8 +31,8 @@ aiVector3D irrToAssimpVector3(const core::vector2df& vect)
 
 aiVector3D irrToAssimpVector3(const core::vector3df& vect)
 {
-//    return aiVector3D(vect.X, vect.Y, vect.Z);
-    return aiVector3D(vect.X, vect.Z, -vect.Y);
+    return aiVector3D(vect.X, vect.Y, vect.Z);
+    //return aiVector3D(vect.X, vect.Z, -vect.Y);
 }
 
 aiQuaternion irrToAssimpQuaternion(const core::quaternion& quat)
@@ -59,13 +59,11 @@ aiMatrix4x4 irrToAssimpMatrix(const core::matrix4& irrMatrix)
     assimpMatrix.c3 = irrMatrix[10];
     assimpMatrix.d3 = irrMatrix[11];
 
-    //assimpMatrix.a4 = irrMatrix[12];
-    //assimpMatrix.b4 = irrMatrix[13];
-    //assimpMatrix.c4 = irrMatrix[14];
-    //assimpMatrix.d4 = irrMatrix[15];
     assimpMatrix.a4 = irrMatrix[12];
-    assimpMatrix.b4 = irrMatrix[14];
-    assimpMatrix.c4 = -irrMatrix[13];
+    assimpMatrix.b4 = irrMatrix[13];
+    assimpMatrix.c4 = irrMatrix[14];
+    //assimpMatrix.b4 = irrMatrix[14];
+    //assimpMatrix.c4 = -irrMatrix[13];
     assimpMatrix.d4 = irrMatrix[15];
 
     return assimpMatrix;

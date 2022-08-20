@@ -11,6 +11,7 @@
 //#include "Utils_Loaders_Irr.h"
 //#include "MeshCombiner.h"
 
+
 namespace irr
 {
 namespace scene
@@ -856,10 +857,12 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
     scene::ISkinnedMesh::SRotationKey* rkey;
     scene::ISkinnedMesh::SScaleKey* skey;
 
+    for (u32 i = 1; i < inf.size(); ++i)
 
-    for (u32 i = 2; i < inf.size(); ++i)
     {
-        scene::ISkinnedMesh::SJoint* joint = meshToAnimate->getAllJoints()[i];
+        core::stringc str = Skeleton.rigNames[i];
+//        scene::ISkinnedMesh::SJoint* joint = meshToAnimate->getAllJoints()[i];
+        scene::ISkinnedMesh::SJoint* joint = JointHelper::GetJointByName(meshToAnimate, Skeleton.rigNames[i]);
 
         for (u32 j = 0; j < inf[i].size(); ++j)
         {
