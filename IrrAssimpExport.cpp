@@ -32,7 +32,7 @@ aiVector3D irrToAssimpVector3(const core::vector2df& vect)
 aiVector3D irrToAssimpVector3(const core::vector3df& vect)
 {
     return aiVector3D(vect.X, vect.Y, vect.Z);
-    //return aiVector3D(vect.X, vect.Z, -vect.Y);
+//    return aiVector3D(vect.X, vect.Z, -vect.Y);
 }
 
 aiQuaternion irrToAssimpQuaternion(const core::quaternion& quat)

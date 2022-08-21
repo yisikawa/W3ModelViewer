@@ -55,7 +55,7 @@ harpy03,-r,1,characters\base_entities\harpy_base\harpy_base.w2rig,-m,1,character
 harpy04,-r,1,characters\base_entities\harpy_base\harpy_base.w2rig,-m,1,characters\models\monsters\harpy\t_04__harpy.w2ent,,
 him01,,,,-m,1,characters\models\monsters\him\t_01__him.w2ent,,
 him02,,,,-m,1,characters\models\monsters\him\t_02__him.w2ent,,
-ice_giant01,-r,1,characters\models\monsters\ice_giant\model\skeleton_ice_giant.w2rig,-m,1,characters\models\monsters\ice_giant\body_01__ice_giant.w2ent,,
+ice_giant01,-r,1,Z:\uncooked\characters\base_entities\giant_base\giant_base.w2rig,-m,1,characters\models\monsters\ice_giant\body_01__ice_giant.w2ent,,
 ice_giant02,-r,1,Z:\uncooked\characters\base_entities\giant_base\giant_base.w2rig,-m,1,characters\models\monsters\ice_giant\body_02__ice_giant_cs.w2ent,,
 katakan01,-r,1,characters\models\monsters\katakan\model\katakan_skeleton.w2rig,-m,1,characters\models\monsters\katakan\t_01__katakan.w2ent,,
 katakan01_mh,-r,1,characters\models\monsters\katakan\model\katakan_skeleton.w2rig,-m,1,characters\models\monsters\katakan\t_01__katakan_mh.w2ent,,
