@@ -27,6 +27,7 @@ void IO_MeshLoader_W3ENT::clear()
     Strings.clear();
     Files.clear();
     Meshes.clear();
+    Anims.clear();
 }
 
 //! Constructor

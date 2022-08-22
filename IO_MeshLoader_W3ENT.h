@@ -176,7 +176,7 @@ public:
 	//! If you no longer need the mesh, you should call IAnimatedMesh::drop().
 	//! See IReferenceCounted::drop() for more information.
 	virtual IAnimatedMesh* createMesh(io::IReadFile* file);
-
+    core::array<core::array< scene::ISkinnedMesh::SJoint>> Anims;
     std::map<int, video::SMaterial> Materials;
     TW3_CSkeleton Skeleton;
     scene::ISkinnedMesh* meshToAnimate;
