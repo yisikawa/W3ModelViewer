@@ -176,11 +176,20 @@ public:
 	//! If you no longer need the mesh, you should call IAnimatedMesh::drop().
 	//! See IReferenceCounted::drop() for more information.
 	virtual IAnimatedMesh* createMesh(io::IReadFile* file);
-    core::array<core::array< scene::ISkinnedMesh::SJoint>> Anims;
+    // Strings table
+    core::array<core::stringc> Strings;
+    // Files table
+    core::array<core::stringc> Files;
+    core::array<core::stringc> animStrings;
+    core::array<core::stringc> animFiles;
+    core::array<core::stringc> animNames;
+    core::array<struct W3_DataInfos> animInfos;
+    io::path animFile;
     std::map<int, video::SMaterial> Materials;
     TW3_CSkeleton Skeleton;
     scene::ISkinnedMesh* meshToAnimate;
     void clear();
+    void W3_CAnimationBufferBitwiseCompressed(io::IReadFile* file, struct W3_DataInfos infos);
 
 
 private:
@@ -191,10 +200,7 @@ private:
     scene::ISceneManager* SceneManager;
     io::IFileSystem* FileSystem;
     scene::ISkinnedMesh* AnimatedMesh;
-    // Strings table
-    core::array<core::stringc> Strings;
-    // Files table
-    core::array<core::stringc> Files;
+
     bool ConfigLoadSkeleton;
     bool ConfigLoadOnlyBestLOD;
     io::path ConfigGameTexturesPath;
@@ -207,6 +213,30 @@ private:
     bool W3_load(io::IReadFile* file);
     void W3_CMesh(io::IReadFile* file, struct W3_DataInfos infos);
     video::SMaterial W3_CMaterialInstance(io::IReadFile* file, struct W3_DataInfos infos);
+    void W3_CSkeletalAnimation(io::IReadFile* file, struct W3_DataInfos infos)
+    {
+        file->seek(infos.adress + 1);
+        struct SPropertyHeader propHeader;
+        while (ReadPropertyHeader(file, propHeader))
+        {
+            // "name","motionExtraction","animBuffer","framesPerSecond",
+            if (propHeader.propName == "name")
+            {
+                u16 propName = readU16(file);
+                core::stringc name = Strings[propName];
+                animNames.push_back(name);
+            }
+            //if (propHeader.propName == "animBuffer")
+            //{
+            //    u32 size, adress;
+            //    file->read(&size, 4);
+            //    file->read(&adress, 4);
+            //}
+
+            file->seek(propHeader.endPos);
+        }
+    }
+
     void W3_CMeshComponent(io::IReadFile* file, struct W3_DataInfos infos)
     {
         file->seek(infos.adress + 1);
@@ -236,7 +266,7 @@ private:
     void W3_CEntityTemplate(io::IReadFile* file, struct W3_DataInfos infos);   // Not handled yet
     void W3_CEntity(io::IReadFile* file, struct W3_DataInfos infos);           // Not handled yet
     TW3_CSkeleton W3_CSkeleton(io::IReadFile* file, struct W3_DataInfos infos);
-    void W3_CAnimationBufferBitwiseCompressed(io::IReadFile* file, struct W3_DataInfos infos);
+    //void W3_CAnimationBufferBitwiseCompressed(io::IReadFile* file, struct W3_DataInfos infos);
     void W3_CUnknown(io::IReadFile* file, struct W3_DataInfos infos);
 
     // load a mesh buffer from the buffer file

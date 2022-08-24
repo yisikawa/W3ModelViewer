@@ -27,7 +27,8 @@ void IO_MeshLoader_W3ENT::clear()
     Strings.clear();
     Files.clear();
     Meshes.clear();
-    Anims.clear();
+    animNames.clear();
+    animInfos.clear();
 }
 
 //! Constructor
@@ -171,7 +172,12 @@ bool IO_MeshLoader_W3ENT::W3_load(io::IReadFile* file)
         }
         else if (dataTypeName == "CAnimationBufferBitwiseCompressed" && meshToAnimate)
         {
-            W3_CAnimationBufferBitwiseCompressed(file, infos);
+            animInfos.push_back(infos);
+            //W3_CAnimationBufferBitwiseCompressed(file, infos);
+        }
+        else if (dataTypeName == "CSkeletalAnimation")
+        {
+            W3_CSkeletalAnimation(file, infos);
         }
         else
         {

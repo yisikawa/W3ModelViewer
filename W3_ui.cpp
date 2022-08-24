@@ -21,6 +21,7 @@ extern core::stringc gTexPath ;
 core::array<struct ExporterInfos> gExporters;
 core::array<struct ModelList> gAnimals, gMonsters, gBackgrounds, gMainNpcs, gSecondNpcs, gGeralt;
 
+bool setAnims(s32 pos);
 void loadModel(const c8* fn, const c8* name);
 bool addMesh(const c8* fn);
 void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node);
@@ -36,6 +37,8 @@ void OnBackgroundsListSelected(IGUIComboBox* combo);
 void OnMainNpcsListSelected(IGUIComboBox* combo);
 void OnSecondNpcsListSelected(IGUIComboBox* combo);
 void OnGeraltListSelected(IGUIComboBox* combo);
+void OnAnimationtSelected(IGUIComboBox* combo);
+
 
 void registerExporters()
 {
@@ -178,6 +181,10 @@ bool MyEventReceiver::OnEvent(const SEvent& event)
 			else if (id == GUI_ID_GERALT_LIST)
 			{
 				OnGeraltListSelected((IGUIComboBox*)event.GUIEvent.Caller);
+			}
+			else if (id == GUI_ID_ANIMS_LIST)
+			{
+				OnAnimationtSelected((IGUIComboBox*)event.GUIEvent.Caller);
 			}
 			break;
 		default:
@@ -322,6 +329,12 @@ void OnMenuItemSelected(IGUIContextMenu* menu)
 /*
 	Handle the event that one of the texture-filters was selected in the corresponding combobox.
 */
+void OnAnimationtSelected(IGUIComboBox* combo)
+{
+	s32 pos = combo->getSelected();
+	setAnims(pos - 1);
+}
+
 void OnAnimalsListSelected(IGUIComboBox* combo)
 {
 	s32 pos = combo->getSelected();
@@ -559,6 +572,29 @@ void addModelList(core::array<struct ModelList>* list, core::stringc fileName)
 	}
 }
 
+gui::IGUIToolBar* bar;
+gui::IGUIComboBox* animations;
+gui::IGUIComboBox* animals;
+gui::IGUIComboBox* monsters;
+gui::IGUIComboBox* backgrounds;
+gui::IGUIComboBox* mainnpcs;
+gui::IGUIComboBox* secondnpcs;
+gui::IGUIComboBox* geralt;
+
+void addAnimList(core::stringc name)
+{
+	size_t ret;
+	wchar_t str[100];
+	mbstowcs_s(&ret, str, name.c_str(), _TRUNCATE);
+	animations->addItem((const wchar_t*)str);
+}
+
+void clearAnimList()
+{
+
+	animations->clear();
+}
+
 void init_ui()
 {
 	registerExporters();
@@ -618,14 +654,15 @@ void init_ui()
 	submenu->addItem(L"Transparent", GUI_ID_MAT_TRANSPARENT);
 	submenu->addItem(L"Alpha Channel", GUI_ID_MAT_ALPHA_REF);
 	// create toolbar
-	gui::IGUIToolBar* bar = env->addToolBar();
-	gui::IGUIComboBox* animals = env->addComboBox(core::rect<s32>(10, 4, 160, 23), bar, GUI_ID_ANIMALS_LIST);
-	gui::IGUIComboBox* monsters = env->addComboBox(core::rect<s32>(170, 4, 320, 23), bar, GUI_ID_MONSTERS_LIST);
-	gui::IGUIComboBox* backgrounds = env->addComboBox(core::rect<s32>(330, 4, 480, 23), bar, GUI_ID_BACKGROUNDS_LIST);
-	gui::IGUIComboBox* mainnpcs = env->addComboBox(core::rect<s32>(490, 4, 640, 23), bar, GUI_ID_MAIN_NPCS_LIST);
-	gui::IGUIComboBox* secondnpcs = env->addComboBox(core::rect<s32>(650, 4, 800, 23), bar, GUI_ID_SECOND_NPCS_LIST);
-	gui::IGUIComboBox* geralt = env->addComboBox(core::rect<s32>(810, 4, 960, 23), bar, GUI_ID_GERALT_LIST);
-
+	bar = env->addToolBar();
+	animations = env->addComboBox(core::rect<s32>(10, 4, 160, 23), bar, GUI_ID_ANIMS_LIST);
+	animals = env->addComboBox(core::rect<s32>(170, 4, 320, 23), bar, GUI_ID_ANIMALS_LIST);
+	monsters = env->addComboBox(core::rect<s32>(330, 4, 480, 23), bar, GUI_ID_MONSTERS_LIST);
+	backgrounds = env->addComboBox(core::rect<s32>(490, 4, 640, 23), bar, GUI_ID_BACKGROUNDS_LIST);
+	mainnpcs = env->addComboBox(core::rect<s32>(650, 4, 800, 23), bar, GUI_ID_MAIN_NPCS_LIST);
+	secondnpcs = env->addComboBox(core::rect<s32>(810, 4, 960, 23), bar, GUI_ID_SECOND_NPCS_LIST);
+	geralt = env->addComboBox(core::rect<s32>(970, 4, 1120, 23), bar, GUI_ID_GERALT_LIST);
+	animations->addItem(L"No Animation");
 	animals->addItem(L"No Animals");
 	for (u32 i = 0; i < gAnimals.size(); i++)
 	{
