@@ -226,12 +226,18 @@ private:
                 core::stringc name = Strings[propName];
                 animNames.push_back(name);
             }
-            //if (propHeader.propName == "animBuffer")
-            //{
-            //    u32 size, adress;
-            //    file->read(&size, 4);
-            //    file->read(&adress, 4);
-            //}
+            else if (propHeader.propName == "animBuffer")
+            {
+                u8 chunkNo = readU8(file);  // chunk no from 1 and array no = chunkNo -1
+            }
+            else if (propHeader.propName == "framesPerSecond")
+            {
+                f32 framesPS = readF32(file);  // chunk no from 1 and array no = chunkNo -1
+            }
+            else if (propHeader.propName == "duration")
+            {
+                f32 duration = readF32(file);  // chunk no from 1 and array no = chunkNo -1
+            }
 
             file->seek(propHeader.endPos);
         }
