@@ -213,62 +213,9 @@ private:
     bool W3_load(io::IReadFile* file);
     void W3_CMesh(io::IReadFile* file, struct W3_DataInfos infos);
     video::SMaterial W3_CMaterialInstance(io::IReadFile* file, struct W3_DataInfos infos);
-    void W3_CSkeletalAnimation(io::IReadFile* file, struct W3_DataInfos infos)
-    {
-        file->seek(infos.adress + 1);
-        struct SPropertyHeader propHeader;
-        while (ReadPropertyHeader(file, propHeader))
-        {
-            // "name","motionExtraction","animBuffer","framesPerSecond",
-            if (propHeader.propName == "name")
-            {
-                u16 propName = readU16(file);
-                core::stringc name = Strings[propName];
-                animNames.push_back(name);
-            }
-            else if (propHeader.propName == "animBuffer")
-            {
-                u8 chunkNo = readU8(file);  // chunk no from 1 and array no = chunkNo -1
-            }
-            else if (propHeader.propName == "framesPerSecond")
-            {
-                f32 framesPS = readF32(file);  // chunk no from 1 and array no = chunkNo -1
-            }
-            else if (propHeader.propName == "duration")
-            {
-                f32 duration = readF32(file);  // chunk no from 1 and array no = chunkNo -1
-            }
+    void W3_CSkeletalAnimation(io::IReadFile* file, struct W3_DataInfos infos);
+    void W3_CMeshComponent(io::IReadFile* file, struct W3_DataInfos infos);
 
-            file->seek(propHeader.endPos);
-        }
-    }
-
-    void W3_CMeshComponent(io::IReadFile* file, struct W3_DataInfos infos)
-    {
-        file->seek(infos.adress + 1);
-
-        struct SPropertyHeader propHeader;
-        while (ReadPropertyHeader(file, propHeader))
-        {
-            if (propHeader.propName == "mesh")
-            {
-                u32 meshComponentValue = readU32(file);
-                u32 fileId = 0xFFFFFFFF - meshComponentValue;
-                TW3_DataCache::_instance._bufferID += AnimatedMesh->getMeshBufferCount();
-                scene::ISkinnedMesh* mesh = ReadW2MESHFile(ConfigGamePath + Files[fileId]);
-                TW3_DataCache::_instance._bufferID -= AnimatedMesh->getMeshBufferCount();
-                if (mesh)
-                {
-                    // Merge in the main mesh
-                    combineMeshes(AnimatedMesh, mesh, true);
-                    //Meshes.push_back(mesh);
-                }
-            }
-
-            file->seek(propHeader.endPos);
-        }
-
-    }
     void W3_CEntityTemplate(io::IReadFile* file, struct W3_DataInfos infos);   // Not handled yet
     void W3_CEntity(io::IReadFile* file, struct W3_DataInfos infos);           // Not handled yet
     TW3_CSkeleton W3_CSkeleton(io::IReadFile* file, struct W3_DataInfos infos);

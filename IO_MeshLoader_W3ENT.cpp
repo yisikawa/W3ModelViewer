@@ -62,6 +62,73 @@ bool IO_MeshLoader_W3ENT::isALoadableFileExtension(const io::path& filename) con
     return checkIsLoadable;
 }
 
+void IO_MeshLoader_W3ENT::W3_CSkeletalAnimation(io::IReadFile* file, struct W3_DataInfos infos)
+{
+    file->seek(infos.adress + 1);
+    struct SPropertyHeader propHeader;
+    while (ReadPropertyHeader(file, propHeader))
+    {
+        // "name","motionExtraction","animBuffer","framesPerSecond",
+        if (propHeader.propName == "name")
+        {
+            u16 propName = readU16(file);
+            core::stringc name = Strings[propName];
+            animNames.push_back(name);
+        }
+        else if (propHeader.propName == "motionExtraction")
+        {
+            u8 chunkCLineNo = readU8(file);  // CLineMotionExtraction chunk no from 1 and array no = chunkNo -1
+        }
+        else if (propHeader.propName == "animBuffer")
+        {
+            u8 chunkAnimNo = readU8(file);  // CAnimationBufferBitwiseCompressed chunk no from 1 and array no = chunkNo -1
+        }
+        else if (propHeader.propName == "framesPerSecond")
+        {
+            f32 framesPS = readF32(file);  // chunk no from 1 and array no = chunkNo -1
+        }
+        else if (propHeader.propName == "duration")
+        {
+            f32 duration = readF32(file);  // chunk no from 1 and array no = chunkNo -1
+        }
+
+        file->seek(propHeader.endPos);
+    }
+}
+
+void IO_MeshLoader_W3ENT::W3_CMeshComponent(io::IReadFile* file, struct W3_DataInfos infos)
+{
+    file->seek(infos.adress + 1);
+
+    struct SPropertyHeader propHeader;
+    while (ReadPropertyHeader(file, propHeader))
+    {
+        if (propHeader.propName == "mesh")
+        {
+            u32 meshComponentValue = readU32(file);
+            u32 fileId = 0xFFFFFFFF - meshComponentValue;
+            TW3_DataCache::_instance._bufferID += AnimatedMesh->getMeshBufferCount();
+            scene::ISkinnedMesh* mesh = ReadW2MESHFile(ConfigGamePath + Files[fileId]);
+            TW3_DataCache::_instance._bufferID -= AnimatedMesh->getMeshBufferCount();
+            if (mesh)
+            {
+                // Merge in the main mesh
+                combineMeshes(AnimatedMesh, mesh, true);
+                //Meshes.push_back(mesh);
+            }
+        }
+        else if (propHeader.propName == "boundingBox")
+        {
+
+        }
+        else if (propHeader.propName == "name")
+        {
+            //core::stringc name = Strings[propName];
+        }
+        file->seek(propHeader.endPos);
+    }
+
+}
 
 //! creates/loads an animated mesh from the file.
 //! \return Pointer to the created mesh. Returns 0 if loading failed.
@@ -1001,7 +1068,14 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
         {
             defferedData = readU16(file);
         }
-
+        else if (propHeader.propName == "dt")
+        {
+            f32 dt_anim = readF32(file);
+        }
+        else if (propHeader.propName == "nonStreamableBones")
+        {
+            u32 bonesTotal = readU32(file);
+        }
         file->seek(propHeader.endPos);
     }
 
@@ -1232,6 +1306,7 @@ void IO_MeshLoader_W3ENT::W3_CMesh(io::IReadFile* file, struct W3_DataInfos info
     SBufferInfos bufferInfos;
     core::array<SMeshInfos> meshes;
     core::array<video::SMaterial> materials;
+    char nbBones;
 
     bool isStatic = false;
 
@@ -1256,7 +1331,23 @@ void IO_MeshLoader_W3ENT::W3_CMesh(io::IReadFile* file, struct W3_DataInfos info
         {
             isStatic = ReadBoolProperty(file);
         }
-
+        else if (propHeader.propName == "boneNames")
+        {
+            // Name of the bones
+            nbBones = readBonesNumber(file);
+        }
+        else if (propHeader.propName == "bonematrices")
+        {
+            nbBones = readBonesNumber(file);
+        }
+        else if (propHeader.propName == "block3")
+        {
+            nbBones = readBonesNumber(file);
+        }
+        else if (propHeader.propName == "boneIndecesMappingBoneIndex")
+        {
+            nbBones = readBonesNumber(file);
+        }
         file->seek(propHeader.endPos);
    }
 
