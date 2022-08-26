@@ -381,6 +381,12 @@ void OnMonstersListSelected(IGUIComboBox* combo)
 		gW3ENT->Skeleton.clear();
 		loadRig(gDevice, gModel, io::path(file));
 	}
+	if (gMonsters[pos - 1].animFiles.size() >= 1)
+	{
+		core::stringc file = gGamePath + gMonsters[pos - 1].animFiles[0];
+		loadAnims(gDevice, gModel, io::path(file));
+
+	}
 }
 
 void OnBackgroundsListSelected(IGUIComboBox* combo)

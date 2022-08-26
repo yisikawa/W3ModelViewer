@@ -899,14 +899,14 @@ float bits12ToFloat(s16 value)
 */
 
 // Fixed by Ákos Köte, thx
-float bits12ToFloat(s16 value)
+float bits12ToFloat(u16 value)
 {
     float fVal = (2047.0f - value) * (1 / 2048.0f);
     return fVal;
 }
 
 // Fixed by Ákos Köte, thx
-float bits16ToFloat(s16 value)
+float bits16ToFloat(u16 value)
 {
     float fVal = (32767.0f - value) * (1 / 32768.0f);
     return fVal;
@@ -930,7 +930,7 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
     f32 sx, sy, sz;
     f32 px, py, pz;
     f32 fx, fy, fz, fw;
-    s16 x, y, z, w;
+    u16 x, y, z, w;
     core::vector3df euler;
     core::quaternion orientation;
     scene::ISkinnedMesh::SPositionKey* pkey;
@@ -986,42 +986,41 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                         //dataFile->read(&bits, sizeof(uint64_t));
 
                         x = y = z = w = 0;
-                        x = (irr::s16)((bits & 0x0000FFF000000000) >> 36);
-                        y = (irr::s16)((bits & 0x0000000FFF000000) >> 24);
-                        z = (irr::s16)((bits & 0x0000000000FFF000) >> 12);
-                        w =  bits & 0x0000000000000FFF;
+                        x = (irr::u16)((bits & 0x0000FFF000000000) >> 36);
+                        y = (irr::u16)((bits & 0x0000000FFF000000) >> 24);
+                        z = (irr::u16)((bits & 0x0000000000FFF000) >> 12);
+                        w = (irr::u16)((bits & 0x0000000000000FFF));
 
                         fx = bits12ToFloat(x);
                         fy = bits12ToFloat(y);
                         fz = bits12ToFloat(z);
                         fw = -bits12ToFloat(w);
-                        orientation = core::quaternion(fx, fy, fz, fw);
+
                     }
                     else if (c == ABOCM_PackIn64bitsW)
                     {
-                        //b1 = readU8(dataFile);
-                        //b2 = readU8(dataFile);
-                        //b3 = readU8(dataFile);
-                        //b4 = readU8(dataFile);
-                        //b5 = readU8(dataFile);
-                        //b6 = readU8(dataFile);
-                        //b7 = readU8(dataFile);
-                        //b8 = readU8(dataFile);
-                        //bits = b8 | (b7 << 8) | (b6 << 16) | (b5 << 24) | (b4 << 32) | (b3 << 40) | (b2 << 48) | (b1 << 56);
-                        //x = y = z = w = 0;
-                        //x = (irr::s16)((bits & 0xFFFF000000000000) >> 48);
-                        //y = (irr::s16)((bits & 0x0000FFFF00000000) >> 32);
-                        //z = (irr::s16)((bits & 0x00000000FFFF0000) >> 16);
-                        //w = (irr::s16)(bits & 0x000000000000FFFF);
+                        b1 = readU8(dataFile);
+                        b2 = readU8(dataFile);
+                        b3 = readU8(dataFile);
+                        b4 = readU8(dataFile);
+                        b5 = readU8(dataFile);
+                        b6 = readU8(dataFile);
+                        b7 = readU8(dataFile);
+                        b8 = readU8(dataFile);
+                        bits = b8 | (b7 << 8) | (b6 << 16) | (b5 << 24) | (b4 << 32) | (b3 << 40) | (b2 << 48) | (b1 << 56);
+                        x = y = z = w = 0;
+                        x = (irr::u16)(b2<<8 | b1);
+                        y = (irr::u16)(b4<<8 | b3);
+                        z = (irr::u16)(b6<<8 | b5);
+                        w = (irr::u16)(b8<<8 | b7);
 
-                        //fx = bits16ToFloat(x);
-                        //fy = bits16ToFloat(y);
-                        //fz = bits16ToFloat(z);
-                        //fw = -bits16ToFloat(w);
-                        orientation.makeIdentity();
+                        fx = bits16ToFloat(x);
+                        fy = bits16ToFloat(y);
+                        fz = bits16ToFloat(z);
+                        fw = -bits16ToFloat(w);
                     }
-
-                    //orientation.normalize();
+                    orientation = core::quaternion(fx, fy, fz, fw);
+                    orientation.normalize();
                     //orientation.toEuler(euler);
                     //euler *= core::RADTODEG;
                     rkey = meshToAnimate->addRotationKey(joint);
@@ -1121,8 +1120,8 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
         dataFile = FileSystem->createAndOpenFile(filename);
     }
 
-
-    if (dataFile && compress == ABOCM_PackIn48bitsW )
+    //if (dataFile && compress == ABOCM_PackIn48bitsW)
+    if (dataFile )
     {
         readAnimBuffer(inf, dataFile, compress);
         dataFile->drop();
