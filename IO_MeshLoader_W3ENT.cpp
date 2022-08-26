@@ -28,7 +28,6 @@ void IO_MeshLoader_W3ENT::clear()
     Files.clear();
     Meshes.clear();
     animNames.clear();
-    animInfos.clear();
 }
 
 //! Constructor
@@ -239,8 +238,8 @@ bool IO_MeshLoader_W3ENT::W3_load(io::IReadFile* file)
         }
         else if (dataTypeName == "CAnimationBufferBitwiseCompressed" && meshToAnimate)
         {
-            animInfos.push_back(infos);
-            //W3_CAnimationBufferBitwiseCompressed(file, infos);
+//            animInfos.push_back(infos);
+            W3_CAnimationBufferBitwiseCompressed(file, infos);
         }
         else if (dataTypeName == "CSkeletalAnimation")
         {
@@ -906,6 +905,13 @@ float bits12ToFloat(s16 value)
     return fVal;
 }
 
+// Fixed by Ákos Köte, thx
+float bits16ToFloat(s16 value)
+{
+    float fVal = (32767.0f - value) * (1 / 32768.0f);
+    return fVal;
+}
+
 core::stringc getAnimTrackString(EAnimTrackType type)
 {
     if (type == EATT_POSITION)
@@ -918,7 +924,7 @@ core::stringc getAnimTrackString(EAnimTrackType type)
 
 void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimationBufferBitwiseCompressedData> >& inf, io::IReadFile* dataFile, SAnimationBufferOrientationCompressionMethod c)
 {
-    uint64_t b1, b2, b3, b4, b5, b6, bits;
+    uint64_t b1, b2, b3, b4, b5, b6,b7,b8, bits;
     u8 compressionSize;
     u32 keyframe;
     f32 sx, sy, sz;
@@ -931,8 +937,8 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
     scene::ISkinnedMesh::SRotationKey* rkey;
     scene::ISkinnedMesh::SScaleKey* skey;
 
-    for (u32 i = 1; i < inf.size(); ++i)
-
+    for (u32 i = 1; i < Skeleton.rigNames.size() ; ++i)
+    //for (u32 i = 1; i < inf.size(); ++i)
     {
         core::stringc str = Skeleton.rigNames[i];
 //        scene::ISkinnedMesh::SJoint* joint = meshToAnimate->getAllJoints()[i];
@@ -941,6 +947,8 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
         for (u32 j = 0; j < inf[i].size(); ++j)
         {
             struct SAnimationBufferBitwiseCompressedData infos = inf[i][j];
+            if (infos.dataAddr == 0)
+                continue;
             dataFile->seek(infos.dataAddr);
 
             // TODO
@@ -987,16 +995,38 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                         fy = bits12ToFloat(y);
                         fz = bits12ToFloat(z);
                         fw = -bits12ToFloat(w);
-
                         orientation = core::quaternion(fx, fy, fz, fw);
-                        orientation.normalize();
-                        orientation.toEuler(euler);
-                        euler *= core::RADTODEG;
-                        rkey = meshToAnimate->addRotationKey(joint);
-                        rkey->rotation = orientation;
-                        rkey->frame = (irr::f32)keyframe;
+                    }
+                    else if (c == ABOCM_PackIn64bitsW)
+                    {
+                        //b1 = readU8(dataFile);
+                        //b2 = readU8(dataFile);
+                        //b3 = readU8(dataFile);
+                        //b4 = readU8(dataFile);
+                        //b5 = readU8(dataFile);
+                        //b6 = readU8(dataFile);
+                        //b7 = readU8(dataFile);
+                        //b8 = readU8(dataFile);
+                        //bits = b8 | (b7 << 8) | (b6 << 16) | (b5 << 24) | (b4 << 32) | (b3 << 40) | (b2 << 48) | (b1 << 56);
+                        //x = y = z = w = 0;
+                        //x = (irr::s16)((bits & 0xFFFF000000000000) >> 48);
+                        //y = (irr::s16)((bits & 0x0000FFFF00000000) >> 32);
+                        //z = (irr::s16)((bits & 0x00000000FFFF0000) >> 16);
+                        //w = (irr::s16)(bits & 0x000000000000FFFF);
+
+                        //fx = bits16ToFloat(x);
+                        //fy = bits16ToFloat(y);
+                        //fz = bits16ToFloat(z);
+                        //fw = -bits16ToFloat(w);
+                        orientation.makeIdentity();
                     }
 
+                    //orientation.normalize();
+                    //orientation.toEuler(euler);
+                    //euler *= core::RADTODEG;
+                    rkey = meshToAnimate->addRotationKey(joint);
+                    rkey->rotation = orientation;
+                    rkey->frame = (irr::f32)keyframe;
 
                 }
                 else if (infos.type == EATT_SCALE)
@@ -1033,7 +1063,7 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
     core::array<core::array<struct SAnimationBufferBitwiseCompressedData> > inf;
     core::array<s8> data;
     io::IReadFile* dataFile = nullptr;
-    SAnimationBufferOrientationCompressionMethod compress= ABOCM_PackIn48bitsW;
+    SAnimationBufferOrientationCompressionMethod compress= ABOCM_PackIn64bitsW;
 
     f32 animDuration = 1.0f;
     u32 numFrames = 0;
@@ -1396,7 +1426,8 @@ void IO_MeshLoader_W3ENT::ReadBones(io::IReadFile* file)
             if (!checkBones(file, nbRead))
             {
                 nbRead = -1;
-                return;
+                continue;
+                //return;
             }
         }
 

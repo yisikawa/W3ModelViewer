@@ -192,11 +192,7 @@ bool loadAnims(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_n
 	loader.meshToAnimate = newMesh;
 	loader.Skeleton = gW3ENT->Skeleton;
 	scene::IAnimatedMesh* mesh = loader.createMesh(file);
-	gW3ENT->animStrings = loader.Strings;
-	gW3ENT->animFiles = loader.Files;
 	gW3ENT->animNames = loader.animNames;
-	gW3ENT->animInfos = loader.animInfos;
-	gW3ENT->animFile = filename;
 	file->drop();
 
 	if (mesh)
@@ -220,26 +216,16 @@ bool loadAnims(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_n
 
 bool setAnims(s32 pos)
 {
-	io::IReadFile* file = gDevice->getFileSystem()->createAndOpenFile(gW3ENT->animFile);
-	if (!file)
+	if (!gW3ENT->meshToAnimate)
 		return false;
-	scene::IO_MeshLoader_W3ENT loader(gDevice->getSceneManager(), gDevice->getFileSystem());
-	loader.meshToAnimate = (scene::ISkinnedMesh*)gModel->getMesh();
-	for (u32 i = 0; i < loader.meshToAnimate->getAllJoints().size(); i++)
+	for (u32 i = 0; i < gW3ENT->meshToAnimate->getAllJoints().size(); i++)
 	{
-		scene::ISkinnedMesh::SJoint* joint = loader.meshToAnimate->getAllJoints()[i];
+		scene::ISkinnedMesh::SJoint* joint = gW3ENT->meshToAnimate->getAllJoints()[i];
 		joint->PositionKeys.clear();
 		joint->RotationKeys.clear();
 		joint->ScaleKeys.clear();
 	}
-
-	loader.Skeleton = gW3ENT->Skeleton;
-	loader.Strings = gW3ENT->animStrings;
-	loader.Files = gW3ENT->animFiles;
-	loader.W3_CAnimationBufferBitwiseCompressed(file, gW3ENT->animInfos[pos]);
-	loader.meshToAnimate->setDirty();
-	loader.meshToAnimate->finalize();
-	file->drop();
+	return true;
 }
 
 // Convert and copy a single loader.meshToAnimat

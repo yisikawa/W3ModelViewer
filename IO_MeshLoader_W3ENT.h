@@ -180,11 +180,7 @@ public:
     core::array<core::stringc> Strings;
     // Files table
     core::array<core::stringc> Files;
-    core::array<core::stringc> animStrings;
-    core::array<core::stringc> animFiles;
     core::array<core::stringc> animNames;
-    core::array<struct W3_DataInfos> animInfos;
-    io::path animFile;
     std::map<int, video::SMaterial> Materials;
     TW3_CSkeleton Skeleton;
     scene::ISkinnedMesh* meshToAnimate;
