@@ -1122,7 +1122,7 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
     }
 
 
-    if (dataFile)
+    if (dataFile && compress == ABOCM_PackIn48bitsW )
     {
         readAnimBuffer(inf, dataFile, compress);
         dataFile->drop();
