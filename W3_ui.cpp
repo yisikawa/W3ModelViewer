@@ -661,13 +661,13 @@ void init_ui()
 	submenu->addItem(L"Alpha Channel", GUI_ID_MAT_ALPHA_REF);
 	// create toolbar
 	bar = env->addToolBar();
-	animations = env->addComboBox(core::rect<s32>(10, 4, 160, 23), bar, GUI_ID_ANIMS_LIST);
-	animals = env->addComboBox(core::rect<s32>(170, 4, 320, 23), bar, GUI_ID_ANIMALS_LIST);
-	monsters = env->addComboBox(core::rect<s32>(330, 4, 480, 23), bar, GUI_ID_MONSTERS_LIST);
-	backgrounds = env->addComboBox(core::rect<s32>(490, 4, 640, 23), bar, GUI_ID_BACKGROUNDS_LIST);
-	mainnpcs = env->addComboBox(core::rect<s32>(650, 4, 800, 23), bar, GUI_ID_MAIN_NPCS_LIST);
-	secondnpcs = env->addComboBox(core::rect<s32>(810, 4, 960, 23), bar, GUI_ID_SECOND_NPCS_LIST);
-	geralt = env->addComboBox(core::rect<s32>(970, 4, 1120, 23), bar, GUI_ID_GERALT_LIST);
+	animations = env->addComboBox(core::rect<s32>(10, 4, 310, 23), bar, GUI_ID_ANIMS_LIST);
+	animals = env->addComboBox(core::rect<s32>(320, 4, 470, 23), bar, GUI_ID_ANIMALS_LIST);
+	monsters = env->addComboBox(core::rect<s32>(480, 4, 630, 23), bar, GUI_ID_MONSTERS_LIST);
+	backgrounds = env->addComboBox(core::rect<s32>(640, 4, 790, 23), bar, GUI_ID_BACKGROUNDS_LIST);
+	mainnpcs = env->addComboBox(core::rect<s32>(800, 4, 950, 23), bar, GUI_ID_MAIN_NPCS_LIST);
+	secondnpcs = env->addComboBox(core::rect<s32>(960, 4, 1110, 23), bar, GUI_ID_SECOND_NPCS_LIST);
+	geralt = env->addComboBox(core::rect<s32>(1120, 4, 1270, 23), bar, GUI_ID_GERALT_LIST);
 	animations->addItem(L"No Animation");
 	animals->addItem(L"No Animals");
 	for (u32 i = 0; i < gAnimals.size(); i++)
