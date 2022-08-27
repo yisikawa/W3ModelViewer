@@ -50,6 +50,12 @@ enum SAnimationBufferOrientationCompressionMethod
     ABOCM_PackIn32bits
 };
 
+enum SAnimationBufferStreamingOption
+{
+    ABSO_NonStreamable,
+    ABSO_PartiallyStreamable,
+    ABSO_FullyStreamable
+};
 
 // Information to load a mesh from the buffer
 struct SMeshInfos

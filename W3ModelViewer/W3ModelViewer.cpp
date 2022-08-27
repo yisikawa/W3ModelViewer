@@ -60,8 +60,8 @@ void setMaterialsSettings(scene::IAnimatedMeshSceneNode* node)
 	}
 
 	node->setMaterialFlag(video::EMF_LIGHTING, false);
-	//node->setMaterialFlag(video::EMF_FRONT_FACE_CULLING, false);
-	//node->setMaterialFlag(video::EMF_BACK_FACE_CULLING, false);
+	node->setMaterialFlag(video::EMF_FRONT_FACE_CULLING, false);
+	node->setMaterialFlag(video::EMF_BACK_FACE_CULLING, false);
 
 	for (u32 i = 1; i < _IRR_MATERIAL_MAX_TEXTURES_; ++i)
 		node->setMaterialTexture(i, nullptr);

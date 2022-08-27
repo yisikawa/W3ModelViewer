@@ -238,7 +238,6 @@ bool IO_MeshLoader_W3ENT::W3_load(io::IReadFile* file)
         }
         else if (dataTypeName == "CAnimationBufferBitwiseCompressed" && meshToAnimate)
         {
-//            animInfos.push_back(infos);
             W3_CAnimationBufferBitwiseCompressed(file, infos);
         }
         else if (dataTypeName == "CSkeletalAnimation")
@@ -883,6 +882,37 @@ float readCompressedFloat(io::IReadFile* file, u8 compressionSize)
         return readF32(file); // Not tested yet !
 }
 
+u32 readFloat24(io::IReadFile* file)
+{
+    u32 pad = 0;
+    u8 b1 = readU8(file);
+    u8 b2 = readU8(file);
+    u8 b3 = readU8(file);
+    return
+        ((u32)b3 << 24) | ((u32)b2 << 16) | ((u32)b1 << 8) | ((u32)pad);
+}
+
+float readCompressionFloat(io::IReadFile* file, u32 compression)
+{
+    float fVal=0.;
+    u32    val;
+    if (compression == 0)
+    {
+        fVal = readF32(file);
+    }
+    else if (compression == 1)
+    {
+        val = readFloat24(file);
+        memcpy(&fVal, &val, 4);
+    }
+    else if (compression == 2)
+    {
+        val = (u32)readU16(file) << 16;
+        memcpy(&fVal, &val, 4);
+    }
+    return fVal;
+}
+
 /*
 // old version
 float bits12ToFloat(s16 value)
@@ -964,9 +994,12 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                     compressionSize = 16;
                 if (infos.type == EATT_POSITION)
                 {
-                    px = readCompressedFloat(dataFile, compressionSize);
-                    py = readCompressedFloat(dataFile, compressionSize);
-                    pz = readCompressedFloat(dataFile, compressionSize);
+                    px = readCompressionFloat(dataFile,infos.compression);
+                    py = readCompressionFloat(dataFile,infos.compression);
+                    pz = readCompressionFloat(dataFile,infos.compression);
+                    //px = readCompressedFloat(dataFile, compressionSize);
+                    //py = readCompressedFloat(dataFile, compressionSize);
+                    //pz = readCompressedFloat(dataFile, compressionSize);
                     pkey = meshToAnimate->addPositionKey(joint);
                     pkey->position = core::vector3df(px,py,pz);
                     pkey->frame = (irr::f32)keyframe;
@@ -1020,7 +1053,7 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                         fw = -bits16ToFloat(w);
                     }
                     orientation = core::quaternion(fx, fy, fz, fw);
-                    orientation.normalize();
+//                    orientation.normalize();
                     //orientation.toEuler(euler);
                     //euler *= core::RADTODEG;
                     rkey = meshToAnimate->addRotationKey(joint);
@@ -1030,10 +1063,12 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                 }
                 else if (infos.type == EATT_SCALE)
                 {
-                    sx = readCompressedFloat(dataFile, compressionSize);
-                    sy = readCompressedFloat(dataFile, compressionSize);
-                    sz = readCompressedFloat(dataFile, compressionSize);
-
+                    sx = readCompressionFloat(dataFile, infos.compression);
+                    sy = readCompressionFloat(dataFile, infos.compression);
+                    sz = readCompressionFloat(dataFile, infos.compression);
+                    //sx = readCompressedFloat(dataFile, compressionSize);
+                    //sy = readCompressedFloat(dataFile, compressionSize);
+                    //sz = readCompressedFloat(dataFile, compressionSize);
                     skey = meshToAnimate->addScaleKey(joint);
                     skey->scale = core::vector3df(sx, sy, sz);
                     skey->frame = (irr::f32)keyframe;
@@ -1062,7 +1097,8 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
     core::array<core::array<struct SAnimationBufferBitwiseCompressedData> > inf;
     core::array<s8> data;
     io::IReadFile* dataFile = nullptr;
-    SAnimationBufferOrientationCompressionMethod compress= ABOCM_PackIn64bitsW;
+    SAnimationBufferOrientationCompressionMethod compress= ABOCM_PackIn64bitsW; 
+    SAnimationBufferStreamingOption option = ABSO_NonStreamable;
 
     f32 animDuration = 1.0f;
     u32 numFrames = 0;
@@ -1105,6 +1141,15 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
         {
             u32 bonesTotal = readU32(file);
         }
+        else if (propHeader.propName == "streamingOption")
+        {
+            u16 enumStringId = readU16(file);
+            core::stringc enumString = Strings[enumStringId];
+            if (enumString == "ABSO_PartiallyStreamable")
+                option = ABSO_PartiallyStreamable;
+            else if(enumString == "ABSO_FullyStreamable")
+                option = ABSO_FullyStreamable;
+        }
         file->seek(propHeader.endPos);
     }
 
@@ -1120,8 +1165,7 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
         dataFile = FileSystem->createAndOpenFile(filename);
     }
 
-    //if (dataFile && compress == ABOCM_PackIn48bitsW)
-    if (dataFile )
+    if (dataFile && option!= ABSO_PartiallyStreamable)
     {
         readAnimBuffer(inf, dataFile, compress);
         dataFile->drop();
@@ -1388,8 +1432,8 @@ void IO_MeshLoader_W3ENT::W3_CMesh(io::IReadFile* file, struct W3_DataInfos info
 
    for (u32 i = 0; i < meshes.size(); ++i)
    {
-       if (materials[meshes[i].materialID].TextureLayer->Texture == NULL)
-           continue;
+       //if (materials[meshes[i].materialID].TextureLayer->Texture == NULL)
+       //    continue;
        if (!W3_ReadBuffer(file, bufferInfos, meshes[i]))
             continue;
         AnimatedMesh->getMeshBuffer(AnimatedMesh->getMeshBufferCount() - 1)->getMaterial() = materials[meshes[i].materialID];
