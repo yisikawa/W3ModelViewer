@@ -997,9 +997,6 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                     px = readCompressionFloat(dataFile,infos.compression);
                     py = readCompressionFloat(dataFile,infos.compression);
                     pz = readCompressionFloat(dataFile,infos.compression);
-                    //px = readCompressedFloat(dataFile, compressionSize);
-                    //py = readCompressedFloat(dataFile, compressionSize);
-                    //pz = readCompressedFloat(dataFile, compressionSize);
                     pkey = meshToAnimate->addPositionKey(joint);
                     pkey->position = core::vector3df(px,py,pz);
                     pkey->frame = (irr::f32)keyframe;
@@ -1066,9 +1063,6 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                     sx = readCompressionFloat(dataFile, infos.compression);
                     sy = readCompressionFloat(dataFile, infos.compression);
                     sz = readCompressionFloat(dataFile, infos.compression);
-                    //sx = readCompressedFloat(dataFile, compressionSize);
-                    //sy = readCompressedFloat(dataFile, compressionSize);
-                    //sz = readCompressedFloat(dataFile, compressionSize);
                     skey = meshToAnimate->addScaleKey(joint);
                     skey->scale = core::vector3df(sx, sy, sz);
                     skey->frame = (irr::f32)keyframe;
