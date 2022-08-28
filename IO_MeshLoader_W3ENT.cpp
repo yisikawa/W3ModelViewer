@@ -1037,7 +1037,6 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                         b6 = readU8(dataFile);
                         b7 = readU8(dataFile);
                         b8 = readU8(dataFile);
-                        bits = b8 | (b7 << 8) | (b6 << 16) | (b5 << 24) | (b4 << 32) | (b3 << 40) | (b2 << 48) | (b1 << 56);
                         x = y = z = w = 0;
                         x = (irr::u16)(b2<<8 | b1);
                         y = (irr::u16)(b4<<8 | b3);
