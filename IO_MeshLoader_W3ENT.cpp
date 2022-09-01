@@ -967,7 +967,8 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
     scene::ISkinnedMesh::SRotationKey* rkey;
     scene::ISkinnedMesh::SScaleKey* skey;
 
-    for (u32 i = 1; i < Skeleton.rigNames.size() ; ++i)
+    s32 loopSize = core::s32_min(Skeleton.rigNames.size(), inf.size());
+    for (s32 i = 1; i < loopSize ; ++i)
     //for (u32 i = 1; i < inf.size(); ++i)
     {
         core::stringc str = Skeleton.rigNames[i];

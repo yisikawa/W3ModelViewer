@@ -26,9 +26,10 @@ goose02,-r,1,characters\base_entities\goose_base\goose_base.w2rig,-a,1,animation
 goose_wings01,-r,1,characters\base_entities\goose_base\goose_base.w2rig,-a,1,animations\animals\goose\goose_animation.w2anims,-m,1,characters\models\animals\goose\t_01__goose_wings.w2ent,,
 goose_wings02,-r,1,characters\base_entities\goose_base\goose_base.w2rig,-a,1,animations\animals\goose\goose_animation.w2anims,-m,1,characters\models\animals\goose\t_02__goose_wings.w2ent,,
 hare,-r,1,characters\base_entities\hare_base\hare_base.w2rig,-a,1,animations\animals\hare\hare_animation.w2anims,-m,1,characters\models\animals\hare\t_01__hare.w2ent,,
-horse_black,-r,1,characters\base_entities\horse_base\horse_base.w2rig,,,,-m,1,characters\models\animals\horse\draft\b_01_hd__black.w2ent,,
-horse_brown,-r,1,characters\base_entities\horse_base\horse_base.w2rig,,,,-m,1,characters\models\animals\horse\draft\b_01_hd__brown.w2ent,,
-horse_white,-r,1,characters\base_entities\horse_base\horse_base.w2rig,,,,-m,1,characters\models\animals\horse\draft\b_01_hd__white.w2ent,,
+horse_wild,-r,1,characters\base_entities\horse_base\horse_base.w2rig,-a,1,animations\interaction\horse_draft\horse_draft.w2anims,-m,1,characters\models\animals\horse\draft\b_01_hd__wild.w2ent,,
+horse_black,-r,1,characters\base_entities\horse_base\horse_base.w2rig,,,,-m,3,characters\models\animals\horse\draft\b_01_hd__black.w2ent,characters\models\animals\horse\draft\t_01_hd__brown_static.w2ent,characters\models\animals\horse\draft\h_01_hd__simple.w2ent
+horse_brown,-r,1,characters\base_entities\horse_base\horse_base.w2rig,,,,-m,3,characters\models\animals\horse\draft\b_01_hd__brown.w2ent,characters\models\animals\horse\draft\t_01_hd__brown_static.w2ent,characters\models\animals\horse\draft\h_02_hd__simple.w2ent
+horse_white,-r,1,characters\base_entities\horse_base\horse_base.w2rig,,,,-m,3,characters\models\animals\horse\draft\b_01_hd__white.w2ent,characters\models\animals\horse\draft\t_01_hd__brown_static.w2ent,characters\models\animals\horse\draft\h_03_hd__simple.w2ent
 mountain_goat,-r,1,characters\base_entities\goat_base\goat_base.w2rig,-a,1,animations\animals\goat\goat_animation.w2anims,-m,1,characters\models\animals\mountain_goat\t_01__mountain_goat.w2ent,,
 owl01,-r,1,characters\base_entities\owl_base\owl_base.w2rig,-a,1,animations\animals\owl\owl_animation.w2anims,-m,1,characters\models\animals\owl\t_01__owl.w2ent,,
 owl02,-r,1,characters\base_entities\owl_base\owl_base.w2rig,-a,1,animations\animals\owl\owl_animation.w2anims,-m,1,characters\models\animals\owl\t_02__owl.w2ent,,
