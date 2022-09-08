@@ -978,9 +978,9 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
         for (u32 j = 0; j < inf[i].size(); ++j)
         {
             struct SAnimationBufferBitwiseCompressedData infos = inf[i][j];
-            if (infos.dataAddr == 0)
+            if (infos.dataAddrFallback == 0)
                 continue;
-            dataFile->seek(infos.dataAddr);
+            dataFile->seek(infos.dataAddrFallback);
 
             // TODO
             for (u32 f = 0; f < infos.numFrames; ++f)
@@ -1090,6 +1090,7 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
 
     core::array<core::array<struct SAnimationBufferBitwiseCompressedData> > inf;
     core::array<s8> data;
+    core::array<s8> fallbackData;
     io::IReadFile* dataFile = nullptr;
     SAnimationBufferOrientationCompressionMethod compress= ABOCM_PackIn64bitsW; 
     SAnimationBufferStreamingOption option = ABSO_NonStreamable;
@@ -1110,6 +1111,11 @@ void IO_MeshLoader_W3ENT::W3_CAnimationBufferBitwiseCompressed(io::IReadFile* fi
         {
             u32 arraySize = readU32(file);
             data = readDataArray<s8>(file, arraySize);
+        }
+        else if (propHeader.propName == "fallbackData")
+        {
+            u32 arraySize = readU32(file);
+            fallbackData = readDataArray<s8>(file, arraySize);
         }
         else if (propHeader.propName == "orientationCompressionMethod")
         {
