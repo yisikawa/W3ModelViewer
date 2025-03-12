@@ -150,6 +150,23 @@ struct SAnimationBufferBitwiseCompressedData
     u32 dataAddrFallback;
 };
 
+typedef struct SkelCurveStk
+{
+    core::stringc   mSkelName;
+    int             mQuatKeyNum, mScalKeyNum, mTransKeyNum;
+    std::vector<scene::ISkinnedMesh::SPositionKey> pPosKey;
+    std::vector<scene::ISkinnedMesh::SRotationKey> pRotKey;
+    std::vector<scene::ISkinnedMesh::SScaleKey>    pScalKey;
+};
+
+typedef struct AnimStk
+{
+    core::stringc   mMotionName;
+    int             mSkelNum;
+    int             mFrameNum;
+    float           mAnimDuration;
+    std::vector<SkelCurveStk> pSkelCStk;
+};
 
 namespace irr
 {
@@ -189,9 +206,11 @@ public:
     core::array<core::stringc> animNames;
     std::map<int, video::SMaterial> Materials;
     TW3_CSkeleton Skeleton;
-    scene::ISkinnedMesh* meshToAnimate;
+    scene::ISkinnedMesh* meshToAnimate; // AnimatedMeshをコピーしてアニメーションを追加しているようだ
     void clear();
     void W3_CAnimationBufferBitwiseCompressed(io::IReadFile* file, struct W3_DataInfos infos);
+    scene::ISkinnedMesh* AnimatedMesh; // メッシュ＆スケルトン情報格納
+    std::vector<AnimStk> pAnimStk;
 
 
 private:
@@ -201,7 +220,6 @@ private:
     u32 NbBonesPos;
     scene::ISceneManager* SceneManager;
     io::IFileSystem* FileSystem;
-    scene::ISkinnedMesh* AnimatedMesh;
 
     bool ConfigLoadSkeleton;
     bool ConfigLoadOnlyBestLOD;
