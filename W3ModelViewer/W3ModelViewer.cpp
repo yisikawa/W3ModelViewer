@@ -193,6 +193,7 @@ bool loadAnims(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_n
 	loader.Skeleton = gW3ENT->Skeleton;
 	scene::IAnimatedMesh* mesh = loader.createMesh(file);
 	gW3ENT->animNames = loader.animNames;
+	gW3ENT->pAnimStk = loader.pAnimStk;
 	file->drop();
 
 	if (mesh)
@@ -216,15 +217,18 @@ bool loadAnims(IrrlichtDevice* device, scene::IAnimatedMeshSceneNode* _current_n
 
 bool setAnims(s32 pos)
 {
-	if (!gW3ENT->meshToAnimate)
+	if (!gW3ENT->AnimatedMesh)
 		return false;
-	for (u32 i = 0; i < gW3ENT->meshToAnimate->getAllJoints().size(); i++)
-	{
-		scene::ISkinnedMesh::SJoint* joint = gW3ENT->meshToAnimate->getAllJoints()[i];
-		joint->PositionKeys.clear();
-		joint->RotationKeys.clear();
-		joint->ScaleKeys.clear();
-	}
+	//for (u32 i = 0; i < gW3ENT->AnimatedMesh->getAllJoints().size(); i++)
+	//{
+	//	scene::ISkinnedMesh::SJoint* joint = gW3ENT->AnimatedMesh->getAllJoints()[i];
+	//	joint->PositionKeys.clear();
+	//	joint->RotationKeys.clear();
+	//	joint->ScaleKeys.clear();
+	//}
+	gModel->getMesh()->drop();
+	gModel->setMesh(gW3ENT->AnimatedMesh);
+	setMaterialsSettings(gModel);
 	return true;
 }
 

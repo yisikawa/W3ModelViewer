@@ -28,6 +28,7 @@ void IO_MeshLoader_W3ENT::clear()
     Files.clear();
     Meshes.clear();
     animNames.clear();
+    pAnimStk.clear();
 }
 
 //! Constructor
@@ -63,6 +64,7 @@ bool IO_MeshLoader_W3ENT::isALoadableFileExtension(const io::path& filename) con
 
 void IO_MeshLoader_W3ENT::W3_CSkeletalAnimation(io::IReadFile* file, struct W3_DataInfos infos)
 {
+    AnimStk *animStk;
     file->seek(infos.adress + 1);
     struct SPropertyHeader propHeader;
     while (ReadPropertyHeader(file, propHeader))
@@ -73,6 +75,10 @@ void IO_MeshLoader_W3ENT::W3_CSkeletalAnimation(io::IReadFile* file, struct W3_D
             u16 propName = readU16(file);
             core::stringc name = Strings[propName];
             animNames.push_back(name);
+            animStk = new AnimStk;
+            animStk->mMotionName = name;
+            pAnimStk.push_back(*animStk);
+            
         }
         else if (propHeader.propName == "motionExtraction")
         {
@@ -85,10 +91,18 @@ void IO_MeshLoader_W3ENT::W3_CSkeletalAnimation(io::IReadFile* file, struct W3_D
         else if (propHeader.propName == "framesPerSecond")
         {
             f32 framesPS = readF32(file);  // chunk no from 1 and array no = chunkNo -1
+            animStk = &pAnimStk.back();
+            if (animStk) {
+                animStk->mFrameNum = framesPS;
+            }
         }
         else if (propHeader.propName == "duration")
         {
             f32 duration = readF32(file);  // chunk no from 1 and array no = chunkNo -1
+            animStk = &pAnimStk.back();
+            if (animStk) {
+                animStk->mAnimDuration = duration;
+            }
         }
 
         file->seek(propHeader.endPos);
@@ -966,7 +980,13 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
     scene::ISkinnedMesh::SPositionKey* pkey;
     scene::ISkinnedMesh::SRotationKey* rkey;
     scene::ISkinnedMesh::SScaleKey* skey;
-
+    AnimStk*        animStk;
+    SkelCurveStk*    skelCurveStk;
+    scene::ISkinnedMesh::SPositionKey *tSPKey;
+    scene::ISkinnedMesh::SRotationKey *tSRKey;
+    scene::ISkinnedMesh::SScaleKey    *tSSKey;
+     
+    animStk = &pAnimStk.back();
     s32 loopSize = core::s32_min(Skeleton.rigNames.size(), inf.size());
     for (s32 i = 1; i < loopSize ; ++i)
     //for (u32 i = 1; i < inf.size(); ++i)
@@ -974,7 +994,9 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
         core::stringc str = Skeleton.rigNames[i];
 //        scene::ISkinnedMesh::SJoint* joint = meshToAnimate->getAllJoints()[i];
         scene::ISkinnedMesh::SJoint* joint = JointHelper::GetJointByName(meshToAnimate, Skeleton.rigNames[i]);
-
+        skelCurveStk = new SkelCurveStk;
+        skelCurveStk->mSkelName = str;
+        animStk->pSkelCStk.push_back(*skelCurveStk);
         for (u32 j = 0; j < inf[i].size(); ++j)
         {
             struct SAnimationBufferBitwiseCompressedData infos = inf[i][j];
@@ -1001,6 +1023,9 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                     pkey = meshToAnimate->addPositionKey(joint);
                     pkey->position = core::vector3df(px,py,pz);
                     pkey->frame = (irr::f32)keyframe;
+                    tSPKey = new scene::ISkinnedMesh::SPositionKey;
+                    *tSPKey = *pkey;
+                    skelCurveStk->pPosKey.push_back(*tSPKey);
                 }
                 else if (infos.type == EATT_ORIENTATION)
                 {
@@ -1056,6 +1081,9 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                     rkey = meshToAnimate->addRotationKey(joint);
                     rkey->rotation = orientation;
                     rkey->frame = (irr::f32)keyframe;
+                    tSRKey = new scene::ISkinnedMesh::SRotationKey;
+                    *tSRKey = *rkey;
+                    skelCurveStk->pRotKey.push_back(*tSRKey);
 
                 }
                 else if (infos.type == EATT_SCALE)
@@ -1066,6 +1094,9 @@ void IO_MeshLoader_W3ENT::readAnimBuffer(core::array<core::array<struct SAnimati
                     skey = meshToAnimate->addScaleKey(joint);
                     skey->scale = core::vector3df(sx, sy, sz);
                     skey->frame = (irr::f32)keyframe;
+                    tSSKey = new scene::ISkinnedMesh::SScaleKey;
+                    *tSSKey = *skey;
+                    skelCurveStk->pScalKey.push_back(*tSSKey);
                 }
             }
         }

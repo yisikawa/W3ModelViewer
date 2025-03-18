@@ -150,7 +150,7 @@ struct SAnimationBufferBitwiseCompressedData
     u32 dataAddrFallback;
 };
 
-typedef struct SkelCurveStk
+struct SkelCurveStk
 {
     core::stringc   mSkelName;
     int             mQuatKeyNum, mScalKeyNum, mTransKeyNum;
@@ -159,11 +159,11 @@ typedef struct SkelCurveStk
     std::vector<scene::ISkinnedMesh::SScaleKey>    pScalKey;
 };
 
-typedef struct AnimStk
+struct AnimStk
 {
     core::stringc   mMotionName;
     int             mSkelNum;
-    int             mFrameNum;
+    float           mFrameNum;
     float           mAnimDuration;
     std::vector<SkelCurveStk> pSkelCStk;
 };
